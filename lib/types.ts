@@ -7,6 +7,8 @@ export interface User {
   telephone: string
   email: string
   role: Role
+  /** All roles this account can operate as (multi-role accounts). */
+  availableRoles?: Role[]
   score?: number
 }
 

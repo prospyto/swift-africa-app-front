@@ -30,10 +30,15 @@ interface RegisterPayload {
   password: string
 }
 
+const ALL_ROLES: Role[] = ['acheteur', 'vendeur', 'livreur']
+
 interface AppState {
   user: User | null
   ready: boolean
   offline: boolean
+  mode: Role
+  availableRoles: Role[]
+  setMode: (role: Role) => void
   products: Product[]
   productsLoading: boolean
   cart: CartItem[]
@@ -77,6 +82,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [ready, setReady] = useState(false)
   const [offline, setOffline] = useState(false)
+  const [mode, setMode] = useState<Role>('acheteur')
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [cart, setCart] = useState<CartItem[]>([])
