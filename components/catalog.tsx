@@ -12,6 +12,7 @@ export function Catalog() {
   const [query, setQuery] = useState('')
   const [cat, setCat] = useState('Tous')
   const [added, setAdded] = useState<number | null>(null)
+  const [animate, setAnimate] = useState(true)
 
   const categories = useMemo(
     () => ['Tous', ...Array.from(new Set(products.map((p) => p.categorie)))],
@@ -19,13 +20,17 @@ export function Catalog() {
   )
 
   const filtered = useMemo(
-    () =>
-      products.filter(
+    () => {
+      // Reset animation on filter change
+      setAnimate(false)
+      setTimeout(() => setAnimate(true), 50)
+      return products.filter(
         (p) =>
           (cat === 'Tous' || p.categorie === cat) &&
           (p.nom.toLowerCase().includes(query.toLowerCase()) ||
             p.vendeur.toLowerCase().includes(query.toLowerCase())),
-      ),
+      )
+    },
     [products, cat, query],
   )
 
@@ -88,81 +93,89 @@ export function Catalog() {
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((p) => {
+          {filtered.map((p, idx) => {
             const inCart = cart.some((i) => i.product.id === p.id)
             const onSale = p.prix_solde != null && p.prix_solde < p.prix
+            const delay = animate ? idx * 50 : 0
             return (
-              <GlassCard
+              <div
                 key={p.id}
-                className="group flex flex-col overflow-hidden p-4 transition hover:-translate-y-1"
+                className={`transition-all duration-500 transform ${
+                  animate
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-4'
+                }`}
+                style={{ transitionDelay: `${delay}ms` }}
               >
-                <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-secondary">
-                  <Image
-                    src={p.image || '/placeholder.svg'}
-                    alt={p.nom}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
-                  />
-                  {onSale && (
-                    <span className="absolute left-3 top-3 rounded-full bg-success px-3 py-1 text-xs font-bold text-success-foreground">
-                      Solde
-                    </span>
-                  )}
-                </div>
-
-                <div className="mt-4 flex flex-1 flex-col">
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-bold leading-snug">{p.nom}</h3>
-                    <span className="rounded-full bg-accent px-2.5 py-1 text-[11px] font-medium text-accent-foreground">
-                      {p.categorie}
-                    </span>
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                    {p.description}
-                  </p>
-                  <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-                    <MapPin className="size-3.5" />
-                    {p.vendeur} · {p.ville}
+                <GlassCard className="group flex flex-col overflow-hidden p-4 transition hover:-translate-y-1">
+                  <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-secondary">
+                    <Image
+                      src={p.image || '/placeholder.svg'}
+                      alt={p.nom}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover transition duration-500 group-hover:scale-105"
+                    />
+                    {onSale && (
+                      <span className="absolute left-3 top-3 rounded-full bg-success px-3 py-1 text-xs font-bold text-success-foreground">
+                        Solde
+                      </span>
+                    )}
                   </div>
 
-                  <div className="mt-4 flex items-end justify-between gap-3">
-                    <div>
-                      {onSale ? (
-                        <>
-                          <p className="text-lg font-bold text-success">
-                            {formatXOF(p.prix_solde as number)}
-                          </p>
-                          <p className="text-xs text-muted-foreground line-through">
-                            {formatXOF(p.prix)}
-                          </p>
-                        </>
-                      ) : (
-                        <p className="text-lg font-bold">{formatXOF(p.prix)}</p>
-                      )}
+                  <div className="mt-4 flex flex-1 flex-col">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-bold leading-snug">{p.nom}</h3>
+                      <span className="rounded-full bg-accent px-2.5 py-1 text-[11px] font-medium text-accent-foreground">
+                        {p.categorie}
+                      </span>
                     </div>
-                    <button
-                      onClick={() => handleAdd(p)}
-                      className={`glass-cta flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
-                        added === p.id
-                          ? 'bg-success text-success-foreground'
-                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
-                      }`}
-                    >
-                      {added === p.id ? (
-                        <>
-                          <Check className="size-4" /> Ajouté
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="size-4" />
-                          {inCart ? 'Encore' : 'Panier'}
-                        </>
-                      )}
-                    </button>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                      {p.description}
+                    </p>
+                    <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                      <MapPin className="size-3.5" />
+                      {p.vendeur} · {p.ville}
+                    </div>
+
+                    <div className="mt-4 flex items-end justify-between gap-3">
+                      <div>
+                        {onSale ? (
+                          <>
+                            <p className="text-lg font-bold text-success">
+                              {formatXOF(p.prix_solde as number)}
+                            </p>
+                            <p className="text-xs text-muted-foreground line-through">
+                              {formatXOF(p.prix)}
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-lg font-bold">{formatXOF(p.prix)}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleAdd(p)}
+                        className={`glass-cta flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
+                          added === p.id
+                            ? 'bg-success text-success-foreground'
+                            : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        }`}
+                      >
+                        {added === p.id ? (
+                          <>
+                            <Check className="size-4" /> Ajouté
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="size-4" />
+                            {inCart ? 'Encore' : 'Panier'}
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </GlassCard>
+                </GlassCard>
+              </div>
             )
           })}
 
