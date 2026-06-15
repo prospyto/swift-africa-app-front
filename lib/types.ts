@@ -48,3 +48,17 @@ export interface Order {
   livreur?: string | null
   note_donnee?: boolean
 }
+
+export type MessageChatType = 'buyer_seller' | 'seller_delivery' | 'buyer_delivery'
+
+export interface Message {
+  id: number
+  orderId: number
+  sender: string
+  senderRole: Role
+  content: string
+  chatType: MessageChatType
+  timestamp: string
+  isRead?: boolean
+}
+
