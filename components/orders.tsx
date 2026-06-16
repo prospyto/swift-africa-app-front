@@ -290,7 +290,6 @@ function OrderCard({ order }: { order: Order }) {
     </>
   )
 }
-  }
 
   return (
     <GlassCard strong className="p-5 md:p-6">
