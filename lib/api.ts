@@ -2,7 +2,7 @@
 // Talks to the Django backend, with an automatic local demo fallback
 // whenever the server is unreachable (offline / not started).
 
-export const API_BASE_URL = 'http://127.0.0.1:8000/api/'
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://swift-africa-backend.onrender.com/api/'
 
 const TOKEN_KEY = 'sa_token'
 const ROLE_KEY = 'sa_role'
