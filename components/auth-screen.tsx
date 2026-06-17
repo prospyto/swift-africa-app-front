@@ -190,30 +190,7 @@ export function AuthScreen() {
             ))}
           </div>
 
-          {/* Demo mode badge */}
-          <div className="mb-6 rounded-2xl bg-accent/15 p-3 text-xs text-accent-foreground">
-            <p className="font-semibold mb-1.5">{"Mode Démo - Comptes de test:"}</p>
-            <ul className="space-y-1 text-[11px]">
-              <li>
-                <code className="bg-accent/30 px-1.5 py-0.5 rounded">{"demo@gmail.com"}</code>
-                {" / "}
-                <code className="bg-accent/30 px-1.5 py-0.5 rounded">{"password123"}</code>
-                {" (Acheteur)"}
-              </li>
-              <li>
-                <code className="bg-accent/30 px-1.5 py-0.5 rounded">{"vendeur@gmail.com"}</code>
-                {" / "}
-                <code className="bg-accent/30 px-1.5 py-0.5 rounded">{"password123"}</code>
-                {" (Vendeur)"}
-              </li>
-              <li>
-                <code className="bg-accent/30 px-1.5 py-0.5 rounded">{"livreur@gmail.com"}</code>
-                {" / "}
-                <code className="bg-accent/30 px-1.5 py-0.5 rounded">{"password123"}</code>
-                {" (Livreur)"}
-              </li>
-            </ul>
-          </div>
+          {/* Demo mode badge - REMOVED */}
 
           <form onSubmit={onSubmit} className="grid gap-4">
             {mode === 'register' && (
