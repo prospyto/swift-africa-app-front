@@ -175,18 +175,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setUser(res.user)
     } catch (err) {
       if (isOfflineError(err)) {
-        // demo login: infer role from any stored value, default acheteur
-        const role = (getStoredRole() as Role) || 'acheteur'
+        // Demo mode: only accept valid demo credentials
+        const validDemoAccounts = [
+          { email: 'demo@gmail.com', password: 'password123', role: 'acheteur' as Role },
+          { email: 'vendeur@gmail.com', password: 'password123', role: 'vendeur' as Role },
+          { email: 'livreur@gmail.com', password: 'password123', role: 'livreur' as Role },
+        ]
+
+        const demoAccount = validDemoAccounts.find(
+          (acc) => acc.email === email && acc.password === password,
+        )
+
+        if (!demoAccount) {
+          throw new ApiError(
+            401,
+            'Email ou mot de passe incorrect (Mode Démo: utilisez demo@gmail.com / vendeur@gmail.com / livreur@gmail.com)',
+          )
+        }
+
         const demoUser: User = {
           id: 0,
-          nom: 'Démo',
-          prenom: 'Utilisateur',
+          nom: demoAccount.role === 'vendeur' ? 'Vendeur' : demoAccount.role === 'livreur' ? 'Livreur' : 'Acheteur',
+          prenom: 'Démo',
           telephone: '+221770000000',
           email,
-          role,
+          role: demoAccount.role,
           score: 4.8,
         }
-        setSession('demo-token', role)
+        setSession('demo-token', demoAccount.role)
         setUser(demoUser)
         setOffline(true)
         return
