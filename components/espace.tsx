@@ -16,6 +16,8 @@ import {
 } from 'lucide-react'
 import { GlassCard } from '@/components/glass'
 import { useApp, formatXOF } from '@/lib/store'
+import { AddProductForm } from '@/components/add-product-form'
+import { GPSTracker } from '@/components/gps-tracker'
 
 export function Espace() {
   const { user } = useApp()
@@ -156,30 +158,37 @@ function BuyerSpace() {
 
 function SellerSpace() {
   const { products } = useApp()
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
   const COMMISSION = 0.88
+  
   return (
     <div className="grid gap-5">
-      <div className="grid gap-5 sm:grid-cols-3">
-        <Stat
-          icon={Package}
-          label="Produits en ligne"
-          value={String(products.length)}
-          delay={0}
-        />
-        <Stat
-          icon={Percent}
-          label="Commission plateforme"
-          value="12 %"
-          accent="primary"
-          delay={50}
-        />
-        <Stat icon={Star} label="Score vendeur" value="4.9 / 5" accent="success" delay={100} />
+      <div className="flex items-center justify-between">
+        <div className="grid gap-5 sm:grid-cols-3 flex-1">
+          <Stat
+            icon={Package}
+            label="Produits en ligne"
+            value={String(products.length)}
+            delay={0}
+          />
+          <Stat
+            icon={Percent}
+            label="Commission plateforme"
+            value="12 %"
+            accent="primary"
+            delay={50}
+          />
+          <Stat icon={Star} label="Score vendeur" value="4.9 / 5" accent="success" delay={100} />
+        </div>
       </div>
 
       <GlassCard strong className="p-5 md:p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <TrendingUp className="size-5 text-success" />
-          <h2 className="font-bold">Gains nets par produit (Prix × 0.88)</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="size-5 text-success" />
+            <h2 className="font-bold">Gains nets par produit (Prix × 0.88)</h2>
+          </div>
+          <AddProductForm onProductAdded={() => setRefreshTrigger(p => p + 1)} />
         </div>
         <ul className="divide-y divide-border/60">
           {products.slice(0, 5).map((p, i) => {
@@ -271,6 +280,17 @@ function CourierSpace() {
           </ul>
         )}
       </GlassCard>
+
+      {/* GPS Tracking for active missions */}
+      {missions.length > 0 && (
+        <GlassCard strong className="p-5 md:p-6">
+          <h2 className="mb-4 font-bold flex items-center gap-2">
+            <MapPin className="size-5 text-primary" />
+            Suivi GPS
+          </h2>
+          <GPSTracker missionId={missions[0].id} />
+        </GlassCard>
+      )}
     </div>
   )
 }
