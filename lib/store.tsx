@@ -13,7 +13,6 @@ import {
   clearSession,
   getStoredRole,
   getToken,
-  isOfflineError,
   setSession,
 } from './api'
 import type { CartItem, Order, Product, Role, User } from './types'
@@ -58,8 +57,51 @@ interface AppState {
 
 const AppContext = createContext<AppState | null>(null)
 
-function genOtp() {
-  return String(Math.floor(1000 + Math.random() * 9000))
+// Convertit la réponse brute de /api/me/ en objet User du frontend
+interface BackendMe {
+  id: string
+  username: string
+  email: string
+  telephone: string
+  est_acheteur: boolean
+  est_vendeur: boolean
+  est_livreur: boolean
+  solde: string
+}
+
+function backendMeToUser(me: BackendMe, storedRole?: string | null): User {
+  // Déduire le rôle principal
+  let role: Role = 'acheteur'
+  if (storedRole && ['acheteur', 'vendeur', 'livreur'].includes(storedRole)) {
+    role = storedRole as Role
+  } else if (me.est_vendeur) {
+    role = 'vendeur'
+  } else if (me.est_livreur) {
+    role = 'livreur'
+  }
+
+  // Rôles disponibles
+  const availableRoles: Role[] = []
+  if (me.est_acheteur) availableRoles.push('acheteur')
+  if (me.est_vendeur) availableRoles.push('vendeur')
+  if (me.est_livreur) availableRoles.push('livreur')
+  if (availableRoles.length === 0) availableRoles.push('acheteur')
+
+  // username peut être "prenom.nom" ou juste email
+  const parts = me.username.split('.')
+  const prenom = parts.length >= 2 ? parts[0] : me.username.split('@')[0]
+  const nom = parts.length >= 2 ? parts.slice(1).join(' ') : ''
+
+  return {
+    id: 0, // UUID → number non critique
+    nom,
+    prenom,
+    telephone: me.telephone || '',
+    email: me.email,
+    role,
+    availableRoles,
+    score: 4.8,
+  }
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -80,7 +122,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       : [user.role]
   }, [user])
 
-  // ----- session bootstrap -----
+  // ----- events -----
   useEffect(() => {
     function onUnauthorized() {
       setUser(null)
@@ -90,12 +132,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setOffline(true)
       setWaking(false)
     }
-    function onWaking() {
-      setWaking(true)
-    }
-    function onAwake() {
-      setWaking(false)
-    }
+    function onWaking() { setWaking(true) }
+    function onAwake() { setWaking(false) }
+
     window.addEventListener('sa:unauthorized', onUnauthorized)
     window.addEventListener('sa:offline', onOffline)
     window.addEventListener('sa:waking', onWaking)
@@ -108,25 +147,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [])
 
+  // ----- session bootstrap -----
   useEffect(() => {
     let active = true
     async function bootstrap() {
       const token = getToken()
       if (token) {
         try {
-          const me = await apiFetch<User>('me/')
-          if (active) setUser(me)
+          const me = await apiFetch<BackendMe>('me/')
+          if (active) setUser(backendMeToUser(me, getStoredRole()))
         } catch {
-          // Token invalide ou expiré → déconnexion propre
           clearSession()
         }
       }
       if (active) setReady(true)
     }
     bootstrap()
-    return () => {
-      active = false
-    }
+    return () => { active = false }
   }, [])
 
   // ----- products -----
@@ -135,11 +172,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const data = await apiFetch<Product[]>('produits/', { auth: false })
       setProducts(data)
-    } catch (err) {
-      if (isOfflineError(err)) {
-        setOffline(true)
-      }
-      // Pas de fallback démo : afficher liste vide si backend indisponible
+    } catch {
       setProducts([])
     } finally {
       setProductsLoading(false)
@@ -152,24 +185,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ----- auth -----
   const login = useCallback(async (email: string, password: string) => {
-    // Appel réel au backend Django — aucun fallback démo
+    // SimpleJWT attend "username" (qui est l'email dans notre modèle)
     const res = await apiFetch<{ access: string; refresh: string }>('token/', {
       auth: false,
       method: 'POST',
-      body: { email, password },
+      body: { username: email, password },
     })
-    // Stocker le token JWT
+    // Stocker le token provisoirement
     setSession(res.access, 'acheteur')
     // Récupérer le profil réel
-    const me = await apiFetch<User>('me/', {
-      auth: true,
-    })
-    setSession(res.access, me.role)
-    setUser(me)
+    const me = await apiFetch<BackendMe>('me/')
+    const userData = backendMeToUser(me, null)
+    setSession(res.access, userData.role)
+    setUser(userData)
   }, [])
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    // Créer l'utilisateur
+    // username = email (car SimpleJWT utilise username pour l'auth)
     await apiFetch('utilisateurs/', {
       auth: false,
       method: 'POST',
@@ -183,7 +215,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         est_livreur: payload.role === 'livreur',
       },
     })
-    // Connexion automatique après inscription
+    // Connexion automatique
     await login(payload.email, payload.password)
   }, [login])
 
@@ -212,9 +244,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateQty = useCallback((productId: number, qty: number) => {
     setCart((prev) =>
       prev
-        .map((i) =>
-          i.product.id === productId ? { ...i, quantite: Math.max(0, qty) } : i,
-        )
+        .map((i) => i.product.id === productId ? { ...i, quantite: Math.max(0, qty) } : i)
         .filter((i) => i.quantite > 0),
     )
   }, [])
@@ -226,11 +256,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const clearCart = useCallback(() => setCart([]), [])
 
   const cartTotal = useMemo(
-    () =>
-      cart.reduce(
-        (sum, i) => sum + (i.product.prix_solde ?? i.product.prix) * i.quantite,
-        0,
-      ),
+    () => cart.reduce((sum, i) => sum + (i.product.prix_solde ?? i.product.prix) * i.quantite, 0),
     [cart],
   )
   const cartCount = useMemo(
@@ -244,10 +270,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const res = await apiFetch<Order>('commandes/', {
         method: 'POST',
         body: {
-          produits: cart.map((i) => ({
-            id: i.product.id,
-            quantite: i.quantite,
-          })),
+          produits: cart.map((i) => ({ id: i.product.id, quantite: i.quantite })),
           ville_depart: depart,
           ville_arrivee: arrivee,
         },
@@ -259,69 +282,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [cart],
   )
 
-  const fundOrder = useCallback(
-    (orderId: number) => {
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId
-            ? { ...o, statut: 'finance', livreur: 'En cours d\'assignation' }
-            : o,
-        ),
-      )
-    },
-    [],
-  )
+  const fundOrder = useCallback((orderId: number) => {
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId ? { ...o, statut: 'finance' as const, livreur: "En cours d'assignation" } : o,
+      ),
+    )
+  }, [])
 
   const confirmOtp = useCallback(
     (orderId: number, code: string): boolean => {
       const order = orders.find((o) => o.id === orderId)
       if (!order || order.otp !== code) return false
       setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId ? { ...o, statut: 'decaisse' } : o,
-        ),
+        prev.map((o) => o.id === orderId ? { ...o, statut: 'decaisse' as const } : o),
       )
       return true
     },
     [orders],
   )
 
-  const rateOrder = useCallback(
-    (orderId: number) => {
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === orderId ? { ...o, note_donnee: true } : o,
-        ),
-      )
-    },
-    [],
-  )
+  const rateOrder = useCallback((orderId: number) => {
+    setOrders((prev) =>
+      prev.map((o) => o.id === orderId ? { ...o, note_donnee: true } : o),
+    )
+  }, [])
 
   const value: AppState = {
-    user,
-    ready,
-    offline,
-    waking,
-    mode,
-    availableRoles,
-    setMode,
-    products,
-    productsLoading,
-    cart,
-    orders,
-    login,
-    register,
-    logout,
-    addToCart,
-    updateQty,
-    removeFromCart,
-    clearCart,
-    cartTotal,
-    cartCount,
-    checkout,
-    fundOrder,
-    confirmOtp,
-    rateOrder,
+    user, ready, offline, waking, mode, availableRoles, setMode,
+    products, productsLoading, cart, orders,
+    login, register, logout,
+    addToCart, updateQty, removeFromCart, clearCart,
+    cartTotal, cartCount,
+    checkout, fundOrder, confirmOtp, rateOrder,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
