@@ -16,10 +16,7 @@ import {
   isOfflineError,
   setSession,
 } from './api'
-import { DEMO_PRODUCTS } from './demo-data'
 import type { CartItem, Order, Product, Role, User } from './types'
-
-const DEMO_ORDERS_KEY = 'sa_demo_orders'
 
 interface RegisterPayload {
   nom: string
@@ -63,20 +60,6 @@ const AppContext = createContext<AppState | null>(null)
 
 function genOtp() {
   return String(Math.floor(1000 + Math.random() * 9000))
-}
-
-function loadDemoOrders(): Order[] {
-  if (typeof window === 'undefined') return []
-  try {
-    return JSON.parse(localStorage.getItem(DEMO_ORDERS_KEY) || '[]')
-  } catch {
-    return []
-  }
-}
-
-function saveDemoOrders(orders: Order[]) {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(DEMO_ORDERS_KEY, JSON.stringify(orders))
 }
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
@@ -131,25 +114,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const token = getToken()
       if (token) {
         try {
-          const me = await apiFetch<User>('auth/me/')
+          const me = await apiFetch<User>('me/')
           if (active) setUser(me)
-        } catch (err) {
-          if (isOfflineError(err)) {
-            // restore a lightweight demo user from stored role
-            const role = (getStoredRole() as Role) || 'acheteur'
-            if (active)
-              setUser({
-                id: 0,
-                nom: 'Démo',
-                prenom: 'Utilisateur',
-                telephone: '+221770000000',
-                email: 'demo@gmail.com',
-                role,
-                score: 4.8,
-              })
-          } else {
-            clearSession()
-          }
+        } catch {
+          // Token invalide ou expiré → déconnexion propre
+          clearSession()
         }
       }
       if (active) setReady(true)
@@ -169,10 +138,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     } catch (err) {
       if (isOfflineError(err)) {
         setOffline(true)
-        setProducts(DEMO_PRODUCTS)
-      } else {
-        setProducts(DEMO_PRODUCTS)
       }
+      // Pas de fallback démo : afficher liste vide si backend indisponible
+      setProducts([])
     } finally {
       setProductsLoading(false)
     }
@@ -180,73 +148,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     loadProducts()
-    setOrders(loadDemoOrders())
   }, [loadProducts])
 
   // ----- auth -----
   const login = useCallback(async (email: string, password: string) => {
-    try {
-      const res = await apiFetch<{ token: string; user: User }>('auth/login/', {
-        auth: false,
-        method: 'POST',
-        body: { email, password },
-      })
-      setSession(res.token, res.user.role)
-      setUser(res.user)
-    } catch (err) {
-      if (isOfflineError(err)) {
-        // demo login: infer role from any stored value, default acheteur
-        const role = (getStoredRole() as Role) || 'acheteur'
-        const demoUser: User = {
-          id: 0,
-          nom: 'Démo',
-          prenom: 'Utilisateur',
-          telephone: '+221770000000',
-          email,
-          role,
-          score: 4.8,
-        }
-        setSession('demo-token', role)
-        setUser(demoUser)
-        setOffline(true)
-        return
-      }
-      throw err
-    }
+    // Appel réel au backend Django — aucun fallback démo
+    const res = await apiFetch<{ access: string; refresh: string }>('token/', {
+      auth: false,
+      method: 'POST',
+      body: { email, password },
+    })
+    // Stocker le token JWT
+    setSession(res.access, 'acheteur')
+    // Récupérer le profil réel
+    const me = await apiFetch<User>('me/', {
+      auth: true,
+    })
+    setSession(res.access, me.role)
+    setUser(me)
   }, [])
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    try {
-      const res = await apiFetch<{ token: string; user: User }>(
-        'auth/register/',
-        { auth: false, method: 'POST', body: payload },
-      )
-      setSession(res.token, res.user.role)
-      setUser(res.user)
-    } catch (err) {
-      if (isOfflineError(err)) {
-        const demoUser: User = {
-          id: 0,
-          nom: payload.nom,
-          prenom: payload.prenom,
-          telephone: payload.telephone,
-          email: payload.email,
-          role: payload.role,
-          score: 5,
-        }
-        setSession('demo-token', payload.role)
-        setUser(demoUser)
-        setOffline(true)
-        return
-      }
-      throw err
-    }
-  }, [])
+    // Créer l'utilisateur
+    await apiFetch('utilisateurs/', {
+      auth: false,
+      method: 'POST',
+      body: {
+        username: payload.email,
+        email: payload.email,
+        password: payload.password,
+        telephone: payload.telephone,
+        est_acheteur: payload.role === 'acheteur',
+        est_vendeur: payload.role === 'vendeur',
+        est_livreur: payload.role === 'livreur',
+      },
+    })
+    // Connexion automatique après inscription
+    await login(payload.email, payload.password)
+  }, [login])
 
   const logout = useCallback(() => {
     clearSession()
     setUser(null)
     setCart([])
+    setOrders([])
   }, [])
 
   // ----- cart -----
@@ -293,89 +238,63 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [cart],
   )
 
-  // ----- orders / escrow -----
-  const persistOrders = useCallback((next: Order[]) => {
-    setOrders(next)
-    saveDemoOrders(next)
-  }, [])
-
+  // ----- orders -----
   const checkout = useCallback(
     async (depart: string, arrivee: string): Promise<Order> => {
-      const newOrder: Order = {
-        id: Date.now(),
-        produits: cart,
-        total: cartTotal,
-        statut: 'en_attente',
-        otp: genOtp(),
-        ville_depart: depart,
-        ville_arrivee: arrivee,
-        cree_le: new Date().toISOString(),
-        livreur: null,
-        note_donnee: false,
-      }
-      try {
-        const res = await apiFetch<Order>('commandes/', {
-          method: 'POST',
-          body: {
-            produits: cart.map((i) => ({
-              id: i.product.id,
-              quantite: i.quantite,
-            })),
-            ville_depart: depart,
-            ville_arrivee: arrivee,
-          },
-        })
-        persistOrders([res, ...orders])
-        setCart([])
-        return res
-      } catch (err) {
-        if (isOfflineError(err)) {
-          persistOrders([newOrder, ...orders])
-          setCart([])
-          return newOrder
-        }
-        throw err
-      }
+      const res = await apiFetch<Order>('commandes/', {
+        method: 'POST',
+        body: {
+          produits: cart.map((i) => ({
+            id: i.product.id,
+            quantite: i.quantite,
+          })),
+          ville_depart: depart,
+          ville_arrivee: arrivee,
+        },
+      })
+      setOrders((prev) => [res, ...prev])
+      setCart([])
+      return res
     },
-    [cart, cartTotal, orders, persistOrders],
+    [cart],
   )
 
   const fundOrder = useCallback(
     (orderId: number) => {
-      persistOrders(
-        orders.map((o) =>
+      setOrders((prev) =>
+        prev.map((o) =>
           o.id === orderId
-            ? { ...o, statut: 'finance', livreur: 'Moussa D.' }
+            ? { ...o, statut: 'finance', livreur: 'En cours d\'assignation' }
             : o,
         ),
       )
     },
-    [orders, persistOrders],
+    [],
   )
 
   const confirmOtp = useCallback(
     (orderId: number, code: string): boolean => {
       const order = orders.find((o) => o.id === orderId)
       if (!order || order.otp !== code) return false
-      persistOrders(
-        orders.map((o) =>
+      setOrders((prev) =>
+        prev.map((o) =>
           o.id === orderId ? { ...o, statut: 'decaisse' } : o,
         ),
       )
       return true
     },
-    [orders, persistOrders],
+    [orders],
   )
 
   const rateOrder = useCallback(
     (orderId: number) => {
-      persistOrders(
-        orders.map((o) =>
+      setOrders((prev) =>
+        prev.map((o) =>
           o.id === orderId ? { ...o, note_donnee: true } : o,
         ),
       )
     },
-    [orders, persistOrders],
+    [],
   )
 
   const value: AppState = {
