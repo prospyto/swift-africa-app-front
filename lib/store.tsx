@@ -36,6 +36,7 @@ interface AppState {
   user: User | null
   ready: boolean
   offline: boolean
+  waking: boolean
   mode: Role
   availableRoles: Role[]
   setMode: (role: Role) => void
@@ -82,11 +83,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [ready, setReady] = useState(false)
   const [offline, setOffline] = useState(false)
+  const [waking, setWaking] = useState(false)
   const [mode, setMode] = useState<Role>('acheteur')
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [cart, setCart] = useState<CartItem[]>([])
   const [orders, setOrders] = useState<Order[]>([])
+
+  const availableRoles = useMemo<Role[]>(() => {
+    if (!user) return ALL_ROLES
+    return user.availableRoles && user.availableRoles.length > 0
+      ? user.availableRoles
+      : [user.role]
+  }, [user])
 
   // ----- session bootstrap -----
   useEffect(() => {
@@ -96,12 +105,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     function onOffline() {
       setOffline(true)
+      setWaking(false)
+    }
+    function onWaking() {
+      setWaking(true)
+    }
+    function onAwake() {
+      setWaking(false)
     }
     window.addEventListener('sa:unauthorized', onUnauthorized)
     window.addEventListener('sa:offline', onOffline)
+    window.addEventListener('sa:waking', onWaking)
+    window.addEventListener('sa:awake', onAwake)
     return () => {
       window.removeEventListener('sa:unauthorized', onUnauthorized)
       window.removeEventListener('sa:offline', onOffline)
+      window.removeEventListener('sa:waking', onWaking)
+      window.removeEventListener('sa:awake', onAwake)
     }
   }, [])
 
@@ -362,6 +382,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     user,
     ready,
     offline,
+    waking,
+    mode,
+    availableRoles,
+    setMode,
     products,
     productsLoading,
     cart,

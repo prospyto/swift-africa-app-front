@@ -52,6 +52,13 @@ export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
   auth?: boolean
 }
 
+// Render free tier puts the backend to sleep after inactivity. A cold
+// start can take 30-60s, so a short timeout alone would wrongly trigger
+// the demo fallback. We try fast first, then retry once with a much
+// longer timeout while signaling the UI that the server is waking up.
+const FAST_TIMEOUT_MS = 6000
+const WAKE_TIMEOUT_MS = 30000
+
 export async function apiFetch<T = unknown>(
   endpoint: string,
   options: ApiFetchOptions = {},
@@ -70,21 +77,34 @@ export async function apiFetch<T = unknown>(
 
   const url = `${API_BASE_URL}${endpoint.replace(/^\//, '')}`
 
+  const fetchOptions: RequestInit = {
+    ...rest,
+    headers: finalHeaders,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
+  }
+
   let response: Response
   try {
-    response = await fetch(url, {
-      ...rest,
-      headers: finalHeaders,
-      body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(6000),
-    })
+    response = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(FAST_TIMEOUT_MS) })
   } catch {
-    // Network failure / timeout → trigger demo fallback
-    if (!offlineNotified && typeof window !== 'undefined') {
-      offlineNotified = true
-      window.dispatchEvent(new CustomEvent('sa:offline'))
+    // First attempt failed (likely a Render cold start). Retry once with
+    // a much longer timeout, telling the UI the server is waking up.
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('sa:waking'))
     }
-    throw new OfflineError()
+    try {
+      response = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(WAKE_TIMEOUT_MS) })
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('sa:awake'))
+      }
+    } catch {
+      // Still unreachable after the long retry → trigger demo fallback
+      if (!offlineNotified && typeof window !== 'undefined') {
+        offlineNotified = true
+        window.dispatchEvent(new CustomEvent('sa:offline'))
+      }
+      throw new OfflineError()
+    }
   }
 
   // Session handling: expired or invalid token

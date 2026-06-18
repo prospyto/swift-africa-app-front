@@ -1,6 +1,6 @@
 'use client'
 
-import { Truck, ShoppingCart, LogOut, WifiOff } from 'lucide-react'
+import { Truck, ShoppingCart, LogOut, WifiOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 
@@ -11,7 +11,7 @@ interface NavbarProps {
 }
 
 export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
-  const { user, logout, cartCount, offline } = useApp()
+  const { user, logout, cartCount, offline, waking } = useApp()
   if (!user) return null
 
   const tabs = [
@@ -49,6 +49,11 @@ export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
+          {waking && !offline && (
+            <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground sm:flex">
+              <Loader2 className="size-3.5 animate-spin" /> Réveil du serveur…
+            </span>
+          )}
           {offline && (
             <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground sm:flex">
               <WifiOff className="size-3.5" /> Mode démo
