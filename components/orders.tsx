@@ -2,18 +2,13 @@
 
 import { useState } from 'react'
 import {
-  ArrowRight,
-  ShieldCheck,
-  Truck,
-  PackageCheck,
-  Wallet,
-  Star,
-  KeyRound,
-  CheckCircle2,
-  CircleDollarSign,
+  ArrowRight, ShieldCheck, Truck, PackageCheck,
+  Wallet, Star, KeyRound, CheckCircle2,
+  CircleDollarSign, MessageCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass'
+import { ChatCommande } from '@/components/chat-commande'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Order, OrderStatus } from '@/lib/types'
 
@@ -25,15 +20,12 @@ const STEPS: { key: OrderStatus; label: string; icon: typeof Truck }[] = [
 ]
 
 const ORDER_RANK: Record<OrderStatus, number> = {
-  en_attente: 0,
-  finance: 1,
-  en_livraison: 2,
-  livre: 2,
-  decaisse: 3,
+  en_attente: 0, finance: 1, en_livraison: 2, livre: 2, decaisse: 3,
 }
 
 export function Orders() {
   const { orders } = useApp()
+  const [chatCommandeId, setChatCommandeId] = useState<number | null>(null)
 
   if (orders.length === 0) {
     return (
@@ -42,8 +34,7 @@ export function Orders() {
           <PackageCheck className="size-10 text-muted-foreground/50" />
           <h2 className="text-lg font-bold">Aucune commande pour le moment</h2>
           <p className="text-sm text-muted-foreground">
-            Vos achats financés via Escrow apparaîtront ici avec leur code de
-            sécurité.
+            Vos achats financés via Escrow apparaîtront ici avec leur code de sécurité.
           </p>
         </GlassCard>
       </section>
@@ -51,20 +42,31 @@ export function Orders() {
   }
 
   return (
-    <section className="mx-auto max-w-3xl px-3 py-6 md:px-6 md:py-8">
-      <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl">
-        Mes commandes
-      </h1>
-      <div className="grid gap-5">
-        {orders.map((o) => (
-          <OrderCard key={o.id} order={o} />
-        ))}
-      </div>
-    </section>
+    <>
+      <section className="mx-auto max-w-3xl px-3 py-6 md:px-6 md:py-8">
+        <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl">Mes commandes</h1>
+        <div className="grid gap-5">
+          {orders.map((o) => (
+            <OrderCard
+              key={o.id}
+              order={o}
+              onOpenChat={() => setChatCommandeId(o.id)}
+            />
+          ))}
+        </div>
+      </section>
+
+      {chatCommandeId !== null && (
+        <ChatCommande
+          commandeId={chatCommandeId}
+          onClose={() => setChatCommandeId(null)}
+        />
+      )}
+    </>
   )
 }
 
-function OrderCard({ order }: { order: Order }) {
+function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void }) {
   const { fundOrder, confirmOtp, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
@@ -84,20 +86,28 @@ function OrderCard({ order }: { order: Order }) {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs text-muted-foreground">
-            Commande #{String(order.id).slice(-6)}
-          </p>
+          <p className="text-xs text-muted-foreground">Commande #{String(order.id).slice(-6)}</p>
           <div className="mt-1 flex items-center gap-2 text-sm font-semibold">
             {order.ville_depart}
             <ArrowRight className="size-4 text-primary" />
             {order.ville_arrivee}
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-lg font-bold">{formatXOF(order.total)}</p>
-          <p className="text-xs text-muted-foreground">
-            {order.produits.reduce((s, i) => s + i.quantite, 0)} article(s)
-          </p>
+        <div className="flex items-center gap-2">
+          {/* Bouton Chat */}
+          <button
+            onClick={onOpenChat}
+            className="glass flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+          >
+            <MessageCircle className="size-4 text-primary" />
+            Chat
+          </button>
+          <div className="text-right">
+            <p className="text-lg font-bold">{formatXOF(order.total)}</p>
+            <p className="text-xs text-muted-foreground">
+              {order.produits.reduce((s, i) => s + i.quantite, 0)} article(s)
+            </p>
+          </div>
         </div>
       </div>
 
@@ -108,25 +118,15 @@ function OrderCard({ order }: { order: Order }) {
           return (
             <div key={step.key} className="flex flex-1 items-center last:flex-none">
               <div className="flex flex-col items-center gap-1">
-                <div
-                  className={`flex size-9 items-center justify-center rounded-xl transition ${
-                    done
-                      ? 'bg-success text-success-foreground'
-                      : 'bg-muted text-muted-foreground'
-                  }`}
-                >
+                <div className={`flex size-9 items-center justify-center rounded-xl transition ${
+                  done ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'
+                }`}>
                   <step.icon className="size-5" />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground">
-                  {step.label}
-                </span>
+                <span className="text-[10px] font-medium text-muted-foreground">{step.label}</span>
               </div>
               {i < STEPS.length - 1 && (
-                <div
-                  className={`mx-1 h-0.5 flex-1 rounded-full ${
-                    rank > i ? 'bg-success' : 'bg-muted'
-                  }`}
-                />
+                <div className={`mx-1 h-0.5 flex-1 rounded-full ${rank > i ? 'bg-success' : 'bg-muted'}`} />
               )}
             </div>
           )
@@ -149,33 +149,21 @@ function OrderCard({ order }: { order: Order }) {
             <div className="flex items-center gap-3 rounded-2xl bg-accent p-4">
               <KeyRound className="size-6 text-primary" />
               <div>
-                <p className="text-xs text-accent-foreground/80">
-                  Votre code de sécurité OTP
-                </p>
-                <p className="font-mono text-2xl font-bold tracking-[0.4em] text-foreground">
-                  {order.otp}
-                </p>
+                <p className="text-xs text-accent-foreground/80">Votre code de sécurité OTP</p>
+                <p className="font-mono text-2xl font-bold tracking-[0.4em] text-foreground">{order.otp}</p>
               </div>
             </div>
             <p className="text-xs text-muted-foreground">
-              Communiquez ce code au livreur{' '}
-              {order.livreur ? `(${order.livreur})` : ''} uniquement à la
-              réception. La saisie ci-dessous simule la validation par le
-              livreur pour débloquer les fonds.
+              Communiquez ce code au livreur{order.livreur ? ` (${order.livreur})` : ''} uniquement à la réception.
             </p>
             <div className="flex gap-2">
               <input
                 value={code}
-                onChange={(e) => {
-                  setCode(e.target.value.replace(/\D/g, '').slice(0, 4))
-                  setOtpError(false)
-                }}
+                onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 4)); setOtpError(false) }}
                 inputMode="numeric"
                 placeholder="• • • •"
                 className={`w-full rounded-2xl border bg-input px-4 py-3 text-center font-mono text-lg tracking-[0.5em] outline-none focus:ring-2 ${
-                  otpError
-                    ? 'border-destructive focus:ring-destructive/30'
-                    : 'border-border focus:border-primary focus:ring-primary/30'
+                  otpError ? 'border-destructive focus:ring-destructive/30' : 'border-border focus:border-primary focus:ring-primary/30'
                 }`}
               />
               <Button
@@ -186,11 +174,7 @@ function OrderCard({ order }: { order: Order }) {
                 Valider
               </Button>
             </div>
-            {otpError && (
-              <p className="text-xs text-destructive">
-                Code incorrect. Vérifiez les 4 chiffres.
-              </p>
-            )}
+            {otpError && <p className="text-xs text-destructive">Code incorrect. Vérifiez les 4 chiffres.</p>}
           </div>
         )}
 
@@ -198,33 +182,17 @@ function OrderCard({ order }: { order: Order }) {
           <div className="grid gap-4">
             <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
               <CheckCircle2 className="size-5" />
-              <span className="text-sm font-semibold">
-                Fonds décaissés au vendeur. Livraison confirmée.
-              </span>
+              <span className="text-sm font-semibold">Fonds décaissés au vendeur. Livraison confirmée.</span>
             </div>
             {order.note_donnee ? (
-              <p className="text-center text-sm text-muted-foreground">
-                Merci pour votre évaluation.
-              </p>
+              <p className="text-center text-sm text-muted-foreground">Merci pour votre évaluation.</p>
             ) : (
               <div className="text-center">
-                <p className="mb-2 text-sm font-medium">
-                  Notez le vendeur et le livreur
-                </p>
+                <p className="mb-2 text-sm font-medium">Notez le vendeur et le livreur</p>
                 <div className="flex justify-center gap-1">
                   {[1, 2, 3, 4, 5].map((n) => (
-                    <button
-                      key={n}
-                      onClick={() => setRating(n)}
-                      aria-label={`${n} étoiles`}
-                    >
-                      <Star
-                        className={`size-7 transition ${
-                          n <= rating
-                            ? 'fill-primary text-primary'
-                            : 'text-muted-foreground/40'
-                        }`}
-                      />
+                    <button key={n} onClick={() => setRating(n)} aria-label={`${n} étoiles`}>
+                      <Star className={`size-7 transition ${n <= rating ? 'fill-primary text-primary' : 'text-muted-foreground/40'}`} />
                     </button>
                   ))}
                 </div>
