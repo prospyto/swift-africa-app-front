@@ -4,25 +4,28 @@ import { Truck, ShoppingCart, LogOut, WifiOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 
+interface Tab {
+  id: string
+  label: string
+}
+
 interface NavbarProps {
   tab: string
   onTab: (t: string) => void
   onOpenCart: () => void
+  tabs: Tab[]
 }
 
-export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
-  const { user, logout, cartCount, offline, waking } = useApp()
+export function Navbar({ tab, onTab, onOpenCart, tabs }: NavbarProps) {
+  const { user, logout, cartCount, offline, waking, mode, availableRoles, setMode } = useApp()
   if (!user) return null
 
-  const tabs = [
-    { id: 'catalogue', label: 'Catalogue' },
-    { id: 'commandes', label: 'Mes commandes' },
-    { id: 'espace', label: 'Mon espace' },
-  ]
+  const activeRole = mode || user.role
 
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 md:px-6 md:pt-4">
       <div className="glass-strong mx-auto flex max-w-7xl items-center gap-3 rounded-3xl px-4 py-3 md:px-5">
+        {/* Logo */}
         <div className="flex items-center gap-2.5">
           <div className="glass-cta flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
             <Truck className="size-5" />
@@ -32,6 +35,7 @@ export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
           </span>
         </div>
 
+        {/* Onglets desktop */}
         <nav className="glass ml-1 hidden rounded-2xl p-1 md:flex">
           {tabs.map((t) => (
             <button
@@ -48,6 +52,7 @@ export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
           ))}
         </nav>
 
+        {/* Actions droite */}
         <div className="ml-auto flex items-center gap-2">
           {waking && !offline && (
             <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground sm:flex">
@@ -55,33 +60,51 @@ export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
             </span>
           )}
           {offline && (
-            <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground sm:flex">
-              <WifiOff className="size-3.5" /> Mode démo
+            <span className="hidden items-center gap-1.5 rounded-full bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive sm:flex">
+              <WifiOff className="size-3.5" /> Hors ligne
             </span>
           )}
 
-          <button
-            onClick={onOpenCart}
-            className="glass relative flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-secondary"
-            aria-label="Ouvrir le panier"
-          >
-            <ShoppingCart className="size-5" />
-            {cartCount > 0 && (
-              <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
-                {cartCount}
-              </span>
-            )}
-          </button>
+          {/* Switch de rôle si multi-rôle */}
+          {availableRoles.length > 1 && (
+            <select
+              value={activeRole}
+              onChange={(e) => setMode(e.target.value as typeof activeRole)}
+              className="glass hidden rounded-xl border-0 bg-transparent px-3 py-1.5 text-xs font-semibold capitalize text-foreground outline-none sm:block"
+            >
+              {availableRoles.map((r) => (
+                <option key={r} value={r}>
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </option>
+              ))}
+            </select>
+          )}
 
+          {/* Panier — visible seulement pour acheteur */}
+          {activeRole === 'acheteur' && (
+            <button
+              onClick={onOpenCart}
+              className="glass relative flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-secondary"
+              aria-label="Ouvrir le panier"
+            >
+              <ShoppingCart className="size-5" />
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                  {cartCount}
+                </span>
+              )}
+            </button>
+          )}
+
+          {/* Avatar */}
           <div className="glass hidden items-center gap-2 rounded-xl px-3 py-1.5 sm:flex">
             <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-xs font-bold text-primary">
-              {user.prenom[0]}
-              {user.nom[0]}
+              {user.prenom?.[0] ?? '?'}{user.nom?.[0] ?? ''}
             </div>
             <div className="leading-tight">
               <p className="text-xs font-semibold">{user.prenom}</p>
               <p className="text-[10px] capitalize text-muted-foreground">
-                {user.role}
+                {activeRole}
               </p>
             </div>
           </div>
@@ -98,7 +121,7 @@ export function Navbar({ tab, onTab, onOpenCart }: NavbarProps) {
         </div>
       </div>
 
-      {/* mobile tabs */}
+      {/* Onglets mobile */}
       <nav className="glass mx-auto mt-2 flex max-w-7xl rounded-2xl p-1 md:hidden">
         {tabs.map((t) => (
           <button
