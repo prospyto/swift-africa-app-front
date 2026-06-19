@@ -38,6 +38,7 @@ interface AppState {
   setMode: (role: Role) => void
   products: Product[]
   productsLoading: boolean
+  refreshProducts: () => Promise<void>
   cart: CartItem[]
   orders: Order[]
   login: (email: string, password: string) => Promise<void>
@@ -310,7 +311,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppState = {
     user, ready, offline, waking, mode, availableRoles, setMode,
-    products, productsLoading, cart, orders,
+    products, productsLoading, refreshProducts: loadProducts, cart, orders,
     login, register, logout,
     addToCart, updateQty, removeFromCart, clearCart,
     cartTotal, cartCount,

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import {
   Wallet,
   Star,
@@ -9,8 +10,11 @@ import {
   Truck,
   ArrowRight,
   Percent,
+  Plus,
 } from 'lucide-react'
 import { GlassCard } from '@/components/glass'
+import { Button } from '@/components/ui/button'
+import { ProductForm } from '@/components/product-form'
 import { useApp, formatXOF } from '@/lib/store'
 
 export function Espace() {
@@ -90,10 +94,29 @@ function BuyerSpace() {
 }
 
 function SellerSpace() {
-  const { products } = useApp()
+  const { products, refreshProducts } = useApp()
+  const [showForm, setShowForm] = useState(false)
   const COMMISSION = 0.88
+
+  if (showForm) {
+    return (
+      <ProductForm
+        onCancel={() => setShowForm(false)}
+        onSuccess={() => {
+          setShowForm(false)
+          refreshProducts()
+        }}
+      />
+    )
+  }
+
   return (
     <div className="grid gap-5">
+      <div className="flex items-center justify-end">
+        <Button onClick={() => setShowForm(true)} className="gap-2">
+          <Plus className="size-4" /> Ajouter un produit
+        </Button>
+      </div>
       <div className="grid gap-5 sm:grid-cols-3">
         <Stat
           icon={Package}
