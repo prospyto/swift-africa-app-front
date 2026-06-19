@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useApp } from '@/lib/store'
 import { AuthScreen } from '@/components/auth-screen'
 import { Navbar } from '@/components/navbar'
@@ -10,10 +10,38 @@ import { Espace } from '@/components/espace'
 import { CartDrawer } from '@/components/cart-drawer'
 import { Spinner } from '@/components/glass'
 
+// Onglets selon le rôle actif
+const TABS_BY_ROLE = {
+  acheteur: [
+    { id: 'catalogue', label: 'Catalogue' },
+    { id: 'commandes', label: 'Mes commandes' },
+    { id: 'espace', label: 'Mon espace' },
+  ],
+  vendeur: [
+    { id: 'espace', label: 'Mes produits' },
+    { id: 'catalogue', label: 'Catalogue' },
+    { id: 'commandes', label: 'Commandes reçues' },
+  ],
+  livreur: [
+    { id: 'espace', label: 'Mes missions' },
+    { id: 'catalogue', label: 'Catalogue' },
+    { id: 'commandes', label: 'Historique' },
+  ],
+}
+
 export function AppShell() {
-  const { user, ready } = useApp()
-  const [tab, setTab] = useState('catalogue')
+  const { user, ready, mode } = useApp()
   const [cartOpen, setCartOpen] = useState(false)
+
+  const activeRole = mode || user?.role || 'acheteur'
+  const tabs = TABS_BY_ROLE[activeRole] ?? TABS_BY_ROLE.acheteur
+
+  // Onglet par défaut selon le rôle
+  const defaultTab = tabs[0].id
+  const [tab, setTab] = useState(defaultTab)
+
+  // Quand le rôle change, revenir au premier onglet
+  const currentTab = tabs.some((t) => t.id === tab) ? tab : tabs[0].id
 
   if (!ready) {
     return (
@@ -27,10 +55,15 @@ export function AppShell() {
 
   return (
     <div className="min-h-screen pb-12">
-      <Navbar tab={tab} onTab={setTab} onOpenCart={() => setCartOpen(true)} />
-      {tab === 'catalogue' && <Catalog />}
-      {tab === 'commandes' && <Orders />}
-      {tab === 'espace' && <Espace />}
+      <Navbar
+        tab={currentTab}
+        onTab={setTab}
+        onOpenCart={() => setCartOpen(true)}
+        tabs={tabs}
+      />
+      {currentTab === 'catalogue' && <Catalog />}
+      {currentTab === 'commandes' && <Orders />}
+      {currentTab === 'espace' && <Espace />}
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
