@@ -155,7 +155,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       const token = getToken()
       if (token) {
         try {
-          const me = await apiFetch<BackendMe>('me/')
+          const me = await apiFetch<BackendMe>('auth/me/')
           if (active) setUser(backendMeToUser(me, getStoredRole()))
         } catch {
           clearSession()
@@ -187,17 +187,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // ----- auth -----
   const login = useCallback(async (email: string, password: string) => {
     // SimpleJWT attend "username" (qui est l'email dans notre modèle)
-    const res = await apiFetch<{ access: string; refresh: string }>('token/', {
+    const res = await apiFetch<{ access: string; refresh: string }>('auth/login/', {
       auth: false,
       method: 'POST',
-      body: { username: email, password },
+      body: { email, password },
     })
     // Stocker le token provisoirement
-    setSession(res.access, 'acheteur')
+    setSession(res.token, 'acheteur')
     // Récupérer le profil réel
-    const me = await apiFetch<BackendMe>('me/')
+    const me = await apiFetch<BackendMe>('auth/me/')
     const userData = backendMeToUser(me, null)
-    setSession(res.access, userData.role)
+    setSession(res.token, userData.role)
     setUser(userData)
   }, [])
 
@@ -330,3 +330,4 @@ export function useApp() {
 export function formatXOF(value: number) {
   return new Intl.NumberFormat('fr-FR').format(value) + ' FCFA'
 }
+
