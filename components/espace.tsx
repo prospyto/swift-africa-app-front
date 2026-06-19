@@ -11,36 +11,42 @@ import {
   ArrowRight,
   Percent,
   Plus,
+  Pencil,
+  Trash2,
 } from 'lucide-react'
 import { GlassCard } from '@/components/glass'
 import { Button } from '@/components/ui/button'
-import { ProductForm } from '@/components/product-form'
 import { useApp, formatXOF } from '@/lib/store'
+import { ProductForm } from '@/components/product-form'
+import type { Product } from '@/lib/types'
 
 export function Espace() {
-  const { user } = useApp()
+  const { user, mode } = useApp()
   if (!user) return null
+
+  // Le rôle actif est "mode" (switchable) ou user.role par défaut
+  const activeRole = mode || user.role
 
   return (
     <section className="mx-auto max-w-7xl px-3 py-6 md:px-6 md:py-8">
       <div className="mb-6 flex items-center gap-4">
         <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/15 text-lg font-bold text-primary">
-          {user.prenom[0]}
-          {user.nom[0]}
+          {user.prenom?.[0] ?? '?'}
+          {user.nom?.[0] ?? ''}
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight md:text-3xl">
             Bonjour {user.prenom}
           </h1>
           <p className="capitalize text-muted-foreground">
-            Espace {user.role}
+            Espace {activeRole}
           </p>
         </div>
       </div>
 
-      {user.role === 'acheteur' && <BuyerSpace />}
-      {user.role === 'vendeur' && <SellerSpace />}
-      {user.role === 'livreur' && <CourierSpace />}
+      {activeRole === 'acheteur' && <BuyerSpace />}
+      {activeRole === 'vendeur' && <SellerSpace />}
+      {activeRole === 'livreur' && <CourierSpace />}
     </section>
   )
 }
@@ -71,6 +77,7 @@ function Stat({
   )
 }
 
+// ─── ACHETEUR ────────────────────────────────────────────────
 function BuyerSpace() {
   const { orders } = useApp()
   const escrow = orders
@@ -81,30 +88,33 @@ function BuyerSpace() {
   return (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <Stat icon={Package} label="Commandes" value={String(orders.length)} />
-      <Stat
-        icon={ShieldCheck}
-        label="Fonds en Escrow"
-        value={formatXOF(escrow)}
-        accent="success"
-      />
+      <Stat icon={ShieldCheck} label="Fonds en Escrow" value={formatXOF(escrow)} accent="success" />
       <Stat icon={Truck} label="Livrées" value={String(done)} accent="success" />
       <Stat icon={Star} label="Score acheteur" value="4.8 / 5" />
     </div>
   )
 }
 
+// ─── VENDEUR ─────────────────────────────────────────────────
 function SellerSpace() {
-  const { products, refreshProducts } = useApp()
-  const [showForm, setShowForm] = useState(false)
+  const { products } = useApp()
+  const [view, setView] = useState<'dashboard' | 'add' | 'edit'>('dashboard')
+  const [editProduct, setEditProduct] = useState<Product | null>(null)
   const COMMISSION = 0.88
 
-  if (showForm) {
+  if (view === 'add' || view === 'edit') {
     return (
       <ProductForm
-        onCancel={() => setShowForm(false)}
+        product={editProduct ?? undefined}
         onSuccess={() => {
-          setShowForm(false)
-          refreshProducts()
+          setView('dashboard')
+          setEditProduct(null)
+          // Recharger les produits
+          window.location.reload()
+        }}
+        onCancel={() => {
+          setView('dashboard')
+          setEditProduct(null)
         }}
       />
     )
@@ -112,59 +122,77 @@ function SellerSpace() {
 
   return (
     <div className="grid gap-5">
-      <div className="flex items-center justify-end">
-        <Button onClick={() => setShowForm(true)} className="gap-2">
-          <Plus className="size-4" /> Ajouter un produit
-        </Button>
-      </div>
+      {/* Stats */}
       <div className="grid gap-5 sm:grid-cols-3">
-        <Stat
-          icon={Package}
-          label="Produits en ligne"
-          value={String(products.length)}
-        />
-        <Stat
-          icon={Percent}
-          label="Commission plateforme"
-          value="12 %"
-          accent="primary"
-        />
+        <Stat icon={Package} label="Produits en ligne" value={String(products.length)} />
+        <Stat icon={Percent} label="Commission plateforme" value="12 %" accent="primary" />
         <Stat icon={Star} label="Score vendeur" value="4.9 / 5" accent="success" />
       </div>
 
+      {/* Bouton ajouter */}
+      <div className="flex justify-end">
+        <Button
+          onClick={() => { setEditProduct(null); setView('add') }}
+          className="glass-cta flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground hover:bg-primary/90"
+        >
+          <Plus className="size-4" />
+          Ajouter un produit
+        </Button>
+      </div>
+
+      {/* Liste produits */}
       <GlassCard strong className="p-5 md:p-6">
         <div className="mb-4 flex items-center gap-2">
           <TrendingUp className="size-5 text-success" />
-          <h2 className="font-bold">Gains nets par produit (Prix × 0.88)</h2>
+          <h2 className="font-bold">Mes produits</h2>
         </div>
-        <ul className="divide-y divide-border/60">
-          {products.slice(0, 5).map((p) => {
-            const base = p.prix_solde ?? p.prix
-            const gain = Math.round(base * COMMISSION)
-            return (
-              <li
-                key={p.id}
-                className="flex items-center justify-between gap-3 py-3"
-              >
-                <span className="text-sm font-medium">{p.nom}</span>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-muted-foreground">
-                    {formatXOF(base)}
-                  </span>
-                  <ArrowRight className="size-3.5 text-muted-foreground" />
-                  <span className="font-bold text-success">
-                    {formatXOF(gain)}
-                  </span>
-                </div>
-              </li>
-            )
-          })}
-        </ul>
+
+        {products.length === 0 ? (
+          <div className="py-10 text-center">
+            <Package className="mx-auto mb-3 size-10 text-muted-foreground/40" />
+            <p className="text-sm text-muted-foreground">
+              Vous n'avez pas encore de produits en ligne.
+            </p>
+            <Button
+              onClick={() => { setEditProduct(null); setView('add') }}
+              className="glass-cta mt-4 rounded-2xl bg-primary px-5 font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              Publier mon premier produit
+            </Button>
+          </div>
+        ) : (
+          <ul className="divide-y divide-border/60">
+            {products.map((p) => {
+              const base = p.prix_solde ?? p.prix
+              const gain = Math.round(base * COMMISSION)
+              return (
+                <li key={p.id} className="flex items-center justify-between gap-3 py-3">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{p.nom}</p>
+                    <p className="text-xs text-muted-foreground">{p.categorie} · {p.ville}</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-muted-foreground">{formatXOF(base)}</span>
+                    <ArrowRight className="size-3.5 text-muted-foreground" />
+                    <span className="font-bold text-success">{formatXOF(gain)}</span>
+                    <button
+                      onClick={() => { setEditProduct(p); setView('edit') }}
+                      className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </GlassCard>
     </div>
   )
 }
 
+// ─── LIVREUR ─────────────────────────────────────────────────
 function CourierSpace() {
   const { orders } = useApp()
   const missions = orders.filter(
@@ -177,23 +205,9 @@ function CourierSpace() {
   return (
     <div className="grid gap-5">
       <div className="grid gap-5 sm:grid-cols-3">
-        <Stat
-          icon={Truck}
-          label="Missions actives"
-          value={String(missions.length)}
-        />
-        <Stat
-          icon={Wallet}
-          label="Wallet livreur"
-          value={formatXOF(wallet)}
-          accent="success"
-        />
-        <Stat
-          icon={Star}
-          label="Score de confiance"
-          value="4.7 / 5"
-          accent="primary"
-        />
+        <Stat icon={Truck} label="Missions actives" value={String(missions.length)} />
+        <Stat icon={Wallet} label="Wallet livreur" value={formatXOF(wallet)} accent="success" />
+        <Stat icon={Star} label="Score de confiance" value="4.7 / 5" accent="primary" />
       </div>
 
       <GlassCard strong className="p-5 md:p-6">
