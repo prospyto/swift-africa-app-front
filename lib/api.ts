@@ -1,6 +1,4 @@
 // Global API layer for Swift Africa.
-// Talks to the Django backend, with an automatic local demo fallback
-// whenever the server is unreachable (offline / not started).
 
 export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://swift-africa-backend.onrender.com/api/'
 
@@ -37,11 +35,9 @@ export class ApiError extends Error {
   }
 }
 
-// Raised when the Django server cannot be reached, so callers can
-// transparently switch to local demo data.
 export class OfflineError extends Error {
   constructor() {
-    super('Serveur Django injoignable — bascule en mode démo local.')
+    super('Serveur injoignable. Vérifiez votre connexion.')
   }
 }
 
@@ -52,12 +48,40 @@ export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
   auth?: boolean
 }
 
-// Render free tier puts the backend to sleep after inactivity. A cold
-// start can take 30-60s, so a short timeout alone would wrongly trigger
-// the demo fallback. We try fast first, then retry once with a much
-// longer timeout while signaling the UI that the server is waking up.
-const FAST_TIMEOUT_MS = 6000
-const WAKE_TIMEOUT_MS = 30000
+const FAST_TIMEOUT_MS = 8000
+const WAKE_TIMEOUT_MS = 45000
+
+// Parse les erreurs Django qui peuvent être de plusieurs formats :
+// { detail: "..." } ou { username: ["..."] } ou { email: ["..."] } etc.
+function parseDjangoError(data: unknown): string {
+  if (!data || typeof data !== 'object') return 'Erreur inconnue'
+  const d = data as Record<string, unknown>
+
+  // Format standard DRF
+  if (typeof d.detail === 'string') return d.detail
+
+  // Format validation par champ : { username: ["A user with..."], email: [...] }
+  const fieldMessages: string[] = []
+  for (const key of Object.keys(d)) {
+    const val = d[key]
+    if (Array.isArray(val)) {
+      const msgs = val.map((v) => String(v)).join(', ')
+      // Traduire les messages courants
+      const translated = msgs
+        .replace('A user with that username already exists.', 'Ce compte existe déjà.')
+        .replace('This field may not be blank.', 'Ce champ est obligatoire.')
+        .replace('This field is required.', 'Ce champ est obligatoire.')
+        .replace('Enter a valid email address.', 'Email invalide.')
+        .replace('No active account found with the given credentials', 'Email ou mot de passe incorrect.')
+      fieldMessages.push(translated)
+    } else if (typeof val === 'string') {
+      fieldMessages.push(val)
+    }
+  }
+  if (fieldMessages.length > 0) return fieldMessages.join(' ')
+
+  return 'Une erreur est survenue.'
+}
 
 export async function apiFetch<T = unknown>(
   endpoint: string,
@@ -87,8 +111,6 @@ export async function apiFetch<T = unknown>(
   try {
     response = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(FAST_TIMEOUT_MS) })
   } catch {
-    // First attempt failed (likely a Render cold start). Retry once with
-    // a much longer timeout, telling the UI the server is waking up.
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('sa:waking'))
     }
@@ -98,7 +120,6 @@ export async function apiFetch<T = unknown>(
         window.dispatchEvent(new CustomEvent('sa:awake'))
       }
     } catch {
-      // Still unreachable after the long retry → trigger demo fallback
       if (!offlineNotified && typeof window !== 'undefined') {
         offlineNotified = true
         window.dispatchEvent(new CustomEvent('sa:offline'))
@@ -107,20 +128,19 @@ export async function apiFetch<T = unknown>(
     }
   }
 
-  // Session handling: expired or invalid token
   if (response.status === 401 || response.status === 403) {
     clearSession()
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('sa:unauthorized'))
     }
-    throw new ApiError(response.status, 'Session expirée, veuillez vous reconnecter.')
+    throw new ApiError(response.status, 'Email ou mot de passe incorrect.')
   }
 
   if (!response.ok) {
     let message = `Erreur ${response.status}`
     try {
       const data = await response.json()
-      message = data?.detail || data?.message || message
+      message = parseDjangoError(data)
     } catch {
       /* noop */
     }
