@@ -73,12 +73,9 @@ function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void
   const [rating, setRating] = useState(0)
   const rank = ORDER_RANK[order.statut]
 
-  function handleConfirm() {
-    if (confirmOtp(order.id, code)) {
-      setOtpError(false)
-    } else {
-      setOtpError(true)
-    }
+  async function handleConfirm() {
+    const ok = await confirmOtp(order.id, code)
+    setOtpError(!ok)
   }
 
   return (

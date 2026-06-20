@@ -51,8 +51,9 @@ interface AppState {
   cartTotal: number
   cartCount: number
   checkout: (depart: string, arrivee: string) => Promise<Order>
-  fundOrder: (orderId: number) => void
-  confirmOtp: (orderId: number, code: string) => boolean
+  fundOrder: (orderId: number) => Promise<void>
+  confirmOtp: (orderId: number, code: string) => Promise<boolean>
+  decaisserOrder: (orderId: number) => Promise<void>
   rateOrder: (orderId: number) => void
 }
 
@@ -61,47 +62,25 @@ const AppContext = createContext<AppState | null>(null)
 // Convertit la réponse brute de /api/me/ en objet User du frontend
 interface BackendMe {
   id: string
-  username: string
-  email: string
+  nom: string
+  prenom: string
   telephone: string
-  est_acheteur: boolean
-  est_vendeur: boolean
-  est_livreur: boolean
-  solde: string
+  email: string
+  role: Role
+  availableRoles?: Role[]
+  score?: number
 }
 
-function backendMeToUser(me: BackendMe, storedRole?: string | null): User {
-  // Déduire le rôle principal
-  let role: Role = 'acheteur'
-  if (storedRole && ['acheteur', 'vendeur', 'livreur'].includes(storedRole)) {
-    role = storedRole as Role
-  } else if (me.est_vendeur) {
-    role = 'vendeur'
-  } else if (me.est_livreur) {
-    role = 'livreur'
-  }
-
-  // Rôles disponibles
-  const availableRoles: Role[] = []
-  if (me.est_acheteur) availableRoles.push('acheteur')
-  if (me.est_vendeur) availableRoles.push('vendeur')
-  if (me.est_livreur) availableRoles.push('livreur')
-  if (availableRoles.length === 0) availableRoles.push('acheteur')
-
-  // username peut être "prenom.nom" ou juste email
-  const parts = me.username.split('.')
-  const prenom = parts.length >= 2 ? parts[0] : me.username.split('@')[0]
-  const nom = parts.length >= 2 ? parts.slice(1).join(' ') : ''
-
+function backendMeToUser(me: BackendMe): User {
   return {
-    id: 0, // UUID → number non critique
-    nom,
-    prenom,
-    telephone: me.telephone || '',
+    id: Number(me.id) || 0,
+    nom: me.nom,
+    prenom: me.prenom,
+    telephone: me.telephone,
     email: me.email,
-    role,
-    availableRoles,
-    score: 4.8,
+    role: me.role,
+    availableRoles: me.availableRoles?.length ? me.availableRoles : [me.role],
+    score: me.score,
   }
 }
 
@@ -156,7 +135,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (token) {
         try {
           const me = await apiFetch<BackendMe>('auth/me/')
-          if (active) setUser(backendMeToUser(me, getStoredRole()))
+          if (active) setUser(backendMeToUser(me))
         } catch {
           clearSession()
         }
@@ -186,39 +165,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ----- auth -----
   const login = useCallback(async (email: string, password: string) => {
-    // SimpleJWT attend "username" (qui est l'email dans notre modèle)
-    const res = await apiFetch<{ access: string; refresh: string }>('auth/login/', {
+    const res = await apiFetch<{ token: string; refresh: string; user: BackendMe }>('auth/login/', {
       auth: false,
       method: 'POST',
       body: { email, password },
     })
-    // Stocker le token provisoirement
-    setSession(res.token, 'acheteur')
-    // Récupérer le profil réel
-    const me = await apiFetch<BackendMe>('auth/me/')
-    const userData = backendMeToUser(me, null)
+    const userData = backendMeToUser(res.user)
     setSession(res.token, userData.role)
     setUser(userData)
   }, [])
 
   const register = useCallback(async (payload: RegisterPayload) => {
-    // username = email (car SimpleJWT utilise username pour l'auth)
-    await apiFetch('utilisateurs/', {
+    const res = await apiFetch<{ token: string; refresh: string; user: BackendMe }>('auth/register/', {
       auth: false,
       method: 'POST',
       body: {
-        username: payload.email,
-        email: payload.email,
-        password: payload.password,
+        nom: payload.nom,
+        prenom: payload.prenom,
         telephone: payload.telephone,
-        est_acheteur: payload.role === 'acheteur',
-        est_vendeur: payload.role === 'vendeur',
-        est_livreur: payload.role === 'livreur',
+        email: payload.email,
+        role: payload.role,
+        password: payload.password,
       },
     })
-    // Connexion automatique
-    await login(payload.email, payload.password)
-  }, [login])
+    const userData = backendMeToUser(res.user)
+    setSession(res.token, userData.role)
+    setUser(userData)
+  }, [])
 
   const logout = useCallback(() => {
     clearSession()
@@ -283,25 +256,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     [cart],
   )
 
-  const fundOrder = useCallback((orderId: number) => {
-    setOrders((prev) =>
-      prev.map((o) =>
-        o.id === orderId ? { ...o, statut: 'finance' as const, livreur: "En cours d'assignation" } : o,
-      ),
-    )
+  const fundOrder = useCallback(async (orderId: number) => {
+    const res = await apiFetch<Order>(`commandes/${orderId}/financer/`, { method: 'POST' })
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? res : o)))
   }, [])
 
   const confirmOtp = useCallback(
-    (orderId: number, code: string): boolean => {
+    async (orderId: number, code: string): Promise<boolean> => {
       const order = orders.find((o) => o.id === orderId)
-      if (!order || order.otp !== code) return false
+      if (!order?.mission_id) return false
+      try {
+        await apiFetch(`missions/${order.mission_id}/valider/`, {
+          method: 'POST',
+          body: { code },
+        })
+      } catch {
+        return false
+      }
       setOrders((prev) =>
-        prev.map((o) => o.id === orderId ? { ...o, statut: 'decaisse' as const } : o),
+        prev.map((o) => (o.id === orderId ? { ...o, statut: 'livre' as const } : o)),
       )
       return true
     },
     [orders],
   )
+
+  const decaisserOrder = useCallback(async (orderId: number) => {
+    const res = await apiFetch<Order>(`commandes/${orderId}/decaisser/`, { method: 'POST' })
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? res : o)))
+  }, [])
 
   const rateOrder = useCallback((orderId: number) => {
     setOrders((prev) =>
@@ -315,7 +298,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     login, register, logout,
     addToCart, updateQty, removeFromCart, clearCart,
     cartTotal, cartCount,
-    checkout, fundOrder, confirmOtp, rateOrder,
+    checkout, fundOrder, confirmOtp, decaisserOrder, rateOrder,
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

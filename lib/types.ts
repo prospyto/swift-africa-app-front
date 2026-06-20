@@ -46,5 +46,6 @@ export interface Order {
   ville_arrivee: string
   cree_le: string
   livreur?: string | null
+  mission_id?: number | null
   note_donnee?: boolean
 }

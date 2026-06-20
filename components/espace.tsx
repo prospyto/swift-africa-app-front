@@ -13,11 +13,13 @@ import {
   Plus,
   Pencil,
   Trash2,
+  MapPin,
 } from 'lucide-react'
 import { GlassCard } from '@/components/glass'
 import { Button } from '@/components/ui/button'
 import { useApp, formatXOF } from '@/lib/store'
 import { ProductForm } from '@/components/product-form'
+import { GPSTracker } from '@/components/gps-tracker'
 import type { Product } from '@/lib/types'
 
 export function Espace() {
@@ -236,6 +238,16 @@ function CourierSpace() {
           </ul>
         )}
       </GlassCard>
+
+      {missions.length > 0 && missions[0].mission_id && (
+        <GlassCard strong className="p-5 md:p-6">
+          <h2 className="mb-4 flex items-center gap-2 font-bold">
+            <MapPin className="size-5 text-primary" />
+            Suivi GPS
+          </h2>
+          <GPSTracker missionId={missions[0].mission_id} />
+        </GlassCard>
+      )}
     </div>
   )
 }
