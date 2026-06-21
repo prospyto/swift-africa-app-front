@@ -33,6 +33,7 @@ const TABS_BY_ROLE = {
 function AppShellInner() {
   const { user, ready, mode } = useApp()
   const [cartOpen, setCartOpen] = useState(false)
+  const [openConversationFor, setOpenConversationFor] = useState<number | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
   const tabs = TABS_BY_ROLE[activeRole] ?? TABS_BY_ROLE.acheteur
@@ -60,10 +61,19 @@ function AppShellInner() {
         tab={currentTab}
         onTab={setTab}
         onOpenCart={() => setCartOpen(true)}
+        onOpenConversation={(commandeId) => {
+          setOpenConversationFor(commandeId)
+          setTab('commandes')
+        }}
         tabs={tabs}
       />
       {currentTab === 'catalogue' && <Catalog />}
-      {currentTab === 'commandes' && <Orders />}
+      {currentTab === 'commandes' && (
+        <Orders
+          openConversationFor={openConversationFor}
+          onConversationOpened={() => setOpenConversationFor(null)}
+        />
+      )}
       {currentTab === 'espace' && <Espace />}
       <CartDrawer
         open={cartOpen}

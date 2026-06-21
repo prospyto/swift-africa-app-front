@@ -15,6 +15,7 @@ interface NavbarProps {
   tab: string
   onTab: (t: string) => void
   onOpenCart: () => void
+  onOpenConversation: (commandeId: number) => void
   tabs: Tab[]
 }
 
@@ -25,7 +26,7 @@ interface ConvResume {
   dernier_auteur: string
 }
 
-export function Navbar({ tab, onTab, onOpenCart, tabs }: NavbarProps) {
+export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: NavbarProps) {
   const { user, logout, cartCount, offline, waking, mode, availableRoles, setMode } = useApp()
   const [notifOpen, setNotifOpen] = useState(false)
   const [nonLus, setNonLus] = useState(0)
@@ -162,7 +163,7 @@ export function Navbar({ tab, onTab, onOpenCart, tabs }: NavbarProps) {
                         <button
                           onClick={() => {
                             setNotifOpen(false)
-                            onTab('commandes')
+                            onOpenConversation(c.commande_id)
                           }}
                           className="glass w-full rounded-2xl p-3 text-left transition hover:bg-secondary"
                         >

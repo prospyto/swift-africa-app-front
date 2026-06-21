@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ArrowRight, ShieldCheck, Truck, PackageCheck,
   Wallet, Star, KeyRound, CheckCircle2,
@@ -38,9 +38,22 @@ const EMPTY_TEXT: Record<string, { title: string; subtitle: string }> = {
   },
 }
 
-export function Orders() {
+export function Orders({
+  openConversationFor,
+  onConversationOpened,
+}: {
+  openConversationFor?: number | null
+  onConversationOpened?: () => void
+} = {}) {
   const { orders, mode, user } = useApp()
   const [messagingOrderId, setMessagingOrderId] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (openConversationFor != null) {
+      setMessagingOrderId(openConversationFor)
+      onConversationOpened?.()
+    }
+  }, [openConversationFor, onConversationOpened])
 
   const activeRole = mode || user?.role || 'acheteur'
   const emptyText = EMPTY_TEXT[activeRole] ?? EMPTY_TEXT.acheteur
