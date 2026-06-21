@@ -211,14 +211,17 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
         </div>
       )}
 
-      {/* OTP acheteur */}
-      {order.statut === 'finance' && order.otp && activeRole === 'acheteur' && (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
-          <KeyRound className="size-5 shrink-0" />
-          <div>
-            <p className="text-xs font-medium opacity-80">Code OTP de livraison</p>
-            <p className="text-2xl font-bold tracking-widest">{order.otp}</p>
+      {/* OTP acheteur — visible jusqu'à confirmation de livraison */}
+      {['finance', 'en_livraison'].includes(order.statut) && order.otp && activeRole === 'acheteur' && (
+        <div className="mt-4 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
+          <div className="mb-2 flex items-center gap-2">
+            <KeyRound className="size-4 text-primary" />
+            <p className="text-xs font-semibold text-primary">Code OTP de livraison</p>
           </div>
+          <p className="text-3xl font-bold tracking-[0.3em] text-foreground">{order.otp}</p>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            ⚠️ Donnez ce code au livreur <span className="font-semibold">uniquement à la réception</span> de votre commande. Il valide le paiement.
+          </p>
         </div>
       )}
 
