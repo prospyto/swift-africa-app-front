@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass'
 import { MessagingModal } from '@/components/messaging-modal'
+import { DeliveryTracker } from '@/components/delivery-tracker'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Order, OrderStatus, Role } from '@/lib/types'
 
@@ -222,6 +223,17 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
           <p className="mt-2 text-[11px] text-muted-foreground">
             ⚠️ Donnez ce code au livreur <span className="font-semibold">uniquement à la réception</span> de votre commande. Il valide le paiement.
           </p>
+        </div>
+      )}
+
+      {/* Suivi GPS — visible pour l'acheteur quand le livreur est en route */}
+      {order.statut === 'en_livraison' && order.mission_id && activeRole === 'acheteur' && (
+        <div className="mt-4 rounded-2xl border border-border/60 p-4">
+          <p className="mb-3 flex items-center gap-2 text-sm font-bold">
+            <span className="flex size-2 rounded-full bg-success animate-pulse" />
+            Suivi en temps réel
+          </p>
+          <DeliveryTracker missionId={order.mission_id} />
         </div>
       )}
 

@@ -354,15 +354,24 @@ function CourierSpace() {
         )}
       </GlassCard>
 
-      {missions.length > 0 && missions[0].mission_id && (
-        <GlassCard strong className="p-5 md:p-6">
-          <h2 className="mb-4 flex items-center gap-2 font-bold">
-            <MapPin className="size-5 text-primary" />
-            Suivi GPS
-          </h2>
-          <GPSTracker missionId={missions[0].mission_id} />
-        </GlassCard>
-      )}
+      {/* GPS — visible dès qu'une mission est en cours */}
+      {(() => {
+        const missionActive = missions.find((m) => m.mission_id && m.statut === 'en_livraison')
+          ?? missions.find((m) => m.mission_id)
+        if (!missionActive?.mission_id) return null
+        return (
+          <GlassCard strong className="p-5 md:p-6">
+            <h2 className="mb-4 flex items-center gap-2 font-bold">
+              <MapPin className="size-5 text-primary" />
+              GPS — Mission en cours
+            </h2>
+            <div className="mb-3 rounded-xl bg-secondary px-3 py-2 text-xs text-muted-foreground">
+              {missionActive.ville_depart} → {missionActive.ville_arrivee}
+            </div>
+            <GPSTracker missionId={missionActive.mission_id} />
+          </GlassCard>
+        )
+      })()}
     </div>
   )
 }
