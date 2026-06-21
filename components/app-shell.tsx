@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useApp } from '@/lib/store'
 import { AuthScreen } from '@/components/auth-screen'
 import { Navbar } from '@/components/navbar'
@@ -9,6 +9,7 @@ import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
 import { CartDrawer } from '@/components/cart-drawer'
 import { Spinner } from '@/components/glass'
+import { ToastProvider } from '@/components/toast'
 
 // Onglets selon le rôle actif
 const TABS_BY_ROLE = {
@@ -29,7 +30,7 @@ const TABS_BY_ROLE = {
   ],
 }
 
-export function AppShell() {
+function AppShellInner() {
   const { user, ready, mode } = useApp()
   const [cartOpen, setCartOpen] = useState(false)
 
@@ -70,5 +71,13 @@ export function AppShell() {
         onOrdered={() => setTab('commandes')}
       />
     </div>
+  )
+}
+
+export function AppShell() {
+  return (
+    <ToastProvider>
+      <AppShellInner />
+    </ToastProvider>
   )
 }

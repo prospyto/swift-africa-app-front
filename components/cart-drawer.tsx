@@ -6,6 +6,7 @@ import { X, Minus, Plus, Trash2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/glass'
 import { useApp, formatXOF } from '@/lib/store'
+import { useToast } from '@/components/toast'
 
 const VILLES = ['Dakar', 'Abidjan', 'Bamako', 'Niamey', 'Lomé', 'Cotonou']
 
@@ -19,6 +20,7 @@ export function CartDrawer({
   onOrdered: () => void
 }) {
   const { cart, updateQty, removeFromCart, cartTotal, checkout } = useApp()
+  const { toast } = useToast()
   const [depart, setDepart] = useState('Dakar')
   const [arrivee, setArrivee] = useState('Abidjan')
   const [loading, setLoading] = useState(false)
@@ -28,8 +30,13 @@ export function CartDrawer({
     setLoading(true)
     try {
       await checkout(depart, arrivee)
+      toast('Commande passée avec succès ! 🎉', 'success')
       onOrdered()
       onClose()
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'Erreur lors de la commande'
+      toast(message, 'error')
     } finally {
       setLoading(false)
     }
