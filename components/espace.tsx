@@ -119,6 +119,17 @@ function SellerSpace() {
     loadMyProducts()
   }, [loadMyProducts])
 
+  const handleDelete = useCallback(async (id: number) => {
+    if (!window.confirm('Supprimer définitivement ce produit ?')) return
+    try {
+      await apiFetch(`produits/${id}/`, { method: 'DELETE' })
+      loadMyProducts()
+      refreshProducts()
+    } catch {
+      window.alert('Impossible de supprimer ce produit.')
+    }
+  }, [loadMyProducts, refreshProducts])
+
   if (view === 'add' || view === 'edit') {
     return (
       <ProductForm
@@ -197,6 +208,12 @@ function SellerSpace() {
                       className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
                     >
                       <Pencil className="size-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <Trash2 className="size-4" />
                     </button>
                   </div>
                 </li>
