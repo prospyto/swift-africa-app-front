@@ -21,6 +21,7 @@ import { useApp, formatXOF } from '@/lib/store'
 import { apiFetch } from '@/lib/api'
 import { ProductForm } from '@/components/product-form'
 import { GPSTracker } from '@/components/gps-tracker'
+import { WalletCard } from '@/components/wallet-card'
 import type { Product } from '@/lib/types'
 
 export function Espace() {
@@ -83,75 +84,20 @@ function Stat({
 // ─── ACHETEUR ────────────────────────────────────────────────
 function BuyerSpace() {
   const { orders } = useApp()
-  const [montant, setMontant] = useState('5000')
-  const [depositing, setDepositing] = useState(false)
-  const [depositMessage, setDepositMessage] = useState<string | null>(null)
   const escrow = orders
     .filter((o) => o.statut === 'finance' || o.statut === 'en_livraison')
     .reduce((s, o) => s + o.total, 0)
   const done = orders.filter((o) => o.statut === 'decaisse').length
 
-  async function handleDeposit() {
-    const valeur = Number(montant)
-    if (!valeur || valeur <= 0) {
-      setDepositMessage('Entrez un montant valide.')
-      return
-    }
-    setDepositing(true)
-    setDepositMessage(null)
-    try {
-      await apiFetch('portefeuille/depot-simulation/', {
-        method: 'POST',
-        body: { montant: valeur },
-      })
-      setDepositMessage(`${formatXOF(valeur)} ajoutés à votre wallet.`)
-    } catch (err) {
-      setDepositMessage(
-        err instanceof Error ? err.message : 'Erreur lors du dépôt.',
-      )
-    } finally {
-      setDepositing(false)
-    }
-  }
-
   return (
-    <div className="grid gap-5">
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 content-start">
         <Stat icon={Package} label="Commandes" value={String(orders.length)} />
         <Stat icon={ShieldCheck} label="Fonds en Escrow" value={formatXOF(escrow)} accent="success" />
         <Stat icon={Truck} label="Livrées" value={String(done)} accent="success" />
         <Stat icon={Star} label="Score acheteur" value="4.8 / 5" />
       </div>
-
-      <GlassCard strong className="p-5 md:p-6">
-        <h2 className="mb-4 flex items-center gap-2 font-bold">
-          <Wallet className="size-5 text-primary" />
-          Recharger mon wallet
-        </h2>
-        <p className="mb-3 text-xs text-muted-foreground">
-          Simulation de dépôt Mobile Money, nécessaire pour financer vos commandes.
-        </p>
-        <div className="flex flex-wrap items-center gap-3">
-          <input
-            type="number"
-            min="100"
-            value={montant}
-            onChange={(e) => setMontant(e.target.value)}
-            className="w-32 rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
-          />
-          <span className="text-sm text-muted-foreground">FCFA</span>
-          <Button
-            onClick={handleDeposit}
-            disabled={depositing}
-            className="glass-cta rounded-xl bg-primary px-5 font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            {depositing ? 'Dépôt…' : 'Déposer'}
-          </Button>
-        </div>
-        {depositMessage && (
-          <p className="mt-3 text-sm text-success">{depositMessage}</p>
-        )}
-      </GlassCard>
+      <WalletCard />
     </div>
   )
 }
