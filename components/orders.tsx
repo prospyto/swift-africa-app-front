@@ -4,11 +4,10 @@ import { useState } from 'react'
 import {
   ArrowRight, ShieldCheck, Truck, PackageCheck,
   Wallet, Star, KeyRound, CheckCircle2,
-  CircleDollarSign, MessageCircle, MessageSquare,
+  CircleDollarSign, MessageSquare,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass'
-import { ChatCommande } from '@/components/chat-commande'
 import { MessagingModal } from '@/components/messaging-modal'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Order, OrderStatus } from '@/lib/types'
@@ -41,7 +40,6 @@ const EMPTY_TEXT: Record<string, { title: string; subtitle: string }> = {
 
 export function Orders() {
   const { orders, mode, user } = useApp()
-  const [chatCommandeId, setChatCommandeId] = useState<number | null>(null)
   const [messagingOrderId, setMessagingOrderId] = useState<number | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
@@ -75,19 +73,11 @@ export function Orders() {
             <OrderCard
               key={o.id}
               order={o}
-              onOpenChat={() => setChatCommandeId(o.id)}
               onOpenMessages={() => setMessagingOrderId(o.id)}
             />
           ))}
         </div>
       </section>
-
-      {chatCommandeId !== null && (
-        <ChatCommande
-          commandeId={chatCommandeId}
-          onClose={() => setChatCommandeId(null)}
-        />
-      )}
 
       {messagingOrderId !== null && (
         <MessagingModal
@@ -100,7 +90,7 @@ export function Orders() {
   )
 }
 
-function OrderCard({ order, onOpenChat, onOpenMessages }: { order: Order; onOpenChat: () => void; onOpenMessages: () => void }) {
+function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: () => void }) {
   const { fundOrder, confirmOtp, decaisserOrder, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
@@ -135,15 +125,6 @@ function OrderCard({ order, onOpenChat, onOpenMessages }: { order: Order; onOpen
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Bouton Chat — suivi temps réel */}
-          <button
-            onClick={onOpenChat}
-            className="glass relative flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
-          >
-            <MessageCircle className="size-4 text-primary" />
-            Chat
-          </button>
-
           {/* Bouton Messages — 3 canaux acheteur/vendeur/livreur */}
           <button
             onClick={onOpenMessages}
