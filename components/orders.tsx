@@ -23,28 +23,51 @@ const ORDER_RANK: Record<OrderStatus, number> = {
   en_attente: 0, finance: 1, en_livraison: 2, livre: 2, decaisse: 3,
 }
 
+const EMPTY_TEXT: Record<string, { title: string; subtitle: string }> = {
+  acheteur: {
+    title: 'Aucune commande pour le moment',
+    subtitle: 'Vos achats financés via Escrow apparaîtront ici avec leur suivi en temps réel.',
+  },
+  vendeur: {
+    title: 'Aucune commande reçue',
+    subtitle: 'Les commandes passées sur vos produits apparaîtront ici.',
+  },
+  livreur: {
+    title: 'Aucune mission disponible',
+    subtitle: 'Les livraisons qui vous sont assignées apparaîtront ici.',
+  },
+}
+
 export function Orders() {
-  const { orders } = useApp()
+  const { orders, mode, user } = useApp()
   const [chatCommandeId, setChatCommandeId] = useState<number | null>(null)
+
+  const activeRole = mode || user?.role || 'acheteur'
+  const emptyText = EMPTY_TEXT[activeRole] ?? EMPTY_TEXT.acheteur
 
   if (orders.length === 0) {
     return (
       <section className="mx-auto max-w-3xl px-3 py-10 md:px-6">
         <GlassCard className="flex flex-col items-center gap-3 p-12 text-center">
           <PackageCheck className="size-10 text-muted-foreground/50" />
-          <h2 className="text-lg font-bold">Aucune commande pour le moment</h2>
-          <p className="text-sm text-muted-foreground">
-            Vos achats financés via Escrow apparaîtront ici avec leur code de sécurité.
-          </p>
+          <h2 className="text-lg font-bold">{emptyText.title}</h2>
+          <p className="text-sm text-muted-foreground">{emptyText.subtitle}</p>
         </GlassCard>
       </section>
     )
   }
 
+  const title =
+    activeRole === 'vendeur'
+      ? 'Commandes reçues'
+      : activeRole === 'livreur'
+        ? 'Mes missions'
+        : 'Mes commandes'
+
   return (
     <>
       <section className="mx-auto max-w-3xl px-3 py-6 md:px-6 md:py-8">
-        <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl">Mes commandes</h1>
+        <h1 className="mb-6 text-3xl font-bold tracking-tight md:text-4xl">{title}</h1>
         <div className="grid gap-5">
           {orders.map((o) => (
             <OrderCard
@@ -101,10 +124,10 @@ function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Bouton Chat */}
+          {/* Bouton Chat — toujours visible pour tous les rôles */}
           <button
             onClick={onOpenChat}
-            className="glass flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
+            className="glass relative flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
           >
             <MessageCircle className="size-4 text-primary" />
             Chat
@@ -128,9 +151,9 @@ function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void
                 <div className={`flex size-9 items-center justify-center rounded-xl transition ${
                   done ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'
                 }`}>
-                  <step.icon className="size-5" />
+                  <step.icon className="size-4" />
                 </div>
-                <span className="text-[10px] font-medium text-muted-foreground">{step.label}</span>
+                <span className="hidden text-[10px] text-muted-foreground sm:block">{step.label}</span>
               </div>
               {i < STEPS.length - 1 && (
                 <div className={`mx-1 h-0.5 flex-1 rounded-full ${rank > i ? 'bg-success' : 'bg-muted'}`} />
@@ -140,97 +163,86 @@ function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void
         })}
       </div>
 
-      {/* Action zone */}
-      <div className="mt-5 border-t border-border/60 pt-5">
-        {order.statut === 'en_attente' && (
-          <Button
-            onClick={() => fundOrder(order.id)}
-            className="glass-cta h-11 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
-          >
-            Confirmer le paiement Escrow
-          </Button>
-        )}
-
-        {(order.statut === 'finance' || order.statut === 'en_livraison') && (
-          <div className="grid gap-4">
-            <div className="flex items-center gap-3 rounded-2xl bg-accent p-4">
-              <KeyRound className="size-6 text-primary" />
-              <div>
-                <p className="text-xs text-accent-foreground/80">Votre code de sécurité OTP</p>
-                <p className="font-mono text-2xl font-bold tracking-[0.4em] text-foreground">{order.otp}</p>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Communiquez ce code au livreur{order.livreur ? ` (${order.livreur})` : ''} uniquement à la réception.
-            </p>
-            <div className="flex gap-2">
-              <input
-                value={code}
-                onChange={(e) => { setCode(e.target.value.replace(/\D/g, '').slice(0, 4)); setOtpError(false) }}
-                inputMode="numeric"
-                placeholder="• • • •"
-                className={`w-full rounded-2xl border bg-input px-4 py-3 text-center font-mono text-lg tracking-[0.5em] outline-none focus:ring-2 ${
-                  otpError ? 'border-destructive focus:ring-destructive/30' : 'border-border focus:border-primary focus:ring-primary/30'
-                }`}
-              />
-              <Button
-                onClick={handleConfirm}
-                disabled={code.length !== 4}
-                className="glass-cta h-auto rounded-2xl bg-success px-5 font-semibold text-success-foreground hover:bg-success/90"
-              >
-                Valider
-              </Button>
-            </div>
-            {otpError && <p className="text-xs text-destructive">Code incorrect. Vérifiez les 4 chiffres.</p>}
+      {/* OTP acheteur */}
+      {order.statut === 'finance' && order.otp && (
+        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
+          <KeyRound className="size-5 shrink-0" />
+          <div>
+            <p className="text-xs font-medium opacity-80">Code OTP de livraison</p>
+            <p className="text-2xl font-bold tracking-widest">{order.otp}</p>
           </div>
-        )}
+        </div>
+      )}
 
-        {order.statut === 'livre' && (
-          <div className="grid gap-3">
-            <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
-              <CheckCircle2 className="size-5" />
-              <span className="text-sm font-semibold">Livraison confirmée par le code OTP.</span>
-            </div>
+      {/* Confirmer OTP livreur */}
+      {order.statut === 'en_livraison' && (
+        <div className="mt-4">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Entrez le code OTP du client</p>
+          <div className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              maxLength={4}
+              placeholder="0000"
+              className={`w-24 rounded-xl border bg-input px-3 py-2 text-center text-lg font-bold tracking-widest outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 ${
+                otpError ? 'border-destructive' : 'border-border'
+              }`}
+            />
             <Button
-              onClick={handleDecaisser}
-              disabled={decaissing}
-              className="glass-cta h-11 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
+              onClick={handleConfirm}
+              className="glass-cta rounded-xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
             >
-              {decaissing ? 'Décaissement…' : 'Libérer les fonds au vendeur'}
+              <CheckCircle2 className="mr-1.5 size-4" /> Confirmer
             </Button>
           </div>
-        )}
+          {otpError && <p className="mt-1 text-xs text-destructive">Code incorrect, réessayez.</p>}
+        </div>
+      )}
 
-        {order.statut === 'decaisse' && (
-          <div className="grid gap-4">
-            <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
-              <CheckCircle2 className="size-5" />
-              <span className="text-sm font-semibold">Fonds décaissés au vendeur. Livraison confirmée.</span>
-            </div>
-            {order.note_donnee ? (
-              <p className="text-center text-sm text-muted-foreground">Merci pour votre évaluation.</p>
-            ) : (
-              <div className="text-center">
-                <p className="mb-2 text-sm font-medium">Notez le vendeur et le livreur</p>
-                <div className="flex justify-center gap-1">
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} onClick={() => setRating(n)} aria-label={`${n} étoiles`}>
-                      <Star className={`size-7 transition ${n <= rating ? 'fill-primary text-primary' : 'text-muted-foreground/40'}`} />
-                    </button>
-                  ))}
-                </div>
-                <Button
-                  onClick={() => rateOrder(order.id)}
-                  disabled={rating === 0}
-                  className="glass-cta mt-3 h-10 rounded-2xl bg-primary px-6 font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  Envoyer ma note
-                </Button>
-              </div>
-            )}
+      {/* Décaisser vendeur */}
+      {order.statut === 'livre' && (
+        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
+          <ShieldCheck className="size-5 shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-semibold">Livraison confirmée !</p>
+            <p className="text-xs opacity-80">Vous pouvez décaisser les fonds.</p>
           </div>
-        )}
-      </div>
+          <Button
+            onClick={handleDecaisser}
+            disabled={decaissing}
+            className="glass-cta rounded-xl bg-success px-5 font-semibold text-success-foreground hover:bg-success/90"
+          >
+            {decaissing ? 'En cours…' : 'Décaisser'}
+          </Button>
+        </div>
+      )}
+
+      {/* Décaissé */}
+      {order.statut === 'decaisse' && (
+        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
+          <Wallet className="size-5 shrink-0" />
+          <p className="text-sm font-semibold">Fonds décaissés avec succès.</p>
+        </div>
+      )}
+
+      {/* Note livreur */}
+      {order.statut === 'decaisse' && !order.note_donnee && (
+        <div className="mt-3">
+          <p className="mb-2 text-xs font-medium text-muted-foreground">Noter le livreur</p>
+          <div className="flex gap-1">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <button
+                key={n}
+                onClick={() => { setRating(n); rateOrder(order.id) }}
+                className={`text-xl transition ${n <= rating ? 'text-yellow-400' : 'text-muted-foreground/40 hover:text-yellow-300'}`}
+                aria-label={`${n} étoile${n > 1 ? 's' : ''}`}
+              >
+                <Star className="size-6" fill={n <= rating ? 'currentColor' : 'none'} />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </GlassCard>
   )
 }

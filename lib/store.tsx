@@ -41,6 +41,7 @@ interface AppState {
   refreshProducts: () => Promise<void>
   cart: CartItem[]
   orders: Order[]
+  refreshOrders: () => Promise<void>
   login: (email: string, password: string) => Promise<void>
   register: (payload: RegisterPayload) => Promise<void>
   logout: () => void
@@ -170,6 +171,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadProducts()
   }, [loadProducts])
+
+  // ----- orders (fetch au login et toutes les 30s) -----
+  const loadOrders = useCallback(async () => {
+    if (!getToken()) return
+    try {
+      const data = await apiFetch<Order[]>('commandes/')
+      setOrders(data)
+    } catch {
+      // silencieux : on garde les commandes en mémoire si le fetch échoue
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!user) return
+    loadOrders()
+    const interval = setInterval(loadOrders, 30_000)
+    return () => clearInterval(interval)
+  }, [user, loadOrders])
 
   // ----- auth -----
   const login = useCallback(async (email: string, password: string) => {
@@ -302,7 +321,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppState = {
     user, ready, offline, waking, mode, availableRoles, setMode,
-    products, productsLoading, refreshProducts: loadProducts, cart, orders,
+    products, productsLoading, refreshProducts: loadProducts, cart, orders, refreshOrders: loadOrders,
     login, register, logout,
     addToCart, updateQty, removeFromCart, clearCart,
     cartTotal, cartCount,
