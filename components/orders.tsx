@@ -96,11 +96,27 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
   const [otpError, setOtpError] = useState(false)
   const [rating, setRating] = useState(0)
   const [decaissing, setDecaissing] = useState(false)
+  const [funding, setFunding] = useState(false)
+  const [fundError, setFundError] = useState<string | null>(null)
   const rank = ORDER_RANK[order.statut]
 
   async function handleConfirm() {
     const ok = await confirmOtp(order.id, code)
     setOtpError(!ok)
+  }
+
+  async function handleFund() {
+    setFunding(true)
+    setFundError(null)
+    try {
+      await fundOrder(order.id)
+    } catch (err) {
+      setFundError(
+        err instanceof Error ? err.message : 'Impossible de financer cette commande.',
+      )
+    } finally {
+      setFunding(false)
+    }
   }
 
   async function handleDecaisser() {
@@ -163,6 +179,23 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
           )
         })}
       </div>
+
+      {/* Financement (escrow) — étape manquante avant cette correction */}
+      {order.statut === 'en_attente' && (
+        <div className="mt-4">
+          {fundError && (
+            <p className="mb-2 text-sm text-destructive">{fundError}</p>
+          )}
+          <Button
+            onClick={handleFund}
+            disabled={funding}
+            className="glass-cta h-11 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
+          >
+            <Wallet className="mr-2 size-4" />
+            {funding ? 'Financement…' : `Financer (${formatXOF(order.total)})`}
+          </Button>
+        </div>
+      )}
 
       {/* OTP acheteur */}
       {order.statut === 'finance' && order.otp && (
