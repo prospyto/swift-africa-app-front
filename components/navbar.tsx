@@ -137,9 +137,9 @@ export function Navbar({ tab, onTab, onOpenCart, tabs }: NavbarProps) {
               )}
             </button>
 
-            {/* Panel déroulant */}
+            {/* Panel déroulant — largeur contrainte au viewport sur mobile */}
             {notifOpen && (
-              <div className="glass-strong absolute right-0 top-12 z-50 w-80 rounded-3xl p-4 shadow-xl">
+              <div className="glass-strong fixed inset-x-3 top-16 z-50 max-h-[70vh] overflow-y-auto rounded-3xl p-4 shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-12 sm:w-80">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-bold">Messages non lus</p>
                   <button

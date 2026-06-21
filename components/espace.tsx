@@ -227,8 +227,51 @@ function SellerSpace() {
 }
 
 // ─── LIVREUR ─────────────────────────────────────────────────
+interface MissionDisponible {
+  id: number
+  ville_depart_nom: string | null
+  ville_arrivee_nom: string | null
+  adresse_precise: string
+  prix_livraison: string
+}
+
 function CourierSpace() {
-  const { orders } = useApp()
+  const { orders, refreshOrders } = useApp()
+  const [disponibles, setDisponibles] = useState<MissionDisponible[]>([])
+  const [loadingDispo, setLoadingDispo] = useState(true)
+  const [accepting, setAccepting] = useState<number | null>(null)
+
+  const loadDisponibles = useCallback(async () => {
+    setLoadingDispo(true)
+    try {
+      const data = await apiFetch<MissionDisponible[]>('missions/disponibles/')
+      setDisponibles(data)
+    } catch {
+      setDisponibles([])
+    } finally {
+      setLoadingDispo(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadDisponibles()
+    const interval = setInterval(loadDisponibles, 20_000)
+    return () => clearInterval(interval)
+  }, [loadDisponibles])
+
+  async function handleAccepter(missionId: number) {
+    setAccepting(missionId)
+    try {
+      await apiFetch(`missions/${missionId}/accepter/`, { method: 'POST' })
+      await loadDisponibles()
+      await refreshOrders()
+    } catch {
+      window.alert("Impossible d'accepter cette mission (peut-être déjà prise).")
+    } finally {
+      setAccepting(null)
+    }
+  }
+
   const missions = orders.filter(
     (o) => o.statut === 'finance' || o.statut === 'en_livraison',
   )
@@ -243,6 +286,42 @@ function CourierSpace() {
         <Stat icon={Wallet} label="Wallet livreur" value={formatXOF(wallet)} accent="success" />
         <Stat icon={Star} label="Score de confiance" value="4.7 / 5" accent="primary" />
       </div>
+
+      <GlassCard strong className="p-5 md:p-6">
+        <h2 className="mb-4 font-bold">Missions disponibles</h2>
+        {loadingDispo ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">Chargement…</p>
+        ) : disponibles.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Aucune mission disponible pour le moment.
+          </p>
+        ) : (
+          <ul className="grid gap-3">
+            {disponibles.map((m) => (
+              <li
+                key={m.id}
+                className="glass flex items-center justify-between gap-3 rounded-2xl p-4"
+              >
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    {m.ville_depart_nom || '?'}
+                    <ArrowRight className="size-4 text-primary" />
+                    {m.ville_arrivee_nom || '?'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{m.adresse_precise}</p>
+                </div>
+                <Button
+                  onClick={() => handleAccepter(m.id)}
+                  disabled={accepting === m.id}
+                  className="glass-cta rounded-xl bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  {accepting === m.id ? '…' : `Accepter (${formatXOF(Number(m.prix_livraison))})`}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </GlassCard>
 
       <GlassCard strong className="p-5 md:p-6">
         <h2 className="mb-4 font-bold">Mes missions</h2>

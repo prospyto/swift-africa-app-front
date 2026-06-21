@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass'
 import { MessagingModal } from '@/components/messaging-modal'
 import { useApp, formatXOF } from '@/lib/store'
-import type { Order, OrderStatus } from '@/lib/types'
+import type { Order, OrderStatus, Role } from '@/lib/types'
 
 const STEPS: { key: OrderStatus; label: string; icon: typeof Truck }[] = [
   { key: 'en_attente', label: 'En attente', icon: CircleDollarSign },
@@ -73,6 +73,7 @@ export function Orders() {
             <OrderCard
               key={o.id}
               order={o}
+              activeRole={activeRole}
               onOpenMessages={() => setMessagingOrderId(o.id)}
             />
           ))}
@@ -90,7 +91,7 @@ export function Orders() {
   )
 }
 
-function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: () => void }) {
+function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; activeRole: Role; onOpenMessages: () => void }) {
   const { fundOrder, confirmOtp, decaisserOrder, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
@@ -181,7 +182,7 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
       </div>
 
       {/* Financement (escrow) — étape manquante avant cette correction */}
-      {order.statut === 'en_attente' && (
+      {order.statut === 'en_attente' && activeRole === 'acheteur' && (
         <div className="mt-4">
           {fundError && (
             <p className="mb-2 text-sm text-destructive">{fundError}</p>
@@ -198,7 +199,7 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
       )}
 
       {/* OTP acheteur */}
-      {order.statut === 'finance' && order.otp && (
+      {order.statut === 'finance' && order.otp && activeRole === 'acheteur' && (
         <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
           <KeyRound className="size-5 shrink-0" />
           <div>
@@ -209,7 +210,7 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
       )}
 
       {/* Confirmer OTP livreur */}
-      {order.statut === 'en_livraison' && (
+      {order.statut === 'en_livraison' && activeRole === 'livreur' && (
         <div className="mt-4">
           <p className="mb-2 text-xs font-medium text-muted-foreground">Entrez le code OTP du client</p>
           <div className="flex gap-2">
@@ -234,7 +235,7 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
       )}
 
       {/* Décaisser vendeur */}
-      {order.statut === 'livre' && (
+      {order.statut === 'livre' && activeRole === 'acheteur' && (
         <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
           <ShieldCheck className="size-5 shrink-0" />
           <div className="flex-1">
@@ -248,6 +249,23 @@ function OrderCard({ order, onOpenMessages }: { order: Order; onOpenMessages: ()
           >
             {decaissing ? 'En cours…' : 'Décaisser'}
           </Button>
+        </div>
+      )}
+
+      {/* Vue lecture pour les rôles non concernés par l'action en cours */}
+      {order.statut === 'finance' && activeRole !== 'acheteur' && (
+        <div className="mt-4 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
+          En attente de prise en charge par un livreur.
+        </div>
+      )}
+      {order.statut === 'en_livraison' && activeRole !== 'livreur' && (
+        <div className="mt-4 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
+          Livraison en cours.
+        </div>
+      )}
+      {order.statut === 'livre' && activeRole !== 'acheteur' && (
+        <div className="mt-4 rounded-2xl bg-success/10 p-4 text-sm text-success">
+          Livraison confirmée, en attente de décaissement par l&apos;acheteur.
         </div>
       )}
 
