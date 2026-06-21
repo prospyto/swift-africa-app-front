@@ -4,11 +4,12 @@ import { useState } from 'react'
 import {
   ArrowRight, ShieldCheck, Truck, PackageCheck,
   Wallet, Star, KeyRound, CheckCircle2,
-  CircleDollarSign, MessageCircle,
+  CircleDollarSign, MessageCircle, MessageSquare,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass'
 import { ChatCommande } from '@/components/chat-commande'
+import { MessagingModal } from '@/components/messaging-modal'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Order, OrderStatus } from '@/lib/types'
 
@@ -41,6 +42,7 @@ const EMPTY_TEXT: Record<string, { title: string; subtitle: string }> = {
 export function Orders() {
   const { orders, mode, user } = useApp()
   const [chatCommandeId, setChatCommandeId] = useState<number | null>(null)
+  const [messagingOrderId, setMessagingOrderId] = useState<number | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
   const emptyText = EMPTY_TEXT[activeRole] ?? EMPTY_TEXT.acheteur
@@ -74,6 +76,7 @@ export function Orders() {
               key={o.id}
               order={o}
               onOpenChat={() => setChatCommandeId(o.id)}
+              onOpenMessages={() => setMessagingOrderId(o.id)}
             />
           ))}
         </div>
@@ -85,11 +88,19 @@ export function Orders() {
           onClose={() => setChatCommandeId(null)}
         />
       )}
+
+      {messagingOrderId !== null && (
+        <MessagingModal
+          orderId={messagingOrderId}
+          open={messagingOrderId !== null}
+          onClose={() => setMessagingOrderId(null)}
+        />
+      )}
     </>
   )
 }
 
-function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void }) {
+function OrderCard({ order, onOpenChat, onOpenMessages }: { order: Order; onOpenChat: () => void; onOpenMessages: () => void }) {
   const { fundOrder, confirmOtp, decaisserOrder, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
@@ -124,13 +135,22 @@ function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Bouton Chat — toujours visible pour tous les rôles */}
+          {/* Bouton Chat — suivi temps réel */}
           <button
             onClick={onOpenChat}
             className="glass relative flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-muted-foreground transition hover:bg-secondary hover:text-foreground"
           >
             <MessageCircle className="size-4 text-primary" />
             Chat
+          </button>
+
+          {/* Bouton Messages — 3 canaux acheteur/vendeur/livreur */}
+          <button
+            onClick={onOpenMessages}
+            className="flex items-center gap-1.5 rounded-xl bg-orange-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-orange-600"
+          >
+            <MessageSquare className="size-4" />
+            Messages
           </button>
           <div className="text-right">
             <p className="text-lg font-bold">{formatXOF(order.total)}</p>
