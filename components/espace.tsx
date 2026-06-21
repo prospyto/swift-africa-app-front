@@ -230,6 +230,93 @@ function SellerSpace() {
   )
 }
 
+
+// ─── MISSION CARD (livreur) ──────────────────────────────────
+function MissionCard({ mission }: { mission: import('@/lib/types').Order }) {
+  const { confirmOtp } = useApp()
+  const [code, setCode] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [otpError, setOtpError] = useState(false)
+  const [confirmed, setConfirmed] = useState(false)
+
+  async function handleConfirm() {
+    if (!code || submitting) return
+    setSubmitting(true)
+    setOtpError(false)
+    try {
+      const ok = await confirmOtp(mission.id, code)
+      if (ok) setConfirmed(true)
+      else setOtpError(true)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <li className="glass rounded-2xl p-4">
+      {/* Trajet */}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          {mission.ville_depart}
+          <ArrowRight className="size-4 text-primary" />
+          {mission.ville_arrivee}
+        </div>
+        <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
+          {formatXOF(Math.round(mission.total * 0.08))} à percevoir
+        </span>
+      </div>
+
+      {/* Formulaire OTP — visible quand en_livraison */}
+      {mission.statut === 'en_livraison' && !confirmed && (
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <KeyRound className="size-4 text-primary" />
+            <p className="text-xs font-semibold text-primary">
+              Confirmer la livraison — Code OTP du client
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={code}
+              onChange={(e) => { setCode(e.target.value); setOtpError(false) }}
+              onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
+              maxLength={4}
+              placeholder="0000"
+              className={`w-24 rounded-xl border bg-input px-3 py-2 text-center text-xl font-bold tracking-widest outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 ${
+                otpError ? 'border-destructive' : 'border-border'
+              }`}
+            />
+            <button
+              onClick={handleConfirm}
+              disabled={code.length < 4 || submitting}
+              className="flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+            >
+              <CheckCircle2 className="size-4" />
+              {submitting ? 'Vérification…' : 'Valider'}
+            </button>
+          </div>
+          {otpError && (
+            <p className="mt-2 text-xs text-destructive">
+              Code incorrect. Demandez à l'acheteur de vérifier son code.
+            </p>
+          )}
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Entrez le code que l'acheteur vous montre à la livraison.
+          </p>
+        </div>
+      )}
+
+      {/* Confirmation */}
+      {(confirmed || mission.statut === 'livre' || mission.statut === 'decaisse') && (
+        <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-3 text-sm font-semibold text-success">
+          <CheckCircle2 className="size-4 shrink-0" />
+          Livraison confirmée — paiement en cours de traitement.
+        </div>
+      )}
+    </li>
+  )
+}
+
 // ─── LIVREUR ─────────────────────────────────────────────────
 interface MissionDisponible {
   id: number
@@ -334,21 +421,9 @@ function CourierSpace() {
             Aucune mission en cours. Les commandes financées apparaîtront ici.
           </p>
         ) : (
-          <ul className="grid gap-3">
+          <ul className="grid gap-4">
             {missions.map((m) => (
-              <li
-                key={m.id}
-                className="glass flex items-center justify-between gap-3 rounded-2xl p-4"
-              >
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  {m.ville_depart}
-                  <ArrowRight className="size-4 text-primary" />
-                  {m.ville_arrivee}
-                </div>
-                <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-                  {formatXOF(Math.round(m.total * 0.08))} à percevoir
-                </span>
-              </li>
+              <MissionCard key={m.id} mission={m} />
             ))}
           </ul>
         )}
