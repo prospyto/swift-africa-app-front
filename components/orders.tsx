@@ -67,15 +67,25 @@ export function Orders() {
 }
 
 function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void }) {
-  const { fundOrder, confirmOtp, rateOrder } = useApp()
+  const { fundOrder, confirmOtp, decaisserOrder, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
   const [rating, setRating] = useState(0)
+  const [decaissing, setDecaissing] = useState(false)
   const rank = ORDER_RANK[order.statut]
 
   async function handleConfirm() {
     const ok = await confirmOtp(order.id, code)
     setOtpError(!ok)
+  }
+
+  async function handleDecaisser() {
+    setDecaissing(true)
+    try {
+      await decaisserOrder(order.id)
+    } finally {
+      setDecaissing(false)
+    }
   }
 
   return (
@@ -172,6 +182,22 @@ function OrderCard({ order, onOpenChat }: { order: Order; onOpenChat: () => void
               </Button>
             </div>
             {otpError && <p className="text-xs text-destructive">Code incorrect. Vérifiez les 4 chiffres.</p>}
+          </div>
+        )}
+
+        {order.statut === 'livre' && (
+          <div className="grid gap-3">
+            <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
+              <CheckCircle2 className="size-5" />
+              <span className="text-sm font-semibold">Livraison confirmée par le code OTP.</span>
+            </div>
+            <Button
+              onClick={handleDecaisser}
+              disabled={decaissing}
+              className="glass-cta h-11 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              {decaissing ? 'Décaissement…' : 'Libérer les fonds au vendeur'}
+            </Button>
           </div>
         )}
 

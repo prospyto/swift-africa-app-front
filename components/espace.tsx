@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import {
   Wallet,
   Star,
@@ -18,6 +18,7 @@ import {
 import { GlassCard } from '@/components/glass'
 import { Button } from '@/components/ui/button'
 import { useApp, formatXOF } from '@/lib/store'
+import { apiFetch } from '@/lib/api'
 import { ProductForm } from '@/components/product-form'
 import { GPSTracker } from '@/components/gps-tracker'
 import type { Product } from '@/lib/types'
@@ -99,10 +100,23 @@ function BuyerSpace() {
 
 // ─── VENDEUR ─────────────────────────────────────────────────
 function SellerSpace() {
-  const { products } = useApp()
+  const [products, setProducts] = useState<Product[]>([])
   const [view, setView] = useState<'dashboard' | 'add' | 'edit'>('dashboard')
   const [editProduct, setEditProduct] = useState<Product | null>(null)
   const COMMISSION = 0.88
+
+  const loadMyProducts = useCallback(async () => {
+    try {
+      const data = await apiFetch<Product[]>('produits/?mine=1')
+      setProducts(data)
+    } catch {
+      setProducts([])
+    }
+  }, [])
+
+  useEffect(() => {
+    loadMyProducts()
+  }, [loadMyProducts])
 
   if (view === 'add' || view === 'edit') {
     return (
@@ -111,8 +125,7 @@ function SellerSpace() {
         onSuccess={() => {
           setView('dashboard')
           setEditProduct(null)
-          // Recharger les produits
-          window.location.reload()
+          loadMyProducts()
         }}
         onCancel={() => {
           setView('dashboard')

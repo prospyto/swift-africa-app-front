@@ -129,11 +129,24 @@ export async function apiFetch<T = unknown>(
   }
 
   if (response.status === 401 || response.status === 403) {
-    clearSession()
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('sa:unauthorized'))
+    let message = 'Accès refusé.'
+    try {
+      const data = await response.json()
+      message = parseDjangoError(data)
+    } catch {
+      /* noop */
     }
-    throw new ApiError(response.status, 'Email ou mot de passe incorrect.')
+    if (response.status === 401) {
+      // 401 = session absente/invalide -> déconnexion.
+      // 403 = session valide mais action non autorisée (ex: tenter de
+      // pousser une position GPS sur une mission qui n'est pas la
+      // sienne) -> ne PAS déconnecter l'utilisateur pour ça.
+      clearSession()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('sa:unauthorized'))
+      }
+    }
+    throw new ApiError(response.status, message)
   }
 
   if (!response.ok) {
