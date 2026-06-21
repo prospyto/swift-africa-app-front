@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { GlassCard } from '@/components/glass'
 import { MessagingModal } from '@/components/messaging-modal'
 import { DeliveryTracker } from '@/components/delivery-tracker'
+import { RatingStars } from '@/components/rating-stars'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Order, OrderStatus, Role } from '@/lib/types'
 
@@ -109,7 +110,6 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
   const { fundOrder, confirmOtp, decaisserOrder, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
-  const [rating, setRating] = useState(0)
   const [decaissing, setDecaissing] = useState(false)
   const [funding, setFunding] = useState(false)
   const [fundError, setFundError] = useState<string | null>(null)
@@ -305,22 +305,15 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
         </div>
       )}
 
-      {/* Note livreur */}
-      {order.statut === 'decaisse' && !order.note_donnee && (
-        <div className="mt-3">
-          <p className="mb-2 text-xs font-medium text-muted-foreground">Noter le livreur</p>
-          <div className="flex gap-1">
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button
-                key={n}
-                onClick={() => { setRating(n); rateOrder(order.id) }}
-                className={`text-xl transition ${n <= rating ? 'text-yellow-400' : 'text-muted-foreground/40 hover:text-yellow-300'}`}
-                aria-label={`${n} étoile${n > 1 ? 's' : ''}`}
-              >
-                <Star className="size-6" fill={n <= rating ? 'currentColor' : 'none'} />
-              </button>
-            ))}
-          </div>
+      {/* Acheteur note le vendeur après décaissement */}
+      {order.statut === 'decaisse' && !order.note_donnee && activeRole === 'acheteur' && (
+        <div className="mt-4">
+          <RatingStars
+            commandeId={order.id}
+            typeNote="acheteur_vendeur"
+            label="le vendeur"
+            onDone={() => rateOrder(order.id)}
+          />
         </div>
       )}
     </GlassCard>

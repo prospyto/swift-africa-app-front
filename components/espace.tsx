@@ -22,6 +22,7 @@ import { apiFetch } from '@/lib/api'
 import { ProductForm } from '@/components/product-form'
 import { GPSTracker } from '@/components/gps-tracker'
 import { WalletCard } from '@/components/wallet-card'
+import { RatingStars } from '@/components/rating-stars'
 import type { Product } from '@/lib/types'
 
 export function Espace() {
@@ -306,11 +307,20 @@ function MissionCard({ mission }: { mission: import('@/lib/types').Order }) {
         </div>
       )}
 
-      {/* Confirmation */}
+      {/* Confirmation + notation vendeur → livreur */}
       {(confirmed || mission.statut === 'livre' || mission.statut === 'decaisse') && (
-        <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-3 text-sm font-semibold text-success">
-          <CheckCircle2 className="size-4 shrink-0" />
-          Livraison confirmée — paiement en cours de traitement.
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center gap-2 rounded-2xl bg-success/10 p-3 text-sm font-semibold text-success">
+            <CheckCircle2 className="size-4 shrink-0" />
+            Livraison confirmée — paiement en cours de traitement.
+          </div>
+          {mission.statut === 'decaisse' && (
+            <RatingStars
+              commandeId={mission.id}
+              typeNote="vendeur_livreur"
+              label="le livreur"
+            />
+          )}
         </div>
       )}
     </li>
