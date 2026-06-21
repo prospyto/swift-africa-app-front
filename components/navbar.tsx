@@ -1,8 +1,10 @@
 'use client'
 
-import { Truck, ShoppingCart, LogOut, WifiOff, Loader2 } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
+import { Truck, ShoppingCart, LogOut, WifiOff, Loader2, Bell, MessageCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
+import { apiFetch } from '@/lib/api'
 
 interface Tab {
   id: string
@@ -16,8 +18,48 @@ interface NavbarProps {
   tabs: Tab[]
 }
 
+interface ConvResume {
+  commande_id: number
+  non_lus: number
+  dernier_message: string
+  dernier_auteur: string
+}
+
 export function Navbar({ tab, onTab, onOpenCart, tabs }: NavbarProps) {
   const { user, logout, cartCount, offline, waking, mode, availableRoles, setMode } = useApp()
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [nonLus, setNonLus] = useState(0)
+  const [convs, setConvs] = useState<ConvResume[]>([])
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  // Fetch non-lus toutes les 15s
+  useEffect(() => {
+    if (!user) return
+    async function fetchNonLus() {
+      try {
+        const data = await apiFetch<{ non_lus: number; conversations?: ConvResume[] }>('chat/non-lus/')
+        setNonLus(data.non_lus)
+        if (data.conversations) setConvs(data.conversations)
+      } catch {
+        // silencieux
+      }
+    }
+    fetchNonLus()
+    const interval = setInterval(fetchNonLus, 15_000)
+    return () => clearInterval(interval)
+  }, [user])
+
+  // Fermer le panel si clic dehors
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+        setNotifOpen(false)
+      }
+    }
+    if (notifOpen) document.addEventListener('mousedown', onClickOutside)
+    return () => document.removeEventListener('mousedown', onClickOutside)
+  }, [notifOpen])
+
   if (!user) return null
 
   const activeRole = mode || user.role
@@ -79,6 +121,84 @@ export function Navbar({ tab, onTab, onOpenCart, tabs }: NavbarProps) {
               ))}
             </select>
           )}
+
+          {/* 🔔 Bouton Notifications messages non lus */}
+          <div className="relative" ref={panelRef}>
+            <button
+              onClick={() => setNotifOpen((v) => !v)}
+              className="glass relative flex size-10 items-center justify-center rounded-xl text-foreground transition hover:bg-secondary"
+              aria-label="Notifications"
+            >
+              <Bell className="size-5" />
+              {nonLus > 0 && (
+                <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-destructive text-[11px] font-bold text-destructive-foreground">
+                  {nonLus > 9 ? '9+' : nonLus}
+                </span>
+              )}
+            </button>
+
+            {/* Panel déroulant */}
+            {notifOpen && (
+              <div className="glass-strong absolute right-0 top-12 z-50 w-80 rounded-3xl p-4 shadow-xl">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-bold">Messages non lus</p>
+                  <button
+                    onClick={() => setNotifOpen(false)}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="size-4" />
+                  </button>
+                </div>
+
+                {nonLus === 0 ? (
+                  <div className="flex flex-col items-center gap-2 py-6 text-center text-muted-foreground">
+                    <Bell className="size-8 opacity-30" />
+                    <p className="text-sm">Aucun message non lu</p>
+                  </div>
+                ) : convs.length > 0 ? (
+                  <ul className="grid gap-2">
+                    {convs.map((c) => (
+                      <li key={c.commande_id}>
+                        <button
+                          onClick={() => {
+                            setNotifOpen(false)
+                            onTab('commandes')
+                          }}
+                          className="glass w-full rounded-2xl p-3 text-left transition hover:bg-secondary"
+                        >
+                          <div className="flex items-center gap-2">
+                            <MessageCircle className="size-4 shrink-0 text-primary" />
+                            <p className="text-xs font-semibold">
+                              Commande #{String(c.commande_id).slice(-6)}
+                            </p>
+                            {c.non_lus > 0 && (
+                              <span className="ml-auto flex size-5 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                                {c.non_lus}
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-1 truncate text-xs text-muted-foreground">
+                            <span className="font-medium">{c.dernier_auteur} :</span> {c.dernier_message}
+                          </p>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="flex flex-col items-center gap-2 py-6 text-center text-muted-foreground">
+                    <MessageCircle className="size-8 opacity-30" />
+                    <p className="text-sm">{nonLus} message(s) non lu(s)</p>
+                    <button
+                      onClick={() => { setNotifOpen(false); onTab('commandes') }}
+                      className="text-xs font-semibold text-primary hover:underline"
+                    >
+                      Voir mes commandes →
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           {/* Panier — visible seulement pour acheteur */}
           {activeRole === 'acheteur' && (
