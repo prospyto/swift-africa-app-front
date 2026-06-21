@@ -100,6 +100,7 @@ function BuyerSpace() {
 
 // ─── VENDEUR ─────────────────────────────────────────────────
 function SellerSpace() {
+  const { refreshProducts } = useApp()
   const [products, setProducts] = useState<Product[]>([])
   const [view, setView] = useState<'dashboard' | 'add' | 'edit'>('dashboard')
   const [editProduct, setEditProduct] = useState<Product | null>(null)
@@ -126,6 +127,7 @@ function SellerSpace() {
           setView('dashboard')
           setEditProduct(null)
           loadMyProducts()
+          refreshProducts()
         }}
         onCancel={() => {
           setView('dashboard')
