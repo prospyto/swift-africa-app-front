@@ -102,6 +102,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       : [user.role]
   }, [user])
 
+  // mode pilote l'affichage (onglets, espace). Sans cette synchro,
+  // mode reste figé sur sa valeur initiale 'acheteur' même après
+  // connexion d'un vendeur ou d'un livreur, et l'app affiche les
+  // onglets/contenus du mauvais rôle.
+  useEffect(() => {
+    if (user) setMode(user.role)
+  }, [user])
+
   // ----- events -----
   useEffect(() => {
     function onUnauthorized() {
