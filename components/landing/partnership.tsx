@@ -96,7 +96,7 @@ export function Partnership() {
         >
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="mx-auto mb-6 flex items-center gap-3 rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition hover:bg-[#e55f00]"
+            className="wave-btn mx-auto mb-6 flex items-center gap-3 rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition hover:bg-[#e55f00] overflow-hidden relative"
           >
             Nous contacter
             <ChevronDown
@@ -194,7 +194,7 @@ export function Partnership() {
                     <button
                       onClick={handleSubmit}
                       disabled={!valid}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6b00] py-3.5 text-sm font-bold text-white transition hover:bg-[#e55f00] disabled:opacity-40"
+                      className="wave-btn flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6b00] py-3.5 text-sm font-bold text-white transition hover:bg-[#e55f00] disabled:opacity-40 overflow-hidden relative"
                     >
                       <Send className="size-4" />
                       Envoyer ma candidature

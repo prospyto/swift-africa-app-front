@@ -116,7 +116,7 @@ export function Feedback() {
                     <button
                       onClick={handleBug}
                       disabled={bugForm.message.length < 10}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition hover:bg-red-600 disabled:opacity-40"
+                      className="wave-btn flex w-full items-center justify-center gap-2 rounded-xl bg-red-500 py-3 text-sm font-bold text-white transition hover:bg-red-600 disabled:opacity-40 overflow-hidden relative"
                     >
                       <Send className="size-4" /> Signaler ce bug
                     </button>
@@ -173,7 +173,7 @@ export function Feedback() {
                     <button
                       onClick={handleSug}
                       disabled={sugForm.message.length < 10}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6b00] py-3 text-sm font-bold text-white transition hover:bg-[#e55f00] disabled:opacity-40"
+                      className="wave-btn flex w-full items-center justify-center gap-2 rounded-xl bg-[#ff6b00] py-3 text-sm font-bold text-white transition hover:bg-[#e55f00] disabled:opacity-40 overflow-hidden relative"
                     >
                       <Send className="size-4" /> Envoyer ma suggestion
                     </button>

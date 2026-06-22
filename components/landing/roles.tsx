@@ -166,7 +166,7 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
 
         <Link
           href="/app"
-          className="flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold transition-all hover:scale-105"
+          className="wave-btn flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold transition-all hover:scale-105 overflow-hidden relative"
           style={
             role.featured
               ? { backgroundColor: 'white', color: '#ff6b00' }

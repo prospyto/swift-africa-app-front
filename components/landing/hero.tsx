@@ -173,7 +173,7 @@ export function Hero() {
         >
           <Link
             href="/app"
-            className="scanner-btn relative flex items-center gap-3 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00]"
+            className="scanner-btn wave-btn relative flex items-center gap-3 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00]"
           >
             <span className="relative z-10 flex items-center gap-3">
               Commencer maintenant →
@@ -182,7 +182,7 @@ export function Hero() {
 
           <Link
             href="/app"
-            className="scanner-btn-dark relative flex items-center gap-2 overflow-hidden rounded-2xl border-2 border-gray-200 px-8 py-4 text-lg font-semibold text-gray-700 transition-all hover:border-[#ff6b00] hover:text-[#ff6b00]"
+            className="scanner-btn-dark wave-btn wave-btn-light relative flex items-center gap-2 overflow-hidden rounded-2xl border-2 border-gray-200 px-8 py-4 text-lg font-semibold text-gray-700 transition-all hover:border-[#ff6b00] hover:text-[#ff6b00]"
           >
             <span className="relative z-10 flex items-center gap-2">
               <LogIn className="size-5" />
