@@ -78,10 +78,10 @@ export function Roles() {
           }}
         >
           <span className="mb-3 inline-block rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
-            Qui êtes-vous ?
+            Qui sommes-nous ?
           </span>
           <h2 className="text-4xl font-black tracking-tight md:text-5xl">
-            Une plateforme,<br />trois façons de l'utiliser
+            Une plateforme,<br />trois acteurs essentiels
           </h2>
         </div>
 
