@@ -152,6 +152,12 @@
   50%  { transform: rotate(180deg) scale(1.05); }
   100% { transform: rotate(360deg) scale(1); }
 }
+@keyframes splash-fade {
+  0%   { opacity: 1; transform: scale(1); }
+  80%  { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.05); pointer-events: none; }
+}
+.animate-splash { animation: splash-fade 1.8s ease-out forwards; }
 @keyframes scanner {
   0%   { left: -40%; opacity: 0; }
   10%  { opacity: 1; }
@@ -161,7 +167,7 @@
 
 .animate-truck-roll { animation: truck-roll 2s ease-in-out infinite; }
 
-/* Bouton scanner */
+/* Bouton scanner orange */
 .scanner-btn::before {
   content: '';
   position: absolute;
@@ -172,10 +178,29 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(255,255,255,0.35) 50%,
+    rgba(255,255,255,0.40) 50%,
     transparent 100%
   );
   animation: scanner 2.5s ease-in-out infinite;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Bouton scanner gris (Se connecter) */
+.scanner-btn-dark::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -40%;
+  width: 30%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255,107,0,0.15) 50%,
+    transparent 100%
+  );
+  animation: scanner 2.5s ease-in-out infinite 1.2s;
   border-radius: inherit;
   z-index: 1;
 }
