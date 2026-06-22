@@ -7,25 +7,25 @@ const STEPS = [
   {
     icon: Lock,
     title: 'Vous payez',
-    desc: "Votre argent est débité et placé en sécurité. Ni le vendeur ni le livreur n'y touche.",
+    desc: 'Votre argent est débité et placé en sécurité. Ni le vendeur ni le livreur n\'y touche.',
     color: '#3b82f6',
   },
   {
     icon: KeyRound,
     title: 'Code OTP généré',
-    desc: "Un code secret à 4 chiffres vous est remis. Gardez-le jusqu'à la réception.",
+    desc: 'Un code secret à 4 chiffres vous est remis. Gardez-le jusqu\'à la réception.',
     color: '#ff6b00',
   },
   {
     icon: ShieldCheck,
     title: 'Livraison confirmée',
-    desc: "Vous donnez le code au livreur uniquement quand vous avez votre colis en main.",
+    desc: 'Vous donnez le code au livreur uniquement quand vous avez votre colis en main.',
     color: '#10b981',
   },
   {
     icon: Wallet,
     title: 'Vendeur payé',
-    desc: "Seulement après votre confirmation, le vendeur reçoit son argent. Zéro risque pour vous.",
+    desc: 'Seulement après votre confirmation, le vendeur reçoit son argent. Zéro risque pour vous.',
     color: '#8b5cf6',
   },
 ]
@@ -46,8 +46,6 @@ export function Security() {
   return (
     <section ref={ref} className="px-4 py-24">
       <div className="mx-auto max-w-5xl">
-
-        {/* Header */}
         <div
           className="mb-16 text-center"
           style={{
@@ -64,50 +62,48 @@ export function Security() {
             <span className="text-[#ff6b00]">sans votre accord</span>
           </h2>
           <p className="mx-auto max-w-xl text-lg text-gray-600">
-            Le système Escrow bloque votre paiement jusqu'à la confirmation de livraison. Première plateforme en Afrique de l'Ouest à offrir cette garantie.
+            Le système Escrow bloque votre paiement jusqu'à la confirmation de livraison. C'est la première plateforme en Afrique de l'Ouest à offrir cette garantie.
           </p>
         </div>
 
-        {/* Timeline alternée avec grands badges */}
+        {/* Timeline */}
         <div className="relative">
-          {/* Ligne verticale centrale */}
-          <div className="absolute left-8 top-0 h-full w-0.5 bg-gradient-to-b from-blue-200 via-orange-200 to-purple-200 md:left-1/2" />
+          {/* Ligne de connexion */}
+          <div className="absolute left-8 top-0 hidden h-full w-0.5 bg-gradient-to-b from-blue-200 via-orange-200 via-green-200 to-purple-200 md:left-1/2 md:block" />
 
-          <div className="grid gap-10 md:gap-14">
+          <div className="grid gap-8 md:gap-12">
             {STEPS.map((step, i) => (
               <div
                 key={i}
                 className={`flex items-center gap-6 ${i % 2 === 1 ? 'md:flex-row-reverse' : 'md:flex-row'}`}
                 style={{
                   opacity: visible ? 1 : 0,
-                  transform: visible ? 'translateX(0)' : `translateX(${i % 2 === 0 ? '-50px' : '50px'})`,
+                  transform: visible ? 'translateX(0)' : `translateX(${i % 2 === 0 ? '-40px' : '40px'})`,
                   transition: `opacity 0.6s ease ${i * 0.15}s, transform 0.6s ease ${i * 0.15}s`,
                 }}
               >
-                {/* Texte */}
                 <div className={`flex-1 ${i % 2 === 1 ? 'md:text-right' : ''}`}>
-                  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                  <div className={`rounded-2xl border border-gray-100 bg-white p-6 shadow-sm ${i % 2 === 1 ? 'md:ml-auto' : ''}`}>
                     <h3 className="mb-2 text-xl font-bold">{step.title}</h3>
-                    <p className="leading-relaxed text-gray-600">{step.desc}</p>
+                    <p className="text-gray-600 leading-relaxed">{step.desc}</p>
                   </div>
                 </div>
 
-                {/* Grand badge icône central */}
+                {/* Icône centrale */}
                 <div
-                  className="relative z-10 flex size-20 shrink-0 items-center justify-center rounded-full shadow-xl"
-                  style={{ backgroundColor: `${step.color}20`, border: `3px solid ${step.color}50` }}
+                  className="relative z-10 flex size-16 shrink-0 items-center justify-center rounded-full shadow-lg"
+                  style={{ backgroundColor: `${step.color}20`, border: `2px solid ${step.color}40` }}
                 >
-                  <step.icon className="size-9" style={{ color: step.color }} />
-                  {/* Numéro */}
+                  <step.icon className="size-7" style={{ color: step.color }} />
                   <div
-                    className="absolute -right-1 -top-1 flex size-7 items-center justify-center rounded-full text-xs font-black text-white shadow-md"
+                    className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full text-xs font-bold text-white"
                     style={{ backgroundColor: step.color }}
                   >
                     {i + 1}
                   </div>
                 </div>
 
-                <div className="hidden flex-1 md:block" />
+                <div className="flex-1 hidden md:block" />
               </div>
             ))}
           </div>
@@ -119,10 +115,10 @@ export function Security() {
           style={{
             opacity: visible ? 1 : 0,
             transform: visible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
-            transition: 'opacity 0.6s ease 0.7s, transform 0.6s ease 0.7s',
+            transition: 'opacity 0.6s ease 0.6s, transform 0.6s ease 0.6s',
           }}
         >
-          <ShieldCheck className="mx-auto mb-3 size-12 opacity-90" />
+          <ShieldCheck className="mx-auto mb-3 size-10 opacity-90" />
           <h3 className="mb-2 text-2xl font-black">Garantie Swift Africa</h3>
           <p className="text-white/85">
             Si vous ne recevez pas votre commande, votre argent vous est remboursé intégralement. Toujours.
