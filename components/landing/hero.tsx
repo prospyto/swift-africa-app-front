@@ -1,11 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Truck, ArrowRight, LogIn } from 'lucide-react'
+import { Truck, LogIn } from 'lucide-react'
 import Link from 'next/link'
 
-const WORDS = ['Commandez.', 'Vendez.', 'Livrez.']
-const SUBTITLE = 'La plateforme de commerce sécurisé pour l\'Afrique de l\'Ouest. Paiement bloqué jusqu\'à la livraison. Zéro arnaque.'
+const WORDS = [
+  { text: 'Achetez,',  color: 'inherit',   delay: 0,    floatClass: 'animate-float' },
+  { text: 'Vendez,',   color: '#ff6b00',   delay: 350,  floatClass: 'animate-float-delay-1' },
+  { text: 'ou Livrez.', color: 'inherit',  delay: 700,  floatClass: 'animate-float-delay-2' },
+]
 
 export function Hero() {
   const [visibleWords, setVisibleWords] = useState<number[]>([])
@@ -13,15 +16,12 @@ export function Hero() {
   const [ctaVisible, setCtaVisible] = useState(false)
 
   useEffect(() => {
-    // Chaque mot pop l'un après l'autre
     WORDS.forEach((_, i) => {
       setTimeout(() => {
         setVisibleWords((prev) => [...prev, i])
       }, 300 + i * 350)
     })
-    // Sous-titre
     setTimeout(() => setSubtitleVisible(true), 300 + WORDS.length * 350 + 200)
-    // CTA
     setTimeout(() => setCtaVisible(true), 300 + WORDS.length * 350 + 500)
   }, [])
 
@@ -33,7 +33,7 @@ export function Hero() {
         <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-[#ff6b00]/5 blur-3xl" />
       </div>
 
-      {/* Logo */}
+      {/* Logo — Truck en mouvement permanent */}
       <div
         className="mb-8 flex items-center gap-3"
         style={{
@@ -43,29 +43,35 @@ export function Hero() {
         }}
       >
         <div className="flex size-14 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-[#ff6b00]/30">
-          <Truck className="size-8" />
+          <span className="animate-truck-roll inline-block">
+            <Truck className="size-8" />
+          </span>
         </div>
         <span className="text-2xl font-bold tracking-tight">Swift Africa</span>
       </div>
 
-      {/* Slogan — mots qui popent */}
+      {/* Slogan — pop puis flottement eau */}
       <h1 className="mb-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-5xl font-black tracking-tight md:text-7xl lg:text-8xl">
-        {WORDS.map((word, i) => (
-          <span
-            key={i}
-            style={{
-              opacity: visibleWords.includes(i) ? 1 : 0,
-              transform: visibleWords.includes(i)
-                ? 'scale(1) translateY(0)'
-                : 'scale(0.5) translateY(30px)',
-              transition: 'opacity 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              color: i === 1 ? '#ff6b00' : 'inherit',
-              display: 'inline-block',
-            }}
-          >
-            {word}
-          </span>
-        ))}
+        {WORDS.map((word, i) => {
+          const popped = visibleWords.includes(i)
+          return (
+            <span
+              key={i}
+              className={popped ? word.floatClass : ''}
+              style={{
+                opacity: popped ? 1 : 0,
+                transform: popped ? 'scale(1) translateY(0)' : 'scale(0.5) translateY(30px)',
+                transition: popped
+                  ? 'opacity 0.5s cubic-bezier(0.34,1.56,0.64,1), transform 0.5s cubic-bezier(0.34,1.56,0.64,1)'
+                  : 'none',
+                color: word.color,
+                display: 'inline-block',
+              }}
+            >
+              {word.text}
+            </span>
+          )
+        })}
       </h1>
 
       {/* Sous-titre */}
@@ -77,7 +83,8 @@ export function Hero() {
           transition: 'opacity 0.6s ease, transform 0.6s ease',
         }}
       >
-        {SUBTITLE}
+        La plateforme de commerce sécurisé pour l'Afrique de l'Ouest.
+        Paiement bloqué jusqu'à la livraison. Zéro arnaque.
       </p>
 
       {/* CTA */}
@@ -91,10 +98,13 @@ export function Hero() {
       >
         <Link
           href="/app"
-          className="group flex items-center gap-2 rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00] hover:shadow-xl hover:shadow-[#ff6b00]/40"
+          className="group flex items-center gap-3 rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00]"
         >
           Commencer maintenant
-          <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+          {/* Flèche qui pulse en permanence */}
+          <span className="animate-arrow-pulse inline-block">
+            →
+          </span>
         </Link>
         <Link
           href="/app"

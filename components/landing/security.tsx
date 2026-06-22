@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { ShieldCheck, KeyRound, Wallet, Lock } from 'lucide-react'
 
 const STEPS = [
@@ -126,5 +127,33 @@ export function Security() {
         </div>
       </div>
     </section>
+  )
+}
+
+function SecurityBadge({ step, number }: { step: { icon: React.ElementType; color: string; title: string }; number: number }) {
+  const [active, setActive] = useState(false)
+  return (
+    <div
+      className="relative z-10 flex size-20 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-xl transition-all duration-300"
+      style={{
+        backgroundColor: `${step.color}20`,
+        border: `3px solid ${step.color}50`,
+        outline: active ? `4px solid ${step.color}` : '4px solid transparent',
+        outlineOffset: '3px',
+        transform: active ? 'scale(1.15) rotate(8deg)' : 'scale(1) rotate(0deg)',
+      }}
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+      onTouchStart={() => setActive(true)}
+      onTouchEnd={() => setTimeout(() => setActive(false), 400)}
+    >
+      <step.icon className="size-9 transition-transform duration-300" style={{ color: step.color }} />
+      <div
+        className="absolute -right-1 -top-1 flex size-7 items-center justify-center rounded-full text-xs font-black text-white shadow-md"
+        style={{ backgroundColor: step.color }}
+      >
+        {number}
+      </div>
+    </div>
   )
 }
