@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { ShieldCheck, KeyRound, Wallet, Lock } from 'lucide-react'
 
 const STEPS = [
@@ -130,7 +129,7 @@ export function Security() {
   )
 }
 
-function SecurityBadge({ step, number }: { step: { icon: React.ElementType; color: string; title: string }; number: number }) {
+function SecurityBadge({ step, number }: { step: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color: string; title: string }; number: number }) {
   const [active, setActive] = useState(false)
   return (
     <div
