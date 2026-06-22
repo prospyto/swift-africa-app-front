@@ -1,0 +1,107 @@
+'use client'
+
+import { useEffect, useRef, useState } from 'react'
+
+const STATS = [
+  { value: 0, target: 0, suffix: ' FCFA', label: 'Frais d\'inscription', display: 'Gratuit', color: '#ff6b00' },
+  { value: 0, target: 100, suffix: '%', label: 'Livraisons sécurisées OTP', color: '#10b981' },
+  { value: 0, target: 3, suffix: ' pays', label: 'Au lancement', color: '#3b82f6' },
+  { value: 0, target: 2, suffix: ' min', label: 'Pour passer une commande', color: '#8b5cf6' },
+]
+
+function CountUp({ target, suffix, display, color }: { target: number; suffix: string; display?: string; color: string }) {
+  const [count, setCount] = useState(0)
+  const [started, setStarted] = useState(false)
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setStarted(true) },
+      { threshold: 0.5 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!started || display) return
+    if (target === 0) return
+    const duration = 1500
+    const steps = 60
+    const increment = target / steps
+    let current = 0
+    const timer = setInterval(() => {
+      current += increment
+      if (current >= target) {
+        setCount(target)
+        clearInterval(timer)
+      } else {
+        setCount(Math.floor(current))
+      }
+    }, duration / steps)
+    return () => clearInterval(timer)
+  }, [started, target, display])
+
+  return (
+    <span ref={ref} className="text-5xl font-black md:text-6xl" style={{ color }}>
+      {display || (started ? count : 0)}{!display && suffix}
+    </span>
+  )
+}
+
+export function Stats() {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
+      { threshold: 0.2 }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    <section ref={ref} className="bg-gray-50 px-4 py-24">
+      <div className="mx-auto max-w-5xl">
+        <div
+          className="mb-16 text-center"
+          style={{
+            opacity: visible ? 1 : 0,
+            transition: 'opacity 0.6s ease',
+          }}
+        >
+          <span className="mb-3 inline-block rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
+            Chiffres clés
+          </span>
+          <h2 className="text-4xl font-black tracking-tight md:text-5xl">
+            Swift Africa en chiffres
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+          {STATS.map((stat, i) => (
+            <div
+              key={i}
+              className="rounded-3xl bg-white p-6 text-center shadow-sm"
+              style={{
+                opacity: visible ? 1 : 0,
+                transform: visible ? 'translateY(0)' : 'translateY(30px)',
+                transition: `opacity 0.6s ease ${i * 0.1}s, transform 0.6s ease ${i * 0.1}s`,
+              }}
+            >
+              <CountUp
+                target={stat.target}
+                suffix={stat.suffix}
+                display={stat.display}
+                color={stat.color}
+              />
+              <p className="mt-2 text-sm text-gray-500">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
