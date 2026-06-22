@@ -13,15 +13,24 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Swift Africa — Logistique & Mobilier Premium',
-  description:
-    "Plateforme logistique et marketplace de meubles haut de gamme. Achat sécurisé par Escrow OTP, livraison suivie en temps réel.",
-  generator: 'v0.app',
+  title: 'Swift Africa — Commandez. Vendez. Livrez.',
+  description: 'La plateforme de commerce sécurisé pour l\'Afrique de l\'Ouest. Paiement bloqué jusqu\'à la livraison. Zéro arnaque.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/favicon.svg',
+  },
+  openGraph: {
+    title: 'Swift Africa',
+    description: 'Commerce sécurisé pour l\'Afrique de l\'Ouest',
+    type: 'website',
+  },
 }
 
 export const viewport: Viewport = {
   colorScheme: 'light',
-  themeColor: '#f8f9fa',
+  themeColor: '#ff6b00',
 }
 
 export default function RootLayout({

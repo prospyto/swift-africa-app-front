@@ -1,10 +1,13 @@
-import { AppProvider } from '@/lib/store'
-import { AppShell } from '@/components/app-shell'
+import { Hero } from '@/components/landing/hero'
+import { HowItWorks } from '@/components/landing/how-it-works'
+import { Roles } from '@/components/landing/roles'
 
-export default function Page() {
+export default function LandingPage() {
   return (
-    <AppProvider>
-      <AppShell />
-    </AppProvider>
+    <main className="min-h-screen bg-white text-gray-900">
+      <Hero />
+      <HowItWorks />
+      <Roles />
+    </main>
   )
 }
