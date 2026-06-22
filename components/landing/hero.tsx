@@ -87,27 +87,36 @@ export function Hero() {
 
         {/* ∞ fond visible */}
         <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
+          {/* ∞ grand et visible */}
           <svg
-            viewBox="0 0 400 200"
-            className="w-[95vw] max-w-4xl opacity-[0.18]"
+            viewBox="0 0 500 250"
+            className="w-[100vw] max-w-5xl"
             style={{ animation: 'infinity-spin 10s linear infinite' }}
           >
             <defs>
-              <linearGradient id="infGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ff6b00" />
-                <stop offset="50%" stopColor="#3b82f6" />
-                <stop offset="100%" stopColor="#ff6b00" />
+              <linearGradient id="infGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ff6b00" stopOpacity="0.35" />
+                <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="#ff6b00" stopOpacity="0.35" />
               </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
             </defs>
             <path
-              d="M200,100 C200,55 235,30 270,30 C320,30 360,65 360,100 C360,135 320,170 270,170 C235,170 200,145 200,100 C200,55 165,30 130,30 C80,30 40,65 40,100 C40,135 80,170 130,170 C165,170 200,145 200,100 Z"
+              d="M250,125 C250,70 292,38 338,38 C400,38 450,81 450,125 C450,169 400,212 338,212 C292,212 250,180 250,125 C250,70 208,38 162,38 C100,38 50,81 50,125 C50,169 100,212 162,212 C208,212 250,180 250,125 Z"
               fill="none"
               stroke="url(#infGrad)"
-              strokeWidth="20"
+              strokeWidth="28"
               strokeLinecap="round"
+              filter="url(#glow)"
             />
           </svg>
-          <div className="absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff6b00]/6 blur-3xl" />
+          <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff6b00]/8 blur-3xl" />
         </div>
 
         {/* Logo */}
