@@ -3,49 +3,38 @@
 import { useEffect, useRef, useState } from 'react'
 
 const STATS = [
-  { value: 0, target: 0, suffix: ' FCFA', label: 'Frais d\'inscription', display: 'Gratuit', color: '#ff6b00' },
-  { value: 0, target: 100, suffix: '%', label: 'Livraisons sécurisées OTP', color: '#10b981' },
-  { value: 0, target: 3, suffix: ' pays', label: 'Au lancement', color: '#3b82f6' },
-  { value: 0, target: 2, suffix: ' min', label: 'Pour passer une commande', color: '#8b5cf6' },
+  { target: 0,   suffix: '',     label: "Frais d'inscription",      display: 'Gratuit', color: '#ff6b00' },
+  { target: 100, suffix: '%',    label: 'Livraisons sécurisées OTP', color: '#10b981' },
+  { target: 3,   suffix: ' pays',label: 'Au lancement',             color: '#3b82f6' },
+  { target: 60,  suffix: 's',    label: 'Pour passer une commande', color: '#8b5cf6' },
 ]
 
-function CountUp({ target, suffix, display, color }: { target: number; suffix: string; display?: string; color: string }) {
+function CountUp({ target, suffix, display, color, started }: {
+  target: number; suffix: string; display?: string; color: string; started: boolean
+}) {
   const [count, setCount] = useState(0)
-  const [started, setStarted] = useState(false)
-  const ref = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setStarted(true) },
-      { threshold: 0.5 }
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-
-  useEffect(() => {
-    if (!started || display) return
-    if (target === 0) return
+    if (!started || display || target === 0) return
     const duration = 1500
     const steps = 60
     const increment = target / steps
     let current = 0
     const timer = setInterval(() => {
       current += increment
-      if (current >= target) {
-        setCount(target)
-        clearInterval(timer)
-      } else {
-        setCount(Math.floor(current))
-      }
+      if (current >= target) { setCount(target); clearInterval(timer) }
+      else setCount(Math.floor(current))
     }, duration / steps)
     return () => clearInterval(timer)
   }, [started, target, display])
 
   return (
-    <span ref={ref} className="text-5xl font-black md:text-6xl" style={{ color }}>
-      {display || (started ? count : 0)}{!display && suffix}
-    </span>
+    <div
+      className="text-4xl font-black md:text-5xl break-words"
+      style={{ color }}
+    >
+      {display ?? `${started ? count : 0}${suffix}`}
+    </div>
   )
 }
 
@@ -55,7 +44,9 @@ export function Stats() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) setVisible(true) },
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true)
+      },
       { threshold: 0.2 }
     )
     if (ref.current) observer.observe(ref.current)
@@ -80,11 +71,11 @@ export function Stats() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {STATS.map((stat, i) => (
             <div
               key={i}
-              className="rounded-3xl bg-white p-6 text-center shadow-sm"
+              className="flex flex-col items-center rounded-3xl bg-white p-5 text-center shadow-sm"
               style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? 'translateY(0)' : 'translateY(30px)',
@@ -96,8 +87,9 @@ export function Stats() {
                 suffix={stat.suffix}
                 display={stat.display}
                 color={stat.color}
+                started={visible}
               />
-              <p className="mt-2 text-sm text-gray-500">{stat.label}</p>
+              <p className="mt-2 text-xs leading-snug text-gray-500">{stat.label}</p>
             </div>
           ))}
         </div>
