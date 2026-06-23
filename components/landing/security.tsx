@@ -54,7 +54,7 @@ export function Security() {
             transition: 'opacity 0.6s ease, transform 0.6s ease',
           }}
         >
-          <span className="mb-3 inline-block rounded-full bg-green-100 px-4 py-1.5 text-sm font-semibold text-green-700">
+          <span className="mb-3 inline-block rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
             🔒 Sécurité
           </span>
           <h2 className="mb-4 text-4xl font-black tracking-tight md:text-5xl">
