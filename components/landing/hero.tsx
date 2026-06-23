@@ -85,40 +85,6 @@ export function Hero() {
       {/* ── PAGE PRINCIPALE ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center">
 
-        {/* ∞ fond visible + deux orbes flottants orange/bleu */}
-        <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center overflow-hidden">
-          <svg
-            viewBox="0 0 500 250"
-            className="w-[100vw] max-w-5xl"
-            style={{ animation: 'infinity-spin 10s linear infinite' }}
-          >
-            <defs>
-              <linearGradient id="infGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#ff6b00" stopOpacity="0.35" />
-                <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.35" />
-                <stop offset="100%" stopColor="#ff6b00" stopOpacity="0.35" />
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
-            <path
-              d="M250,125 C250,70 292,38 338,38 C400,38 450,81 450,125 C450,169 400,212 338,212 C292,212 250,180 250,125 C250,70 208,38 162,38 C100,38 50,81 50,125 C50,169 100,212 162,212 C208,212 250,180 250,125 Z"
-              fill="none"
-              stroke="url(#infGrad)"
-              strokeWidth="28"
-              strokeLinecap="round"
-              filter="url(#glow)"
-            />
-          </svg>
-          <div className="animate-blob-a absolute left-1/2 top-1/3 h-[650px] w-[650px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#ff6b00]/25 blur-3xl" />
-          <div className="animate-blob-b absolute bottom-0 right-0 h-[550px] w-[550px] rounded-full bg-blue-500/20 blur-3xl" />
-        </div>
-
         {/* Logo */}
         <div
           className="relative z-10 mb-10 flex items-center gap-3"
