@@ -14,6 +14,8 @@ import {
   Pencil,
   Trash2,
   MapPin,
+  KeyRound,
+  CheckCircle2,
 } from 'lucide-react'
 import { GlassCard } from '@/components/glass'
 import { Button } from '@/components/ui/button'
