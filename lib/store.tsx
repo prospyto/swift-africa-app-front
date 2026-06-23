@@ -291,19 +291,30 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const confirmOtp = useCallback(
     async (orderId: number, code: string): Promise<boolean> => {
       const order = orders.find((o) => o.id === orderId)
-      if (!order?.mission_id) return false
+      // Si mission_id manque, on ne peut pas valider
+      if (!order?.mission_id) {
+        console.error('confirmOtp: mission_id manquant sur la commande', orderId)
+        return false
+      }
       try {
-        await apiFetch(`missions/${order.mission_id}/valider/`, {
-          method: 'POST',
-          body: { code },
-        })
+        const res = await apiFetch<{ status: string; commande?: Order }>(
+          `missions/${order.mission_id}/valider/`,
+          { method: 'POST', body: { code } },
+        )
+        // Mettre à jour la commande avec les données fraîches du backend
+        if (res.commande) {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === orderId ? res.commande! : o)),
+          )
+        } else {
+          setOrders((prev) =>
+            prev.map((o) => (o.id === orderId ? { ...o, statut: 'livre' as const } : o)),
+          )
+        }
+        return res.status === 'success'
       } catch {
         return false
       }
-      setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, statut: 'livre' as const } : o)),
-      )
-      return true
     },
     [orders],
   )

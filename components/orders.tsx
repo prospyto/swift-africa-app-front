@@ -263,7 +263,7 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
       )}
 
       {/* Décaisser vendeur */}
-      {order.statut === 'livre' && activeRole === 'acheteur' && (
+      {order.statut === 'livre' && activeRole === 'vendeur' && (
         <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
           <ShieldCheck className="size-5 shrink-0" />
           <div className="flex-1">
