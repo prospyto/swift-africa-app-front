@@ -19,6 +19,7 @@ export interface Product {
   prix: number
   prix_solde?: number | null
   image: string
+  image_url?: string | null
   categorie: string
   vendeur: string
   ville: string

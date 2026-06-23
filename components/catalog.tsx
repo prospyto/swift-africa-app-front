@@ -98,7 +98,7 @@ export function Catalog() {
               >
                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-secondary">
                   <Image
-                    src={p.image || '/placeholder.svg'}
+                    src={p.image_url || p.image || '/placeholder.svg'}
                     alt={p.nom}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
