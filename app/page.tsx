@@ -1,4 +1,5 @@
 import { Hero } from '@/components/landing/hero'
+import { CatalogPreview } from '@/components/landing/catalog-preview'
 import { HowItWorks } from '@/components/landing/how-it-works'
 import { Security } from '@/components/landing/security'
 import { Roles } from '@/components/landing/roles'
@@ -11,7 +12,13 @@ import { Footer } from '@/components/landing/footer'
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white text-gray-900">
+      {/* Hero — chargé EN PREMIER, prioritaire */}
       <Hero />
+
+      {/* Catalogue — juste après le hero */}
+      <CatalogPreview />
+
+      {/* Reste de la page — chargé au scroll */}
       <HowItWorks />
       <Security />
       <div id="roles"><Roles /></div>
