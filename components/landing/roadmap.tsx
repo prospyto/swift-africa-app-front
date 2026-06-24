@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import {
-  MapPin, Brain, RotateCcw, Warehouse, Mic2, Fingerprint,
+  MapPin, Brain, RotateCcw, Warehouse, Mic2, Fingerprint, Sparkles,
 } from 'lucide-react'
 
 const FEATURES = [
@@ -88,8 +88,9 @@ export function Roadmap() {
             transition: 'opacity 0.6s ease, transform 0.6s ease',
           }}
         >
-          <span className="mb-3 inline-block rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
-            🚀 Vision 2.0
+          <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
+            <Sparkles className="size-4" />
+            Vision 2.0
           </span>
           <h2 className="mb-4 text-4xl font-black tracking-tight md:text-5xl">
             Ce qui arrive très bientôt
@@ -105,33 +106,6 @@ export function Roadmap() {
           {FEATURES.map((feat, i) => (
             <FeatureCard key={i} feat={feat} i={i} visible={visible} />
           ))}
-        </div>
-
-        {/* Bannière investisseur */}
-        <div
-          className="mt-16 rounded-3xl bg-gradient-to-br from-gray-900 to-gray-800 p-8 text-center text-white"
-          style={{
-            opacity: visible ? 1 : 0,
-            transform: visible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.95)',
-            transition: 'opacity 0.6s ease 0.7s, transform 0.6s ease 0.7s',
-          }}
-        >
-          <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-[#ff6b00]">
-            Opportunité d'investissement
-          </p>
-          <h3 className="mb-3 text-2xl font-black">
-            Rejoignez l'aventure dès maintenant
-          </h3>
-          <p className="mx-auto max-w-xl text-white/70">
-            Ces fonctionnalités sont prêtes à être déployées. Il ne manque que les partenaires
-            qui croient en l'avenir du commerce africain.
-          </p>
-          <a
-            href="#partenariat"
-            className="scanner-btn relative mt-6 inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition hover:scale-105 hover:bg-[#e55f00]"
-          >
-            <span className="relative z-10">Devenir partenaire →</span>
-          </a>
         </div>
       </div>
     </section>
@@ -193,7 +167,7 @@ function FeatureCard({
       <h3 className="mb-2 text-lg font-bold leading-snug">{feat.title}</h3>
       <p className="text-sm leading-relaxed text-gray-500">{feat.desc}</p>
 
-      {/* Barre de couleur en bas au hover */}
+      {/* Barre couleur en bas au hover */}
       <div
         className="absolute bottom-0 left-0 h-1 rounded-b-3xl transition-all duration-500"
         style={{
