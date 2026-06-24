@@ -4,6 +4,7 @@ import { Roles } from '@/components/landing/roles'
 import { CatalogPreview } from '@/components/landing/catalog-preview'
 import { Security } from '@/components/landing/security'
 import { Stats } from '@/components/landing/stats'
+import { Roadmap } from '@/components/landing/roadmap'
 import { Partnership } from '@/components/landing/partnership'
 import { FAQ } from '@/components/landing/faq'
 import { Feedback } from '@/components/landing/feedback'
@@ -30,16 +31,19 @@ export default function LandingPage() {
       {/* 6. CRÉDIBILITÉ — Chiffres */}
       <Stats />
 
-      {/* 7. ACTION — Investir */}
+      {/* 7. VISION — Ce qui arrive bientôt (investisseur) */}
+      <div id="roadmap"><Roadmap /></div>
+
+      {/* 8. ACTION — Investir */}
       <div id="partenariat"><Partnership /></div>
 
-      {/* 8. LEVER LES FREINS */}
+      {/* 9. LEVER LES FREINS */}
       <div id="faq"><FAQ /></div>
 
-      {/* 9. ENGAGEMENT */}
+      {/* 10. ENGAGEMENT */}
       <div id="feedback"><Feedback /></div>
 
-      {/* 10. FOOTER */}
+      {/* 11. FOOTER */}
       <Footer />
     </main>
   )
