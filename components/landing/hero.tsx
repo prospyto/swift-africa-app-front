@@ -65,15 +65,19 @@ export function Hero() {
       {/* ── PAGE PRINCIPALE ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
 
-        {/* Fond plein écran : illustration mascotte */}
-        <div className="absolute inset-0 z-0">
+        {/* Fond hero — illustration livreur scooter */}
+        <div className="absolute inset-0 z-0 overflow-hidden" style={{ background: '#ff6b00' }}>
+          {/* Image positionnée à droite sur desktop, centrée sur mobile */}
           <img
             src="/hero-livreur.png"
             alt=""
-            className="size-full object-cover"
+            className="absolute bottom-0 right-0 h-full w-auto object-contain md:h-[110%] md:-bottom-4"
+            style={{ maxWidth: '65%' }}
           />
-          {/* Voile sombre pour la lisibilité du texte blanc par-dessus */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/35 to-black/60" />
+          {/* Dégradé gauche pour que le texte soit lisible */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
+          {/* Dégradé bas mobile */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent md:hidden" />
         </div>
 
         {/* Logo */}
