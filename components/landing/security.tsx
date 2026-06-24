@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useEffect, useRef, useState } from 'react'
-import { ShieldCheck, KeyRound, Wallet, Lock } from 'lucide-react'
+import { ShieldCheck, KeyRound, Wallet, LockKeyhole } from 'lucide-react'
 
 const STEPS = [
   {
-    icon: Lock,
+    icon: LockKeyhole,
     title: 'Vous payez',
     desc: 'Votre argent est débité et placé en sécurité. Ni le vendeur ni le livreur n\'y touche.',
     color: '#3b82f6',
@@ -136,17 +136,18 @@ function SecurityBadge({ step, number }: { step: { icon: React.ComponentType<{ c
       className="relative z-10 flex size-20 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-xl transition-all duration-300"
       style={{
         backgroundColor: `${step.color}20`,
-        border: `3px solid ${step.color}50`,
+        border: `3px solid ${step.color}60`,
         outline: active ? `4px solid ${step.color}` : '4px solid transparent',
-        outlineOffset: '3px',
-        transform: active ? 'scale(1.15) rotate(8deg)' : 'scale(1) rotate(0deg)',
+        outlineOffset: '4px',
+        transform: active ? 'scale(1.18) rotate(10deg)' : 'scale(1) rotate(0deg)',
+        boxShadow: active ? `0 0 30px 8px ${step.color}30` : '',
       }}
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
       onTouchStart={() => setActive(true)}
       onTouchEnd={() => setTimeout(() => setActive(false), 400)}
     >
-      <step.icon className="size-9 transition-transform duration-300" style={{ color: step.color }} />
+      <step.icon className="size-9 transition-transform duration-300" style={{ color: step.color }} strokeWidth={1.5} />
       <div
         className="absolute -right-1 -top-1 flex size-7 items-center justify-center rounded-full text-xs font-black text-white shadow-md"
         style={{ backgroundColor: step.color }}

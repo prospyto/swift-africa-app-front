@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ShoppingCart, ShieldCheck, PackageCheck } from 'lucide-react'
+import { ScanLine, ShieldCheck, PackageCheck } from 'lucide-react'
 
 const STEPS = [
   {
-    icon: ShoppingCart,
+    icon: ScanLine,
     number: '01',
     title: 'Choisissez un produit',
     desc: 'Parcourez le catalogue et passez commande en quelques secondes depuis votre téléphone.',
@@ -69,17 +69,17 @@ export function HowItWorks() {
                 transition: `opacity 0.6s ease ${i * 0.15}s, transform 0.6s ease ${i * 0.15}s`,
               }}
             >
-              <div className="relative rounded-3xl border border-gray-100 bg-white p-8 shadow-sm">
+              <div className="group relative rounded-3xl border border-gray-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 {/* Numéro */}
                 <span className="absolute right-6 top-6 text-6xl font-black text-gray-100">
                   {step.number}
                 </span>
-                {/* Icône */}
+                {/* Icône pro avec animation */}
                 <div
-                  className="mb-5 flex size-14 items-center justify-center rounded-2xl"
-                  style={{ backgroundColor: `${step.color}15` }}
+                  className="mb-5 flex size-16 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
+                  style={{ backgroundColor: `${step.color}15`, boxShadow: `0 8px 24px -4px ${step.color}30` }}
                 >
-                  <step.icon className="size-7" style={{ color: step.color }} />
+                  <step.icon className="size-8" style={{ color: step.color }} strokeWidth={1.5} />
                 </div>
                 <h3 className="mb-3 text-xl font-bold">{step.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{step.desc}</p>

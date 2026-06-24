@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { ShoppingBag, Store, Bike, ArrowRight, Check } from 'lucide-react'
 import Link from 'next/link'
 
 const ROLES = [
   {
-    emoji: '🛒',
+    icon: ShoppingBag,
     title: 'Acheteur',
     color: '#3b82f6',
     bg: '#eff6ff',
@@ -20,7 +21,7 @@ const ROLES = [
     cta: 'Je veux acheter',
   },
   {
-    emoji: '🏪',
+    icon: Store,
     title: 'Vendeur',
     color: '#ff6b00',
     bg: '#fff7ed',
@@ -36,7 +37,7 @@ const ROLES = [
     featured: true,
   },
   {
-    emoji: '🚚',
+    icon: Bike,
     title: 'Livreur',
     color: '#10b981',
     bg: '#ecfdf5',
@@ -96,6 +97,7 @@ export function Roles() {
 
 function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visible: boolean }) {
   const [hovered, setHovered] = useState(false)
+  const Icon = role.icon
 
   return (
     <div
@@ -104,26 +106,19 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
       onTouchStart={() => setHovered(true)}
       onTouchEnd={() => setTimeout(() => setHovered(false), 400)}
       style={{
-        /* Entrée drapeau */
         opacity: visible ? 1 : 0,
         transform: visible
-          ? hovered ? 'scaleX(1) translateX(0) translateY(-8px)' : 'scaleX(1) translateX(0) translateY(0)'
-          : 'scaleX(0) translateX(-40px)',
-        transformOrigin: 'left center',
+          ? hovered ? 'translateY(-10px)' : 'translateY(0)'
+          : 'translateX(-40px)',
         transition: visible
-          ? `transform 0.3s ease, box-shadow 0.3s ease, opacity 0.7s ease ${i * 0.2}s`
+          ? 'transform 0.3s ease, box-shadow 0.3s ease, opacity 0.7s ease'
           : `opacity 0.7s ease ${i * 0.2}s, transform 0.7s cubic-bezier(0.34,1.2,0.64,1) ${i * 0.2}s`,
-        boxShadow: hovered
-          ? `0 20px 40px -10px ${role.ringColor}`
-          : '0 1px 3px rgba(0,0,0,0.08)',
+        boxShadow: hovered ? `0 24px 50px -12px ${role.ringColor}` : '0 1px 3px rgba(0,0,0,0.08)',
         borderRadius: '1.5rem',
-        cursor: 'pointer',
       }}
     >
       <div
-        className={`relative flex h-full flex-col p-8 rounded-3xl ${
-          role.featured ? 'text-white' : 'bg-white'
-        }`}
+        className={`relative flex h-full flex-col rounded-3xl p-8 ${role.featured ? 'text-white' : 'bg-white'}`}
         style={role.featured ? { background: 'linear-gradient(135deg, #ff6b00, #ff8c00)' } : {}}
       >
         {role.featured && (
@@ -132,33 +127,60 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
           </div>
         )}
 
-        {/* Badge emoji — contour coloré au hover */}
-        <div
-          className="mb-5 flex size-16 items-center justify-center rounded-2xl text-3xl transition-all duration-300"
-          style={{
-            backgroundColor: role.featured ? 'rgba(255,255,255,0.2)' : role.bg,
-            outline: hovered ? `3px solid ${role.color}` : '3px solid transparent',
-            outlineOffset: '2px',
-          }}
-        >
-          {role.emoji}
+        {/* Badge icône pro avec animation */}
+        <div className="mb-6 flex items-start justify-between">
+          <div
+            className="relative flex size-16 items-center justify-center rounded-2xl transition-all duration-500"
+            style={{
+              backgroundColor: role.featured ? 'rgba(255,255,255,0.2)' : role.bg,
+              outline: hovered ? `3px solid ${role.color}` : '3px solid transparent',
+              outlineOffset: '3px',
+              transform: hovered ? 'rotate(8deg) scale(1.1)' : 'rotate(0deg) scale(1)',
+            }}
+          >
+            <Icon
+              className="size-8"
+              style={{ color: role.featured ? 'white' : role.color }}
+              strokeWidth={1.5}
+            />
+            {/* Anneau pulsant en arrière-plan */}
+            {hovered && (
+              <div
+                className="absolute inset-0 rounded-2xl animate-ping opacity-30"
+                style={{ backgroundColor: role.color }}
+              />
+            )}
+          </div>
+
+          {/* Numéro discret */}
+          <span
+            className="text-5xl font-black opacity-10"
+            style={{ color: role.featured ? 'white' : role.color }}
+          >
+            0{i + 1}
+          </span>
         </div>
 
         <h3 className="mb-2 text-2xl font-black">{role.title}</h3>
-        <p className={`mb-6 leading-relaxed ${role.featured ? 'text-white/80' : 'text-gray-600'}`}>
+        <p className={`mb-6 leading-relaxed ${role.featured ? 'text-white/80' : 'text-gray-500'}`}>
           {role.desc}
         </p>
 
         <ul className="mb-8 flex-1 space-y-3">
           {role.points.map((point, j) => (
-            <li key={j} className="flex items-start gap-2 text-sm">
-              <span
-                className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full text-xs font-bold"
+            <li key={j} className="flex items-center gap-3 text-sm">
+              <div
+                className="flex size-5 shrink-0 items-center justify-center rounded-full"
                 style={{
                   backgroundColor: role.featured ? 'rgba(255,255,255,0.25)' : `${role.color}20`,
-                  color: role.featured ? 'white' : role.color,
                 }}
-              >✓</span>
+              >
+                <Check
+                  className="size-3 font-bold"
+                  style={{ color: role.featured ? 'white' : role.color }}
+                  strokeWidth={3}
+                />
+              </div>
               <span className={role.featured ? 'text-white/90' : 'text-gray-700'}>{point}</span>
             </li>
           ))}
@@ -166,14 +188,17 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
 
         <Link
           href="/app"
-          className="wave-btn flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold transition-all hover:scale-105 overflow-hidden relative"
+          className="wave-btn relative flex items-center justify-center gap-2 overflow-hidden rounded-2xl py-3.5 text-sm font-bold transition-all hover:scale-105"
           style={
             role.featured
               ? { backgroundColor: 'white', color: '#ff6b00' }
               : { backgroundColor: role.color, color: 'white' }
           }
         >
-          {role.cta} →
+          <span className="relative z-10 flex items-center gap-2">
+            {role.cta}
+            <ArrowRight className="size-4" />
+          </span>
         </Link>
       </div>
     </div>
