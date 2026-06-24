@@ -1,14 +1,11 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState, useMemo, useRef } from 'react'
 import { Truck, LogIn } from 'lucide-react'
 import Link from 'next/link'
 
 const WORDS = ['ACHETEZ', 'VENDEZ', 'LIVREZ']
 
-// Décalage aléatoire (position, rotation) par lettre, calculé une seule
-// fois — chaque lettre "explose" dans une direction différente puis se
-// reforme à sa place, en boucle infinie (voir .animate-letter en CSS).
 function useLetterOffsets(words: string[]) {
   return useMemo(
     () =>
@@ -30,6 +27,8 @@ export function Hero() {
   const [wordsVisible, setWordsVisible] = useState(false)
   const [subtitleVisible, setSubtitleVisible] = useState(false)
   const [ctaVisible, setCtaVisible] = useState(false)
+  const [videoLoaded, setVideoLoaded] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   const offsets = useLetterOffsets(WORDS)
 
@@ -41,13 +40,18 @@ export function Hero() {
     setTimeout(() => setCtaVisible(true), 2900)
   }, [])
 
+  // Charger la vidéo seulement après le splash (connexions lentes)
+  useEffect(() => {
+    if (splashDone && videoRef.current) {
+      videoRef.current.load()
+    }
+  }, [splashDone])
+
   return (
     <>
       {/* ── SPLASH SCREEN ── */}
       {!splashDone && (
-        <div
-          className="animate-splash fixed inset-0 z-50 flex flex-col items-center justify-center bg-white"
-        >
+        <div className="animate-splash fixed inset-0 z-50 flex flex-col items-center justify-center bg-white">
           <div className="flex size-24 items-center justify-center rounded-3xl bg-[#ff6b00] text-white shadow-2xl shadow-[#ff6b00]/40">
             <Truck className="size-14" />
           </div>
@@ -65,25 +69,37 @@ export function Hero() {
       {/* ── PAGE PRINCIPALE ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
 
-        {/* Fond hero — dégradé en attendant les images/vidéo */}
+        {/* Fond hero — fallback dégradé visible immédiatement */}
         <div className="absolute inset-0 z-0 overflow-hidden">
+
+          {/* Fallback dégradé — toujours présent, masqué dès que la vidéo est prête */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 transition-opacity duration-700"
             style={{
               background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a1a2e 100%)',
+              opacity: videoLoaded ? 0 : 1,
             }}
           />
-          {/* Cercles décoratifs */}
-          <div
-            className="absolute -top-32 -right-32 size-[600px] rounded-full opacity-20"
-            style={{ background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)' }}
-          />
-          <div
-            className="absolute -bottom-32 -left-32 size-[500px] rounded-full opacity-15"
-            style={{ background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)' }}
-          />
-          {/* Voile pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-black/30" />
+
+          {/* Vidéo — chargée après le splash, fade-in dès qu'elle est prête */}
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="none"
+            onCanPlayThrough={() => setVideoLoaded(true)}
+            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
+            style={{ opacity: videoLoaded ? 1 : 0 }}
+          >
+            {/* WebM en priorité (2-3× plus léger que mp4) */}
+            <source src="/hero-video.webm" type="video/webm" />
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
+
+          {/* Voile sombre pour lisibilité du texte */}
+          <div className="absolute inset-0 bg-black/55" />
         </div>
 
         {/* Logo */}
@@ -103,7 +119,7 @@ export function Hero() {
           <span className="text-3xl font-bold tracking-tight text-white">Swift Africa</span>
         </div>
 
-        {/* Mots — chaque lettre se disperse puis se reforme, en boucle infinie */}
+        {/* Mots animés */}
         <h1 className="relative z-10 mb-8 flex flex-col items-center gap-1">
           {WORDS.map((word, wi) => (
             <span key={wi} className="block text-6xl font-black tracking-tight text-white md:text-8xl lg:text-9xl">
@@ -143,7 +159,7 @@ export function Hero() {
           Paiement bloqué jusqu'à la livraison. Zéro arnaque.
         </p>
 
-        {/* CTA — deux boutons avec scanner, sans trait séparateur */}
+        {/* CTA */}
         <div
           className="relative z-10 flex flex-col items-center gap-4 sm:flex-row"
           style={{
