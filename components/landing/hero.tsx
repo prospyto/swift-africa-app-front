@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { Truck, LogIn } from 'lucide-react'
 import Link from 'next/link'
 
-const WORDS = ['ACHETER', 'VENDEZ', 'LIVREZ']
+const WORDS = ['ACHETEZ', 'VENDEZ', 'LIVREZ']
 
 // Décalage aléatoire (position, rotation) par lettre, calculé une seule
 // fois — chaque lettre "explose" dans une direction différente puis se
@@ -65,21 +65,25 @@ export function Hero() {
       {/* ── PAGE PRINCIPALE ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
 
-        {/* Fond hero — vidéo plein écran */}
+        {/* Fond hero — dégradé en attendant les images/vidéo */}
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            style={{ willChange: 'transform' }}
-          >
-            <source src="/hero-video.mp4" type="video/mp4" />
-          </video>
-          {/* Voile sombre pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-black/55" />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a1a2e 100%)',
+            }}
+          />
+          {/* Cercles décoratifs */}
+          <div
+            className="absolute -top-32 -right-32 size-[600px] rounded-full opacity-20"
+            style={{ background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)' }}
+          />
+          <div
+            className="absolute -bottom-32 -left-32 size-[500px] rounded-full opacity-15"
+            style={{ background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)' }}
+          />
+          {/* Voile pour lisibilité du texte */}
+          <div className="absolute inset-0 bg-black/30" />
         </div>
 
         {/* Logo */}
