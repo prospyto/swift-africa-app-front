@@ -7,37 +7,24 @@ import Link from 'next/link'
 const WORDS = ['ACHETER', 'VENDEZ', 'LIVREZ']
 const COLORS = ['#111827', '#ff6b00', '#111827']
 
-function useTypewriter(words: string[], started: boolean) {
-  const [displayed, setDisplayed] = useState<string[]>(['', '', ''])
+// Chaque mot tombe d'en haut, s'écrase légèrement au sol (scaleY réduit),
+// puis se relève à sa taille normale — un seul mot à la fois, en cascade.
+function useDropWords(words: string[], started: boolean) {
+  const [stage, setStage] = useState<('hidden' | 'falling' | 'landed' | 'settled')[]>(
+    words.map(() => 'hidden'),
+  )
 
   useEffect(() => {
     if (!started) return
-    let wi = 0
-    let li = 0
-
-    const type = () => {
-      if (wi >= words.length) return
-      const word = words[wi]
-      if (li <= word.length) {
-        const currentWi = wi
-        const currentLi = li
-        setDisplayed(prev => {
-          const next = [...prev]
-          next[currentWi] = word.slice(0, currentLi)
-          return next
-        })
-        li++
-        setTimeout(type, 60)
-      } else {
-        wi++
-        li = 0
-        setTimeout(type, 250)
-      }
-    }
-    type()
+    words.forEach((_, i) => {
+      const base = i * 550
+      setTimeout(() => setStage((p) => p.map((s, j) => (j === i ? 'falling' : s))), base)
+      setTimeout(() => setStage((p) => p.map((s, j) => (j === i ? 'landed' : s))), base + 450)
+      setTimeout(() => setStage((p) => p.map((s, j) => (j === i ? 'settled' : s))), base + 600)
+    })
   }, [started])
 
-  return displayed
+  return stage
 }
 
 export function Hero() {
@@ -52,14 +39,14 @@ export function Hero() {
     setTimeout(() => setSplashDone(true), 1800)
     // Logo
     setTimeout(() => setLogoVisible(true), 1900)
-    // Écriture
+    // Chute des mots
     setTimeout(() => setTypingStarted(true), 2200)
-    // Sous-titre et CTA
-    setTimeout(() => setSubtitleVisible(true), 4400)
-    setTimeout(() => setCtaVisible(true), 4700)
+    // Sous-titre et CTA — la chute des 3 mots dure environ 1.7s au total
+    setTimeout(() => setSubtitleVisible(true), 3900)
+    setTimeout(() => setCtaVisible(true), 4200)
   }, [])
 
-  const displayed = useTypewriter(WORDS, typingStarted)
+  const stages = useDropWords(WORDS, typingStarted)
 
   return (
     <>
@@ -83,78 +70,116 @@ export function Hero() {
       )}
 
       {/* ── PAGE PRINCIPALE ── */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 text-center">
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center lg:flex-row lg:gap-12 lg:px-12 lg:text-left">
 
-        {/* Logo */}
-        <div
-          className="relative z-10 mb-10 flex items-center gap-3"
-          style={{
-            opacity: logoVisible ? 1 : 0,
-            transform: logoVisible ? 'translateY(0) scale(1)' : 'translateY(-30px) scale(0.8)',
-            transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
-          }}
-        >
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-[#ff6b00]/30">
-            <span className="animate-truck-roll inline-block">
-              <Truck className="size-9" />
-            </span>
+        <div className="flex flex-col items-center lg:items-start">
+          {/* Logo */}
+          <div
+            className="relative z-10 mb-10 flex items-center gap-3"
+            style={{
+              opacity: logoVisible ? 1 : 0,
+              transform: logoVisible ? 'translateY(0) scale(1)' : 'translateY(-30px) scale(0.8)',
+              transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+          >
+            <div className="flex size-16 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-[#ff6b00]/30">
+              <span className="animate-truck-roll inline-block">
+                <Truck className="size-9" />
+              </span>
+            </div>
+            <span className="text-3xl font-bold tracking-tight">Swift Africa</span>
           </div>
-          <span className="text-3xl font-bold tracking-tight">Swift Africa</span>
+
+          {/* Mots — chacun tombe, s'écrase au sol puis se relève */}
+          <h1 className="relative z-10 mb-8 flex flex-col items-center gap-1 lg:items-start">
+            {WORDS.map((word, i) => {
+              const stage = stages[i]
+              const hidden = stage === 'hidden'
+              const falling = stage === 'falling'
+              const landed = stage === 'landed'
+              return (
+                <span
+                  key={i}
+                  className="block text-6xl font-black tracking-tight md:text-8xl lg:text-7xl"
+                  style={{
+                    color: COLORS[i],
+                    minHeight: '1.15em',
+                    display: 'inline-block',
+                    opacity: hidden ? 0 : 1,
+                    transform: hidden
+                      ? 'translateY(-120%)'
+                      : landed
+                        ? 'translateY(0) scaleY(0.7) scaleX(1.08)'
+                        : 'translateY(0) scaleY(1) scaleX(1)',
+                    transformOrigin: 'bottom center',
+                    transition: falling
+                      ? 'transform 0.45s cubic-bezier(0.55,0,1,0.45), opacity 0.1s ease'
+                      : 'transform 0.18s ease-out',
+                  }}
+                >
+                  {word}
+                </span>
+              )
+            })}
+          </h1>
+
+          {/* Sous-titre */}
+          <p
+            className="relative z-10 mb-10 max-w-xl text-lg text-gray-600 md:text-xl"
+            style={{
+              opacity: subtitleVisible ? 1 : 0,
+              transform: subtitleVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.6s ease, transform 0.6s ease',
+            }}
+          >
+            La plateforme de commerce sécurisé pour l'Afrique de l'Ouest.
+            Paiement bloqué jusqu'à la livraison. Zéro arnaque.
+          </p>
+
+          {/* CTA — deux boutons avec scanner, sans trait séparateur */}
+          <div
+            className="relative z-10 flex flex-col items-center gap-4 sm:flex-row"
+            style={{
+              opacity: ctaVisible ? 1 : 0,
+              transform: ctaVisible ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 0.6s ease, transform 0.6s ease',
+            }}
+          >
+            <Link
+              href="/app"
+              className="scanner-btn relative flex items-center gap-3 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00]"
+            >
+              <span className="relative z-10 flex items-center gap-3">
+                Commencer maintenant →
+              </span>
+            </Link>
+
+            <Link
+              href="/app"
+              className="scanner-btn-dark relative flex items-center gap-2 overflow-hidden rounded-2xl border-2 border-gray-200 px-8 py-4 text-lg font-semibold text-gray-700 transition-all hover:border-[#ff6b00] hover:text-[#ff6b00]"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <LogIn className="size-5" />
+                Se connecter
+              </span>
+            </Link>
+          </div>
         </div>
 
-        {/* Mots — écriture lettre par lettre, sans curseur */}
-        <h1 className="relative z-10 mb-8 flex flex-col items-center gap-1">
-          {WORDS.map((_, i) => (
-            <span
-              key={i}
-              className="block text-6xl font-black tracking-tight md:text-8xl lg:text-9xl"
-              style={{ color: COLORS[i], minHeight: '1.15em' }}
-            >
-              {displayed[i]}&nbsp;
-            </span>
-          ))}
-        </h1>
-
-        {/* Sous-titre */}
-        <p
-          className="relative z-10 mb-10 max-w-xl text-lg text-gray-600 md:text-xl"
-          style={{
-            opacity: subtitleVisible ? 1 : 0,
-            transform: subtitleVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
-          }}
-        >
-          La plateforme de commerce sécurisé pour l'Afrique de l'Ouest.
-          Paiement bloqué jusqu'à la livraison. Zéro arnaque.
-        </p>
-
-        {/* CTA — deux boutons avec scanner, sans trait séparateur */}
+        {/* Illustration mascotte */}
         <div
-          className="relative z-10 flex flex-col items-center gap-4 sm:flex-row"
+          className="relative z-10 mt-12 w-full max-w-sm lg:mt-0 lg:max-w-md"
           style={{
             opacity: ctaVisible ? 1 : 0,
-            transform: ctaVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
+            transform: ctaVisible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.92)',
+            transition: 'opacity 0.7s ease, transform 0.7s cubic-bezier(0.34,1.56,0.64,1)',
           }}
         >
-          <Link
-            href="/app"
-            className="scanner-btn relative flex items-center gap-3 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00]"
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              Commencer maintenant →
-            </span>
-          </Link>
-
-          <Link
-            href="/app"
-            className="scanner-btn-dark relative flex items-center gap-2 overflow-hidden rounded-2xl border-2 border-gray-200 px-8 py-4 text-lg font-semibold text-gray-700 transition-all hover:border-[#ff6b00] hover:text-[#ff6b00]"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              <LogIn className="size-5" />
-              Se connecter
-            </span>
-          </Link>
+          <img
+            src="/hero-livreur.png"
+            alt="Livreur Swift Africa sur scooter, colis à l'arrière"
+            className="w-full rounded-[2.5rem] shadow-2xl shadow-[#ff6b00]/30"
+          />
         </div>
 
         {/* Scroll indicator — sans trait */}
