@@ -212,12 +212,14 @@ function SellerSpace() {
                     <span className="font-bold text-success">{formatXOF(gain)}</span>
                     <button
                       onClick={() => { setEditProduct(p); setView('edit') }}
+                      aria-label="Modifier ce produit"
                       className="rounded-lg p-1.5 text-muted-foreground hover:bg-secondary hover:text-foreground"
                     >
                       <Pencil className="size-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(p.id)}
+                      aria-label="Supprimer ce produit"
                       className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                     >
                       <Trash2 className="size-4" />

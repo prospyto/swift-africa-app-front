@@ -132,6 +132,7 @@ export function Partnership() {
                       <div>
                         <label className="mb-1 block text-xs font-semibold text-gray-600">Nom complet *</label>
                         <input
+                          name="nom"
                           value={form.nom}
                           onChange={(e) => setForm({ ...form, nom: e.target.value })}
                           placeholder="Jean Dupont"
@@ -141,6 +142,7 @@ export function Partnership() {
                       <div>
                         <label className="mb-1 block text-xs font-semibold text-gray-600">Téléphone</label>
                         <input
+                          name="telephone"
                           value={form.telephone}
                           onChange={(e) => setForm({ ...form, telephone: e.target.value })}
                           placeholder="+229 XX XX XX XX"
@@ -152,6 +154,7 @@ export function Partnership() {
                       <label className="mb-1 block text-xs font-semibold text-gray-600">Email *</label>
                       <input
                         type="email"
+                        name="email"
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         placeholder="vous@exemple.com"
@@ -160,8 +163,9 @@ export function Partnership() {
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-600">Type de partenariat</label>
+                        <label htmlFor="partenariat-type" className="mb-1 block text-xs font-semibold text-gray-600">Type de partenariat</label>
                         <select
+                          id="partenariat-type"
                           value={form.type}
                           onChange={(e) => setForm({ ...form, type: e.target.value })}
                           className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#ff6b00]"
@@ -173,8 +177,10 @@ export function Partnership() {
                         </select>
                       </div>
                       <div>
-                        <label className="mb-1 block text-xs font-semibold text-gray-600">Montant envisagé (FCFA)</label>
+                        <label htmlFor="partenariat-montant" className="mb-1 block text-xs font-semibold text-gray-600">Montant envisagé (FCFA)</label>
                         <input
+                          id="partenariat-montant"
+                          name="montant"
                           value={form.montant}
                           onChange={(e) => setForm({ ...form, montant: e.target.value })}
                           placeholder="Ex: 500 000"
@@ -185,6 +191,7 @@ export function Partnership() {
                     <div>
                       <label className="mb-1 block text-xs font-semibold text-gray-600">Message *</label>
                       <textarea
+                        name="message"
                         value={form.message}
                         onChange={(e) => setForm({ ...form, message: e.target.value })}
                         placeholder="Parlez-nous de votre intérêt et de vos attentes..."

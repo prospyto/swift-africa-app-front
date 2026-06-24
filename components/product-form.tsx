@@ -253,10 +253,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           {/* Catégorie & Ville */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
-              <label className="mb-2 block text-sm font-medium">
+              <label htmlFor="produit-categorie" className="mb-2 block text-sm font-medium">
                 Catégorie *
               </label>
               <select
+                id="produit-categorie"
                 value={form.categorie}
                 onChange={(e) =>
                   setForm({ ...form, categorie: e.target.value })
@@ -272,10 +273,11 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               </select>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-medium">
+              <label htmlFor="produit-ville" className="mb-2 block text-sm font-medium">
                 Ville *
               </label>
               <select
+                id="produit-ville"
                 value={form.ville}
                 onChange={(e) => setForm({ ...form, ville: e.target.value })}
                 className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"

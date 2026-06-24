@@ -201,10 +201,12 @@ function SelectVille({
 }) {
   return (
     <div>
-      <label className="mb-1 block text-xs font-medium text-muted-foreground">
+      <label htmlFor={`ville-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`} className="mb-1 block text-xs font-medium text-muted-foreground">
         {label}
       </label>
       <select
+        id={`ville-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
+        name={`ville-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"

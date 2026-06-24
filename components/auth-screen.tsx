@@ -320,10 +320,13 @@ function Field({
   error?: string
 }) {
   const invalid = showValidity && valid === false
+  const fieldId = `field-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
   return (
     <div>
-      <label className="mb-1.5 block text-sm font-medium">{label}</label>
+      <label htmlFor={fieldId} className="mb-1.5 block text-sm font-medium">{label}</label>
       <input
+        id={fieldId}
+        name={fieldId}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -103,10 +103,11 @@ export function Feedback() {
                 ) : (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <input value={bugForm.nom} onChange={(e) => setBugForm({ ...bugForm, nom: e.target.value })} placeholder="Nom (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
-                      <input type="email" value={bugForm.email} onChange={(e) => setBugForm({ ...bugForm, email: e.target.value })} placeholder="Email (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+                      <input name="nom" value={bugForm.nom} onChange={(e) => setBugForm({ ...bugForm, nom: e.target.value })} placeholder="Nom (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
+                      <input type="email" name="email" value={bugForm.email} onChange={(e) => setBugForm({ ...bugForm, email: e.target.value })} placeholder="Email (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-red-400 focus:ring-2 focus:ring-red-100" />
                     </div>
                     <textarea
+                      name="message"
                       value={bugForm.message}
                       onChange={(e) => setBugForm({ ...bugForm, message: e.target.value })}
                       placeholder="Que s'est-il passé ? Sur quelle page ? Quel appareil ?"
@@ -160,10 +161,11 @@ export function Feedback() {
                 ) : (
                   <div className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <input value={sugForm.nom} onChange={(e) => setSugForm({ ...sugForm, nom: e.target.value })} placeholder="Nom (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20" />
-                      <input type="email" value={sugForm.email} onChange={(e) => setSugForm({ ...sugForm, email: e.target.value })} placeholder="Email (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20" />
+                      <input name="nom" value={sugForm.nom} onChange={(e) => setSugForm({ ...sugForm, nom: e.target.value })} placeholder="Nom (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20" />
+                      <input type="email" name="email" value={sugForm.email} onChange={(e) => setSugForm({ ...sugForm, email: e.target.value })} placeholder="Email (optionnel)" className="rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20" />
                     </div>
                     <textarea
+                      name="message"
                       value={sugForm.message}
                       onChange={(e) => setSugForm({ ...sugForm, message: e.target.value })}
                       placeholder="Quelle fonctionnalité aimeriez-vous voir ? Comment améliorerait-elle votre expérience ?"

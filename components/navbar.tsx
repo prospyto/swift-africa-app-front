@@ -113,6 +113,7 @@ export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: Nav
             <select
               value={activeRole}
               onChange={(e) => setMode(e.target.value as typeof activeRole)}
+              aria-label="Changer de rôle actif"
               className="glass hidden rounded-xl border-0 bg-transparent px-3 py-1.5 text-xs font-semibold capitalize text-foreground outline-none sm:block"
             >
               {availableRoles.map((r) => (

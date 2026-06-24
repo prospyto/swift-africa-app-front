@@ -151,6 +151,7 @@ export function ChatCommande({ commandeId, onClose }: ChatProps) {
           </div>
           <button
             onClick={onClose}
+            aria-label="Fermer"
             className="flex size-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-secondary hover:text-foreground"
           >
             <X className="size-4" />
