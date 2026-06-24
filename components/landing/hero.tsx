@@ -59,7 +59,7 @@ export function Hero() {
       )}
 
       {/* ── PAGE PRINCIPALE ── */}
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
+      <section className="relative flex h-screen flex-col items-center justify-center overflow-hidden px-4 text-center">
 
         {/* Fond hero */}
         <div className="absolute inset-0 z-0 overflow-hidden">
@@ -97,7 +97,7 @@ export function Hero() {
           </video>
 
           {/* Voile sombre pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-black/55" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/50 to-black/70" />
         </div>
 
         {/* Logo */}
@@ -120,7 +120,7 @@ export function Hero() {
         {/* Mots animés */}
         <h1 className="relative z-10 mb-8 flex flex-col items-center gap-1">
           {WORDS.map((word, wi) => (
-            <span key={wi} className="block text-6xl font-black tracking-tight text-white md:text-8xl lg:text-9xl">
+            <span key={wi} className="block text-7xl font-black tracking-tight text-white drop-shadow-lg md:text-9xl lg:text-[10rem]">
               {word.split('').map((letter, li) => {
                 const o = offsets[wi][li]
                 return (

@@ -63,11 +63,14 @@ export function FAQ() {
           {FAQS.map((faq, i) => (
             <div
               key={i}
-              className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+              className="overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300"
               style={{
                 opacity: visible ? 1 : 0,
                 transform: visible ? 'translateY(0)' : 'translateY(20px)',
-                transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`,
+                transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s, outline 0.3s ease, border-color 0.3s ease`,
+                borderColor: open === i ? '#ff6b00' : '#f3f4f6',
+                outline: open === i ? '3px solid #ff6b0030' : '3px solid transparent',
+                outlineOffset: '2px',
               }}
             >
               <button

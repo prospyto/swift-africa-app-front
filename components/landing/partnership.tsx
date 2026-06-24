@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { TrendingUp, Send, CheckCircle2, ChevronDown } from 'lucide-react'
+import { TrendingUp, Send, CheckCircle2, ChevronDown, Handshake } from 'lucide-react'
 
 const EMAIL = 'swiftafrica@gmail.com'
 
@@ -47,8 +47,9 @@ export function Partnership() {
             transition: 'opacity 0.6s ease, transform 0.6s ease',
           }}
         >
-          <span className="mb-3 inline-block rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
-            💼 Partenariat
+          <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
+            <Handshake className="size-4" />
+            Partenariat
           </span>
           <h2 className="mb-4 text-4xl font-black tracking-tight md:text-5xl">
             Investissez dans<br />

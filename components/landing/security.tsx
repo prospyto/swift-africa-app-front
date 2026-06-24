@@ -54,8 +54,9 @@ export function Security() {
             transition: 'opacity 0.6s ease, transform 0.6s ease',
           }}
         >
-          <span className="mb-3 inline-block rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
-            🔒 Sécurité
+          <span className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-[#ff6b00]/10 px-4 py-1.5 text-sm font-semibold text-[#ff6b00]">
+            <ShieldCheck className="size-4" />
+            Sécurité
           </span>
           <h2 className="mb-4 text-4xl font-black tracking-tight md:text-5xl">
             Votre argent ne bouge pas<br />
@@ -89,19 +90,8 @@ export function Security() {
                   </div>
                 </div>
 
-                {/* Icône centrale */}
-                <div
-                  className="relative z-10 flex size-16 shrink-0 items-center justify-center rounded-full shadow-lg"
-                  style={{ backgroundColor: `${step.color}20`, border: `2px solid ${step.color}40` }}
-                >
-                  <step.icon className="size-7" style={{ color: step.color }} />
-                  <div
-                    className="absolute -right-1 -top-1 flex size-6 items-center justify-center rounded-full text-xs font-bold text-white"
-                    style={{ backgroundColor: step.color }}
-                  >
-                    {i + 1}
-                  </div>
-                </div>
+                {/* Icône centrale — animée au survol/clic, même logique que les badges rôles */}
+                <SecurityBadge step={step} number={i + 1} />
 
                 <div className="flex-1 hidden md:block" />
               </div>
@@ -129,7 +119,7 @@ export function Security() {
   )
 }
 
-function SecurityBadge({ step, number }: { step: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>; color: string; title: string }; number: number }) {
+function SecurityBadge({ step, number }: { step: { icon: React.ComponentType<{ className?: string; style?: React.CSSProperties; strokeWidth?: number }>; color: string; title: string }; number: number }) {
   const [active, setActive] = useState(false)
   return (
     <div
