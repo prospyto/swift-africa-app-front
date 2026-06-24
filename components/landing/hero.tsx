@@ -65,15 +65,21 @@ export function Hero() {
       {/* ── PAGE PRINCIPALE ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
 
-        {/* Fond hero — image plein écran */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="/hero-livreur.png"
-            alt=""
+        {/* Fond hero — vidéo plein écran */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
             className="absolute inset-0 h-full w-full object-cover object-center"
-          />
+            style={{ willChange: 'transform' }}
+          >
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
           {/* Voile sombre pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/55" />
         </div>
 
         {/* Logo */}

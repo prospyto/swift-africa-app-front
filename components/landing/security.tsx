@@ -133,21 +133,28 @@ function SecurityBadge({ step, number }: { step: { icon: React.ComponentType<{ c
   const [active, setActive] = useState(false)
   return (
     <div
-      className="relative z-10 flex size-20 shrink-0 cursor-pointer items-center justify-center rounded-full shadow-xl transition-all duration-300"
+      className="relative z-10 flex size-20 shrink-0 cursor-pointer items-center justify-center rounded-full transition-all duration-300"
       style={{
         backgroundColor: `${step.color}20`,
-        border: `3px solid ${step.color}60`,
+        border: `3px solid ${step.color}`,
         outline: active ? `4px solid ${step.color}` : '4px solid transparent',
         outlineOffset: '4px',
         transform: active ? 'scale(1.18) rotate(10deg)' : 'scale(1) rotate(0deg)',
-        boxShadow: active ? `0 0 30px 8px ${step.color}30` : '',
+        boxShadow: active
+          ? `0 0 35px 10px ${step.color}40, 0 0 0 0 ${step.color}`
+          : `0 8px 24px -4px ${step.color}50`,
       }}
       onMouseEnter={() => setActive(true)}
       onMouseLeave={() => setActive(false)}
       onTouchStart={() => setActive(true)}
       onTouchEnd={() => setTimeout(() => setActive(false), 400)}
     >
-      <step.icon className="size-9 transition-transform duration-300" style={{ color: step.color }} strokeWidth={1.5} />
+      {/* Anneau animé permanent */}
+      <div
+        className="absolute inset-0 rounded-full animate-ping opacity-20"
+        style={{ backgroundColor: step.color }}
+      />
+      <step.icon className="relative z-10 size-9 transition-transform duration-300" style={{ color: step.color }} strokeWidth={1.5} />
       <div
         className="absolute -right-1 -top-1 flex size-7 items-center justify-center rounded-full text-xs font-black text-white shadow-md"
         style={{ backgroundColor: step.color }}
