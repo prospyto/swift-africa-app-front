@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo, useRef } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Truck, LogIn } from 'lucide-react'
 import Link from 'next/link'
 
@@ -28,7 +28,6 @@ export function Hero() {
   const [subtitleVisible, setSubtitleVisible] = useState(false)
   const [ctaVisible, setCtaVisible] = useState(false)
   const [videoLoaded, setVideoLoaded] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
 
   const offsets = useLetterOffsets(WORDS)
 
@@ -39,13 +38,6 @@ export function Hero() {
     setTimeout(() => setSubtitleVisible(true), 2600)
     setTimeout(() => setCtaVisible(true), 2900)
   }, [])
-
-  // Charger la vidéo seulement après le splash (connexions lentes)
-  useEffect(() => {
-    if (splashDone && videoRef.current) {
-      videoRef.current.load()
-    }
-  }, [splashDone])
 
   return (
     <>
@@ -69,32 +61,38 @@ export function Hero() {
       {/* ── PAGE PRINCIPALE ── */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-20 text-center">
 
-        {/* Fond hero — fallback dégradé visible immédiatement */}
+        {/* Fond hero */}
         <div className="absolute inset-0 z-0 overflow-hidden">
 
-          {/* Fallback dégradé — toujours présent, masqué dès que la vidéo est prête */}
+          {/* Dégradé visible immédiatement — fallback si vidéo lente ou absente */}
           <div
-            className="absolute inset-0 transition-opacity duration-700"
+            className="absolute inset-0 transition-opacity duration-1000"
             style={{
               background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a1a2e 100%)',
               opacity: videoLoaded ? 0 : 1,
             }}
           />
+          {/* Cercles décoratifs visibles pendant le chargement */}
+          <div
+            className="absolute -top-32 -right-32 size-[600px] rounded-full"
+            style={{
+              background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)',
+              opacity: videoLoaded ? 0 : 0.2,
+              transition: 'opacity 1s ease',
+            }}
+          />
 
-          {/* Vidéo — chargée après le splash, fade-in dès qu'elle est prête */}
+          {/* Vidéo — se charge en arrière-plan, apparaît en fondu quand prête */}
           <video
-            ref={videoRef}
             autoPlay
             loop
             muted
             playsInline
             preload="none"
-            onCanPlayThrough={() => setVideoLoaded(true)}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
+            onCanPlay={() => setVideoLoaded(true)}
+            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000"
             style={{ opacity: videoLoaded ? 1 : 0 }}
           >
-            {/* WebM en priorité (2-3× plus léger que mp4) */}
-            <source src="/hero-video.webm" type="video/webm" />
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
 
