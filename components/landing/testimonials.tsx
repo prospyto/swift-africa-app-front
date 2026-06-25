@@ -131,7 +131,7 @@ export function Testimonials() {
               >
                 {/* Guillemet décoratif */}
                 <Quote
-                  className="absolute right-5 top-5 size-8 opacity-8 transition-opacity duration-300 group-hover:opacity-15"
+                  className="absolute right-5 top-5 size-8 opacity-[0.08] transition-opacity duration-300 group-hover:opacity-15"
                   style={{ color: t.color }}
                 />
 
@@ -199,3 +199,4 @@ export function Testimonials() {
     </section>
   )
 }
+
