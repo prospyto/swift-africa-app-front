@@ -17,11 +17,11 @@ export default function LandingPage() {
       {/* 1. ATTENTION — Accroche */}
       <Hero />
 
-      {/* 2. INTÉRÊT — Comprendre pour chaque acteur */}
-      <HowItWorks />
-
-      {/* 3. DÉSIR — S'identifier */}
+      {/* 2. DÉSIR — S'identifier */}
       <div id="roles"><Roles /></div>
+
+      {/* 3. INTÉRÊT — Comprendre pour chaque acteur */}
+      <HowItWorks />
 
       {/* 4. INTÉRÊT — Voir les produits */}
       <CatalogPreview />
@@ -52,3 +52,4 @@ export default function LandingPage() {
     </main>
   )
 }
+
