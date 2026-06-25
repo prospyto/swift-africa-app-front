@@ -207,27 +207,9 @@ export function HowItWorks() {
             </div>
           ))}
         </div>
-
-        {/* Badge résumé en bas */}
-        <div
-          className="mt-10 flex justify-center"
-          style={{
-            opacity: visible ? 1 : 0,
-            transition: 'opacity 0.6s ease 0.5s',
-          }}
-        >
-          <div
-            className="inline-flex items-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-white"
-            style={{ backgroundColor: tab.color }}
-          >
-            <BadgeCheck className="size-4" />
-            {activeTab === 0 && 'Commandez sans risque — remboursé si pas livré'}
-            {activeTab === 1 && 'Vendez sans crainte — paiement garanti à chaque livraison'}
-            {activeTab === 2 && 'Livrez à votre rythme — payé immédiatement après chaque mission'}
-          </div>
-        </div>
       </div>
     </section>
   )
 }
+
 
