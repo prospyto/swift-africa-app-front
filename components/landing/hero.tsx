@@ -166,8 +166,8 @@ export function Hero() {
               transition: 'opacity 0.6s ease, transform 0.6s ease',
             }}
           >
-            La plateforme de commerce sécurisé pour l'Afrique de l'Ouest.
-            Paiement bloqué jusqu'à la livraison. Zéro arnaque.
+            Commandez, vendez ou livrez — votre argent est protégé à chaque étape.
+            Zéro arnaque. Zéro risque. Paiement libéré seulement à la livraison.
           </p>
 
           {/* CTA — toujours visibles */}
@@ -215,3 +215,4 @@ export function Hero() {
     </>
   )
 }
+
