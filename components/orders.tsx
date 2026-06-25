@@ -107,10 +107,9 @@ export function Orders({
 }
 
 function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; activeRole: Role; onOpenMessages: () => void }) {
-  const { fundOrder, confirmOtp, decaisserOrder, rateOrder } = useApp()
+  const { fundOrder, confirmOtp, rateOrder } = useApp()
   const [code, setCode] = useState('')
   const [otpError, setOtpError] = useState(false)
-  const [decaissing, setDecaissing] = useState(false)
   const [funding, setFunding] = useState(false)
   const [fundError, setFundError] = useState<string | null>(null)
   const rank = ORDER_RANK[order.statut]
@@ -131,15 +130,6 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
       )
     } finally {
       setFunding(false)
-    }
-  }
-
-  async function handleDecaisser() {
-    setDecaissing(true)
-    try {
-      await decaisserOrder(order.id)
-    } finally {
-      setDecaissing(false)
     }
   }
 
@@ -262,24 +252,6 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
         </div>
       )}
 
-      {/* Décaisser vendeur */}
-      {order.statut === 'livre' && activeRole === 'vendeur' && (
-        <div className="mt-4 flex items-center gap-2 rounded-2xl bg-success/10 p-4 text-success">
-          <ShieldCheck className="size-5 shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold">Livraison confirmée !</p>
-            <p className="text-xs opacity-80">Vous pouvez décaisser les fonds.</p>
-          </div>
-          <Button
-            onClick={handleDecaisser}
-            disabled={decaissing}
-            className="glass-cta rounded-xl bg-success px-5 font-semibold text-success-foreground hover:bg-success/90"
-          >
-            {decaissing ? 'En cours…' : 'Décaisser'}
-          </Button>
-        </div>
-      )}
-
       {/* Vue lecture pour les rôles non concernés par l'action en cours */}
       {order.statut === 'finance' && activeRole !== 'acheteur' && (
         <div className="mt-4 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
@@ -289,11 +261,6 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
       {order.statut === 'en_livraison' && activeRole !== 'livreur' && (
         <div className="mt-4 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
           Livraison en cours.
-        </div>
-      )}
-      {order.statut === 'livre' && activeRole !== 'acheteur' && (
-        <div className="mt-4 rounded-2xl bg-success/10 p-4 text-sm text-success">
-          Livraison confirmée, en attente de décaissement par l&apos;acheteur.
         </div>
       )}
 
