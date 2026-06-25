@@ -6,7 +6,7 @@ import { Gift, ShieldCheck, Globe, Zap } from 'lucide-react'
 const STATS = [
   { target: 0,   suffix: '',     label: "Frais d'inscription",      display: 'Gratuit', color: '#ff6b00', icon: Gift },
   { target: 100, suffix: '%',    label: 'Livraisons sécurisées OTP', color: '#10b981', icon: ShieldCheck },
-  { target: 3,   suffix: ' pays',label: 'Au lancement',             color: '#3b82f6', icon: Globe },
+  { target: 15,  suffix: ' pays CEDEAO',label: 'Au lancement',             color: '#3b82f6', icon: Globe },
   { target: 60,  suffix: 's',    label: 'Pour passer une commande', color: '#8b5cf6', icon: Zap },
 ]
 
@@ -104,3 +104,4 @@ export function Stats() {
     </section>
   )
 }
+
