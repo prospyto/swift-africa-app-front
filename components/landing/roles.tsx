@@ -31,7 +31,7 @@ const ROLES = [
       'Boutique en ligne gratuite',
       'Paiement garanti à la livraison',
       'Gestion des commandes simple',
-      'Zéro commission les 3 premiers mois',
+      '0% de commission les 2 premiers mois',
     ],
     cta: 'Je veux vendre',
     featured: true,
@@ -204,3 +204,4 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
     </div>
   )
 }
+
