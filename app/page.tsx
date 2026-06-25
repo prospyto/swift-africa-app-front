@@ -4,6 +4,7 @@ import { Roles } from '@/components/landing/roles'
 import { CatalogPreview } from '@/components/landing/catalog-preview'
 import { Security } from '@/components/landing/security'
 import { Stats } from '@/components/landing/stats'
+import { Testimonials } from '@/components/landing/testimonials'
 import { Roadmap } from '@/components/landing/roadmap'
 import { Partnership } from '@/components/landing/partnership'
 import { FAQ } from '@/components/landing/faq'
@@ -16,7 +17,7 @@ export default function LandingPage() {
       {/* 1. ATTENTION — Accroche */}
       <Hero />
 
-      {/* 2. INTÉRÊT — Comprendre d'abord */}
+      {/* 2. INTÉRÊT — Comprendre pour chaque acteur */}
       <HowItWorks />
 
       {/* 3. DÉSIR — S'identifier */}
@@ -25,25 +26,28 @@ export default function LandingPage() {
       {/* 4. INTÉRÊT — Voir les produits */}
       <CatalogPreview />
 
-      {/* 5. CONFIANCE — Être rassuré */}
+      {/* 5. CONFIANCE — Sécurité pour tous */}
       <Security />
 
       {/* 6. CRÉDIBILITÉ — Chiffres */}
       <Stats />
 
-      {/* 7. VISION — Ce qui arrive bientôt (investisseur) */}
+      {/* 7. PREUVE SOCIALE — Témoignages */}
+      <Testimonials />
+
+      {/* 8. VISION — Ce qui arrive bientôt */}
       <div id="roadmap"><Roadmap /></div>
 
-      {/* 8. ACTION — Investir */}
+      {/* 9. ACTION — Investir */}
       <div id="partenariat"><Partnership /></div>
 
-      {/* 9. LEVER LES FREINS */}
+      {/* 10. LEVER LES FREINS */}
       <div id="faq"><FAQ /></div>
 
-      {/* 10. ENGAGEMENT */}
+      {/* 11. ENGAGEMENT */}
       <div id="feedback"><Feedback /></div>
 
-      {/* 11. FOOTER */}
+      {/* 12. FOOTER */}
       <Footer />
     </main>
   )
