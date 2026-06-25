@@ -88,7 +88,7 @@ export function Footer() {
         <div className="border-t border-white/10 pt-8">
           <div className="flex flex-col items-center gap-3 text-center md:flex-row md:justify-between">
             <p className="text-sm text-gray-500">
-              © 2026 Swift Africa — Fondée par Yan Youn. Tous droits réservés.
+              © 2026 Swift Africa — Fondée par Prospère Azonglahoun. Tous droits réservés.
             </p>
             <p className="flex items-center gap-1.5 text-xs text-gray-600">
               <Lock className="size-3.5" />
@@ -100,4 +100,5 @@ export function Footer() {
     </footer>
   )
 }
+
 
