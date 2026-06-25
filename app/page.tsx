@@ -1,5 +1,4 @@
 import { Navbar } from '@/components/landing/navbar'
-import { FloatingCTA } from '@/components/landing/floating-cta'
 import { Hero } from '@/components/landing/hero'
 import { Roles } from '@/components/landing/roles'
 import { HowItWorks } from '@/components/landing/how-it-works'
@@ -18,9 +17,6 @@ export default function LandingPage() {
     <main className="min-h-screen bg-white text-gray-900">
       {/* Navbar fixe */}
       <Navbar />
-
-      {/* CTA flottant mobile */}
-      <FloatingCTA />
 
       {/* 1. ATTENTION — Accroche */}
       <Hero />
@@ -60,3 +56,4 @@ export default function LandingPage() {
     </main>
   )
 }
+
