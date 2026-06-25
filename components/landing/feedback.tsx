@@ -54,10 +54,10 @@ export function Feedback() {
             Votre avis compte
           </span>
           <h2 className="mb-3 text-4xl font-black tracking-tight md:text-5xl">
-            Aidez-nous à améliorer<br />Swift Africa
+            Une idée pour améliorer<br />Swift Africa ?
           </h2>
           <p className="text-gray-600">
-            Chaque retour nous aide à construire une meilleure plateforme pour toute l'Afrique de l'Ouest.
+            Partagez vos suggestions — chaque idée compte pour construire la meilleure plateforme d'Afrique de l'Ouest.
           </p>
         </div>
 
@@ -69,8 +69,8 @@ export function Feedback() {
             transition: 'opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s',
           }}
         >
-          {/* ── BLOC BUG ── */}
-          <div className="overflow-hidden rounded-3xl border-2 border-red-100 bg-white shadow-sm">
+          {/* ── BLOC BUG — masqué en prod ── */}
+          <div className="hidden overflow-hidden rounded-3xl border-2 border-red-100 bg-white shadow-sm">
             {/* Bouton */}
             <button
               onClick={() => setShowBug((v) => !v)}
@@ -189,3 +189,4 @@ export function Feedback() {
     </section>
   )
 }
+
