@@ -58,13 +58,12 @@ export function Hero() {
         </div>
       )}
 
-      {/* ── PAGE PRINCIPALE ── */}
-      <section className="relative flex h-screen flex-col items-center justify-center overflow-y-auto px-4 py-8 text-center">
+      {/* ── PAGE PRINCIPALE — h-screen strict, tout tient dans l'écran ── */}
+      <section className="relative h-screen w-full overflow-hidden">
 
-        {/* Fond hero — overflow-hidden ici uniquement, pour contenir la vidéo */}
-        <div className="absolute inset-0 z-0 overflow-hidden">
-
-          {/* Dégradé visible immédiatement — fallback si vidéo lente ou absente */}
+        {/* ── FOND VIDÉO ── */}
+        <div className="absolute inset-0 z-0">
+          {/* Dégradé fallback */}
           <div
             className="absolute inset-0 transition-opacity duration-1000"
             style={{
@@ -72,17 +71,15 @@ export function Hero() {
               opacity: videoLoaded ? 0 : 1,
             }}
           />
-          {/* Cercles décoratifs visibles pendant le chargement */}
           <div
-            className="absolute -top-32 -right-32 size-[600px] rounded-full"
+            className="absolute -right-32 -top-32 size-[600px] rounded-full"
             style={{
               background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)',
               opacity: videoLoaded ? 0 : 0.2,
               transition: 'opacity 1s ease',
             }}
           />
-
-          {/* Vidéo — se charge en arrière-plan, apparaît en fondu quand prête */}
+          {/* Vidéo en fond — object-cover remplit sans déborder */}
           <video
             autoPlay
             loop
@@ -95,108 +92,123 @@ export function Hero() {
           >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
-
-          {/* Voile sombre pour lisibilité du texte */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/50 to-black/70" />
+          {/* Voile dégradé — plus sombre en bas pour les boutons */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/70" />
         </div>
 
-        {/* Logo */}
-        <div
-          className="relative z-10 mb-10 flex items-center gap-3"
-          style={{
-            opacity: logoVisible ? 1 : 0,
-            transform: logoVisible ? 'translateY(0) scale(1)' : 'translateY(-30px) scale(0.8)',
-            transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
-          }}
-        >
-          <div className="flex size-16 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-[#ff6b00]/30">
-            <span className="animate-truck-roll inline-block">
-              <Truck className="size-9" />
+        {/* ── CONTENU — centré verticalement dans h-screen ── */}
+        <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
+
+          {/* Logo */}
+          <div
+            className="mb-5 flex items-center gap-3"
+            style={{
+              opacity: logoVisible ? 1 : 0,
+              transform: logoVisible ? 'translateY(0) scale(1)' : 'translateY(-20px) scale(0.85)',
+              transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+          >
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-[#ff6b00]/30 md:size-14">
+              <span className="animate-truck-roll inline-block">
+                <Truck className="size-7 md:size-8" />
+              </span>
+            </div>
+            <span
+              className="text-2xl font-bold tracking-tight text-white md:text-3xl"
+              style={{ textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+            >
+              Swift Africa
             </span>
           </div>
-          <span className="text-3xl font-bold tracking-tight text-white">Swift Africa</span>
+
+          {/* Mots animés — taille adaptative qui tient dans l'écran */}
+          <h1 className="mb-4 flex flex-col items-center gap-0">
+            {WORDS.map((word, wi) => (
+              <span
+                key={wi}
+                className="block font-black tracking-tight text-white"
+                style={{
+                  fontSize: 'clamp(2.8rem, 9vw, 6.5rem)',
+                  lineHeight: 1.0,
+                  textShadow: '0 4px 24px rgba(0,0,0,0.5)',
+                }}
+              >
+                {word.split('').map((letter, li) => {
+                  const o = offsets[wi][li]
+                  return (
+                    <span
+                      key={li}
+                      className={wordsVisible ? 'animate-letter inline-block' : 'inline-block opacity-0'}
+                      style={
+                        {
+                          '--px': o.px,
+                          '--py': o.py,
+                          '--pr': o.pr,
+                          animationDelay: o.delay,
+                        } as React.CSSProperties
+                      }
+                    >
+                      {letter}
+                    </span>
+                  )
+                })}
+              </span>
+            ))}
+          </h1>
+
+          {/* Sous-titre */}
+          <p
+            className="mb-6 max-w-lg text-base font-semibold text-white/90 md:text-lg"
+            style={{
+              textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+              opacity: subtitleVisible ? 1 : 0,
+              transform: subtitleVisible ? 'translateY(0)' : 'translateY(16px)',
+              transition: 'opacity 0.6s ease, transform 0.6s ease',
+            }}
+          >
+            La plateforme de commerce sécurisé pour l'Afrique de l'Ouest.
+            Paiement bloqué jusqu'à la livraison. Zéro arnaque.
+          </p>
+
+          {/* CTA — toujours visibles */}
+          <div
+            className="flex flex-col items-center gap-3 sm:flex-row"
+            style={{
+              opacity: ctaVisible ? 1 : 0,
+              transform: ctaVisible ? 'translateY(0)' : 'translateY(16px)',
+              transition: 'opacity 0.6s ease, transform 0.6s ease',
+            }}
+          >
+            <Link
+              href="/app"
+              className="scanner-btn relative flex items-center gap-2 overflow-hidden rounded-2xl bg-[#ff6b00] px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-[#ff6b00]/40 transition-all hover:scale-105 hover:bg-[#e55f00] md:px-8 md:py-4 md:text-lg"
+            >
+              <span className="relative z-10">Commencer maintenant →</span>
+            </Link>
+
+            <Link
+              href="/app"
+              className="scanner-btn-dark relative flex items-center gap-2 overflow-hidden rounded-2xl border-2 border-white/50 px-7 py-3.5 text-base font-semibold text-white backdrop-blur-sm transition-all hover:border-[#ff6b00] hover:text-[#ff6b00] md:px-8 md:py-4 md:text-lg"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <LogIn className="size-4 md:size-5" />
+                Se connecter
+              </span>
+            </Link>
+          </div>
         </div>
 
-        {/* Mots animés */}
-        <h1 className="relative z-10 mb-8 flex flex-col items-center gap-1">
-          {WORDS.map((word, wi) => (
-            <span key={wi} className="block text-6xl font-black tracking-tight text-white drop-shadow-lg md:text-8xl lg:text-9xl">
-              {word.split('').map((letter, li) => {
-                const o = offsets[wi][li]
-                return (
-                  <span
-                    key={li}
-                    className={wordsVisible ? 'animate-letter inline-block' : 'inline-block opacity-0'}
-                    style={
-                      {
-                        '--px': o.px,
-                        '--py': o.py,
-                        '--pr': o.pr,
-                        animationDelay: o.delay,
-                      } as React.CSSProperties
-                    }
-                  >
-                    {letter}
-                  </span>
-                )
-              })}
-            </span>
-          ))}
-        </h1>
-
-        {/* Sous-titre */}
-        <p
-          className="relative z-10 mb-10 max-w-xl text-lg text-white/90 md:text-xl"
-          style={{
-            opacity: subtitleVisible ? 1 : 0,
-            transform: subtitleVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
-          }}
-        >
-          La plateforme de commerce sécurisé pour l'Afrique de l'Ouest.
-          Paiement bloqué jusqu'à la livraison. Zéro arnaque.
-        </p>
-
-        {/* CTA */}
+        {/* Scroll indicator — collé en bas */}
         <div
-          className="relative z-10 flex flex-col items-center gap-4 sm:flex-row"
+          className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2"
           style={{
             opacity: ctaVisible ? 1 : 0,
-            transform: ctaVisible ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 0.6s ease, transform 0.6s ease',
+            transition: 'opacity 0.6s ease 0.4s',
           }}
         >
-          <Link
-            href="/app"
-            className="scanner-btn relative flex items-center gap-3 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-lg font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition-all hover:scale-105 hover:bg-[#e55f00]"
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              Commencer maintenant →
-            </span>
-          </Link>
-
-          <Link
-            href="/app"
-            className="scanner-btn-dark relative flex items-center gap-2 overflow-hidden rounded-2xl border-2 border-white/40 px-8 py-4 text-lg font-semibold text-white transition-all hover:border-[#ff6b00] hover:text-[#ff6b00]"
-          >
-            <span className="relative z-10 flex items-center gap-2">
-              <LogIn className="size-5" />
-              Se connecter
-            </span>
-          </Link>
-        </div>
-
-        {/* Scroll indicator */}
-        <div
-          className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2"
-          style={{
-            opacity: ctaVisible ? 1 : 0,
-            transition: 'opacity 0.6s ease 0.3s',
-          }}
-        >
-          <div className="flex flex-col items-center gap-1 text-xs text-white/70">
+          <div className="flex flex-col items-center gap-1 text-xs text-white/60">
             <span>Découvrir</span>
-            <div className="h-6 w-0.5 animate-bounce rounded-full bg-white/40" />
+            <div className="h-5 w-0.5 animate-bounce rounded-full bg-white/40" />
           </div>
         </div>
       </section>
