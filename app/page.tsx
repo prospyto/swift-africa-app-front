@@ -1,6 +1,8 @@
+import { Navbar } from '@/components/landing/navbar'
+import { FloatingCTA } from '@/components/landing/floating-cta'
 import { Hero } from '@/components/landing/hero'
-import { HowItWorks } from '@/components/landing/how-it-works'
 import { Roles } from '@/components/landing/roles'
+import { HowItWorks } from '@/components/landing/how-it-works'
 import { CatalogPreview } from '@/components/landing/catalog-preview'
 import { Security } from '@/components/landing/security'
 import { Stats } from '@/components/landing/stats'
@@ -14,6 +16,12 @@ import { Footer } from '@/components/landing/footer'
 export default function LandingPage() {
   return (
     <main className="min-h-screen bg-white text-gray-900">
+      {/* Navbar fixe */}
+      <Navbar />
+
+      {/* CTA flottant mobile */}
+      <FloatingCTA />
+
       {/* 1. ATTENTION — Accroche */}
       <Hero />
 
@@ -21,13 +29,13 @@ export default function LandingPage() {
       <div id="roles"><Roles /></div>
 
       {/* 3. INTÉRÊT — Comprendre pour chaque acteur */}
-      <HowItWorks />
+      <div id="how"><HowItWorks /></div>
 
       {/* 4. INTÉRÊT — Voir les produits */}
       <CatalogPreview />
 
       {/* 5. CONFIANCE — Sécurité pour tous */}
-      <Security />
+      <div id="security"><Security /></div>
 
       {/* 6. CRÉDIBILITÉ — Chiffres */}
       <Stats />
@@ -44,7 +52,7 @@ export default function LandingPage() {
       {/* 10. LEVER LES FREINS */}
       <div id="faq"><FAQ /></div>
 
-      {/* 11. ENGAGEMENT */}
+      {/* 11. SUGGESTION */}
       <div id="feedback"><Feedback /></div>
 
       {/* 12. FOOTER */}
@@ -52,4 +60,3 @@ export default function LandingPage() {
     </main>
   )
 }
-
