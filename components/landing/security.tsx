@@ -141,7 +141,12 @@ export function Security() {
                   }}
                 >
                   <div className={`flex-1 ${i % 2 === 1 ? 'md:text-right' : ''}`}>
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+                    <div
+                      className="rounded-2xl border-2 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+                      style={{ borderColor: 'transparent' }}
+                      onMouseEnter={(e) => (e.currentTarget.style.borderColor = `${step.color}50`)}
+                      onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
+                    >
                       {/* Badge acteur concerné */}
                       <div className={`mb-3 flex items-center gap-1.5 ${i % 2 === 1 ? 'md:justify-end' : ''}`}>
                         <div

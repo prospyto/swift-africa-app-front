@@ -174,7 +174,12 @@ export function HowItWorks() {
                 transition: `opacity 0.5s ease ${i * 0.12}s, transform 0.5s ease ${i * 0.12}s`,
               }}
             >
-              <div className="group relative rounded-3xl border border-gray-100 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+              <div
+                className="group relative rounded-3xl border-2 bg-white p-8 shadow-sm transition-all duration-300 hover:-translate-y-2 hover:shadow-xl"
+                style={{ borderColor: 'transparent' }}
+                onMouseEnter={(e) => (e.currentTarget.style.borderColor = `${step.color}50`)}
+                onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'transparent')}
+              >
                 {/* Numéro discret */}
                 <span className="absolute right-6 top-6 text-6xl font-black text-gray-100">
                   {step.number}

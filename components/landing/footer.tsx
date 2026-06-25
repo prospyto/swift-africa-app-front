@@ -1,11 +1,11 @@
-import { Truck, MessageCircle, Phone, Mail } from 'lucide-react'
+import { Truck, MessageCircle, Phone, Mail, Globe, Lock } from 'lucide-react'
 import Link from 'next/link'
 
 const WHATSAPP = '2290190685684'
 const PHONE = '+22901906856 84'
 const EMAIL = 'swiftafrica@gmail.com'
 
-const PAYS = ['🇧🇯 Bénin', '🇨🇮 Côte d\'Ivoire', '🇸🇳 Sénégal', '🇲🇱 Mali', '🇹🇬 Togo', '🇳🇪 Niger']
+const PAYS = ['Bénin', 'Côte d\'Ivoire', 'Sénégal', 'Mali', 'Togo', 'Niger']
 
 export function Footer() {
   return (
@@ -67,7 +67,10 @@ export function Footer() {
 
           {/* Pays */}
           <div>
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-gray-400">🌍 Zones couvertes</h3>
+            <h3 className="mb-4 flex items-center gap-1.5 text-sm font-bold uppercase tracking-widest text-gray-400">
+              <Globe className="size-4" />
+              Zones couvertes
+            </h3>
             <ul className="space-y-2 text-sm text-gray-300">
               {PAYS.map((pays, i) => (
                 <li key={i} className="flex items-center gap-2">
@@ -87,8 +90,9 @@ export function Footer() {
             <p className="text-sm text-gray-500">
               © 2026 Swift Africa. Tous droits réservés.
             </p>
-            <p className="text-xs text-gray-600">
-              🔒 Plateforme sécurisée par système Escrow — vos fonds sont protégés.
+            <p className="flex items-center gap-1.5 text-xs text-gray-600">
+              <Lock className="size-3.5" />
+              Plateforme sécurisée par système Escrow — vos fonds sont protégés.
             </p>
           </div>
         </div>
