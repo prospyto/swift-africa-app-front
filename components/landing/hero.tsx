@@ -98,13 +98,12 @@ export function Hero() {
 
         {/* ── CONTENU — centré verticalement dans h-screen ── */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
-        <span
-              className="text-2xl font-bold tracking-tight text-white md:text-3xl"
-              style={{ textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
-            >
-              Swift Africa
-            </span>
-          </div>
+          <span
+            className="mb-2 text-2xl font-bold tracking-tight text-white md:text-3xl"
+            style={{ textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
+          >
+            Swift Africa
+          </span>
 
           {/* Mots animés — taille adaptative qui tient dans l'écran */}
           <h1 className="mb-4 flex flex-col items-center gap-0">
