@@ -85,7 +85,7 @@ const TABS = [
       {
         icon: QrCode,
         number: '03',
-        title: 'Scannez l'OTP et soyez payé',
+        title: "Scannez l'OTP et soyez payé",
         desc: "L'acheteur vous donne son code. Vous le saisissez — votre commission tombe immédiatement dans votre wallet.",
         color: '#ff6b00',
       },
@@ -230,3 +230,4 @@ export function HowItWorks() {
     </section>
   )
 }
+
