@@ -6,7 +6,7 @@ import { ShieldCheck, KeyRound, Wallet, LockKeyhole, ShoppingBag, Store, Bike } 
 const STEPS = [
   {
     icon: LockKeyhole,
-    title: 'L'acheteur paie',
+    title: "L'acheteur paie",
     desc: "L'argent est débité et placé en sécurité sur un compte tiers. Ni le vendeur ni le livreur n'y touche.",
     color: '#3b82f6',
     who: 'Acheteur',
@@ -14,15 +14,15 @@ const STEPS = [
   },
   {
     icon: KeyRound,
-    title: 'Code OTP généré',
+    title: "Code OTP généré",
     desc: "Un code secret unique est envoyé à l'acheteur. Le vendeur prépare le colis et clique sur \"Prêt\".",
     color: '#ff6b00',
-    who: 'Acheteur + Vendeur',
+    who: "Acheteur + Vendeur",
     whoIcon: Store,
   },
   {
     icon: ShieldCheck,
-    title: 'Le livreur livre',
+    title: "Le livreur livre",
     desc: "Le livreur récupère le colis et le dépose chez l'acheteur. L'acheteur lui donne le code uniquement à la réception.",
     color: '#10b981',
     who: 'Livreur',
@@ -30,10 +30,10 @@ const STEPS = [
   },
   {
     icon: Wallet,
-    title: 'Tout le monde est payé',
+    title: "Tout le monde est payé",
     desc: "Le code validé déclenche le paiement instantané : le vendeur reçoit sa vente, le livreur sa commission. Zéro délai.",
     color: '#8b5cf6',
-    who: 'Vendeur + Livreur',
+    who: "Vendeur + Livreur",
     whoIcon: Wallet,
   },
 ]
@@ -202,3 +202,4 @@ export function Security() {
     </section>
   )
 }
+
