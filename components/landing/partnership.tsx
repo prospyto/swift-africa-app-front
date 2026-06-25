@@ -78,7 +78,7 @@ export function Partnership() {
               'Système Escrow unique en Afrique de l\'Ouest',
               'Équipe dédiée et vision long terme',
               'Retour sur investissement dès la phase de déploiement',
-              'Présence dans 6 pays au lancement',
+              'Présence dans les 15 pays CEDEAO au lancement',
             ].map((point, i) => (
               <div key={i} className="flex items-start gap-2 text-sm">
                 <span className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-white/25 text-xs font-bold">✓</span>
@@ -220,3 +220,4 @@ export function Partnership() {
     </section>
   )
 }
+
