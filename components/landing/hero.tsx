@@ -98,22 +98,7 @@ export function Hero() {
 
         {/* ── CONTENU — centré verticalement dans h-screen ── */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
-
-          {/* Logo */}
-          <div
-            className="mb-5 flex items-center gap-3"
-            style={{
-              opacity: logoVisible ? 1 : 0,
-              transform: logoVisible ? 'translateY(0) scale(1)' : 'translateY(-20px) scale(0.85)',
-              transition: 'opacity 0.6s ease, transform 0.6s cubic-bezier(0.34,1.56,0.64,1)',
-            }}
-          >
-            <div className="flex size-12 items-center justify-center rounded-2xl bg-[#ff6b00] text-white shadow-lg shadow-[#ff6b00]/30 md:size-14">
-              <span className="animate-truck-roll inline-block">
-                <Truck className="size-7 md:size-8" />
-              </span>
-            </div>
-            <span
+        <span
               className="text-2xl font-bold tracking-tight text-white md:text-3xl"
               style={{ textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
             >
@@ -215,4 +200,5 @@ export function Hero() {
     </>
   )
 }
+
 
