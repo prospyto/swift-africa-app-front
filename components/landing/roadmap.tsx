@@ -13,7 +13,7 @@ const FEATURES = [
     desc: "Notre algorithme GPS détecte automatiquement les livreurs disponibles près de vous et envoie la mission au plus proche. Zéro attente, zéro friction.",
     color: '#10b981',
     status: 'En développement',
-    statusColor: '#ff6b00',
+    statusColor: '#10b981',
   },
   {
     icon: Brain,
@@ -178,4 +178,5 @@ function FeatureCard({
     </div>
   )
 }
+
 
