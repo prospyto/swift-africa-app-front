@@ -31,7 +31,8 @@ export function Hero() {
   const offsets = useLetterOffsets(WORDS)
 
   useEffect(() => {
-    setTimeout(() => setSplashDone(true), 1800)    setTimeout(() => setWordsVisible(true), 2200)
+    setTimeout(() => setSplashDone(true), 1800)
+    setTimeout(() => setWordsVisible(true), 2200)
     setTimeout(() => setSubtitleVisible(true), 2600)
     setTimeout(() => setCtaVisible(true), 2900)
   }, [])
@@ -55,7 +56,7 @@ export function Hero() {
         </div>
       )}
 
-      {/* ── PAGE PRINCIPALE — h-screen strict, tout tient dans l'écran ── */}
+      {/* ── PAGE PRINCIPALE — h-screen strict ── */}
       <section className="relative h-screen w-full overflow-hidden">
 
         {/* ── FOND VIDÉO ── */}
@@ -76,7 +77,7 @@ export function Hero() {
               transition: 'opacity 1s ease',
             }}
           />
-          {/* Vidéo en fond — object-cover remplit sans déborder */}
+          {/* Vidéo en fond */}
           <video
             autoPlay
             loop
@@ -89,20 +90,14 @@ export function Hero() {
           >
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
-          {/* Voile dégradé — plus sombre en bas pour les boutons */}
+          {/* Voile dégradé */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/70" />
         </div>
 
-        {/* ── CONTENU — centré verticalement dans h-screen ── */}
+        {/* ── CONTENU — centré verticalement ── */}
         <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
-          <span
-            className="mb-2 text-2xl font-bold tracking-tight text-white md:text-3xl"
-            style={{ textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}
-          >
-            Swift Africa
-          </span>
 
-          {/* Mots animés — taille adaptative qui tient dans l'écran */}
+          {/* Mots animés — taille adaptative */}
           <h1 className="mb-4 flex flex-col items-center gap-0">
             {WORDS.map((word, wi) => (
               <span
@@ -179,7 +174,7 @@ export function Hero() {
           </div>
         </div>
 
-        {/* Scroll indicator — collé en bas */}
+        {/* Scroll indicator */}
         <div
           className="absolute bottom-6 left-1/2 z-10 -translate-x-1/2"
           style={{
@@ -196,8 +191,3 @@ export function Hero() {
     </>
   )
 }
-
-
-
-
-
