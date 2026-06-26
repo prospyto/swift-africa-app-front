@@ -8,7 +8,7 @@ import {
 const FEATURES = [
   {
     icon: MapPin,
-    badge: 'Logistique',
+    badge: 'Livreur',
     title: 'Livreur en moins de 10 min',
     desc: "Notre algorithme GPS détecte automatiquement les livreurs disponibles près de vous et envoie la mission au plus proche. Zéro attente, zéro friction.",
     color: '#10b981',
@@ -17,34 +17,34 @@ const FEATURES = [
   },
   {
     icon: Brain,
-    badge: 'Intelligence',
+    badge: 'Acheteur',
     title: 'Un assistant qui veille sur chaque transaction',
     desc: "Swift Africa intègre une IA qui analyse chaque commande en temps réel pour détecter les anomalies et garantir que chaque transaction se passe dans les meilleures conditions.",
-    color: '#8b5cf6',
+    color: '#3b82f6',
     status: 'En développement',
     statusColor: '#8b5cf6',
   },
   {
     icon: Fingerprint,
-    badge: 'Sécurité',
+    badge: 'Livreur',
     title: 'Seul le bon livreur touche votre colis',
     desc: "L'authentification biométrique garantit que votre colis ne peut être récupéré que par le livreur assigné à votre commande. Une couche de sécurité supplémentaire, invisible pour vous.",
-    color: '#3b82f6',
+    color: '#10b981',
     status: 'Bientôt',
     statusColor: '#3b82f6',
   },
   {
     icon: RotateCcw,
-    badge: 'Retours',
+    badge: 'Acheteur',
     title: 'Retours simplifiés, zéro stress',
     desc: "Un produit ne vous convient pas ? Swift Africa gère automatiquement le retour et le remboursement. Pas de négociation, pas d'arnaque — le système s'occupe de tout.",
-    color: '#10b981',
+    color: '#3b82f6',
     status: 'Bientôt',
     statusColor: '#10b981',
   },
   {
     icon: Warehouse,
-    badge: 'Réseau',
+    badge: 'Vendeur',
     title: 'Vos produits encore plus proches',
     desc: "Des points relais partenaires dans chaque quartier permettront de stocker vos best-sellers à proximité de vos clients. Livraison ultra-rapide, coûts réduits.",
     color: '#ff6b00',
@@ -53,10 +53,10 @@ const FEATURES = [
   },
   {
     icon: Mic2,
-    badge: 'Inclusion',
+    badge: 'Vendeur',
     title: 'Swift Africa parle votre langue',
     desc: "Interface vocale en Fongbé, Nago et autres langues locales. Parce que la technologie doit être accessible à tous — même sans lire ni écrire.",
-    color: '#ec4899',
+    color: '#ff6b00',
     status: 'Vision 2.0',
     statusColor: '#ec4899',
   },
@@ -178,5 +178,6 @@ function FeatureCard({
     </div>
   )
 }
+
 
 
