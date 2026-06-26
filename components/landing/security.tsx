@@ -171,7 +171,7 @@ export function Security() {
           </div>
         </div>
 
-        {/* Bannière garantie tripartite */}
+        {/* Garanties tripartites — animées */}
         <div
           className="mt-16 grid gap-4 sm:grid-cols-3"
           style={{
@@ -181,18 +181,23 @@ export function Security() {
           }}
         >
           {[
-            { icon: ShoppingBag, label: 'Acheteur', text: 'Remboursé si non livré', color: '#3b82f6' },
-            { icon: Store, label: 'Vendeur', text: 'Payé à chaque livraison confirmée', color: '#ff6b00' },
-            { icon: Bike, label: 'Livreur', text: 'Commission immédiate après OTP', color: '#10b981' },
+            { icon: ShoppingBag, label: 'Acheteur', text: 'Votre argent est protégé jusqu\'à la livraison. Remboursé si non reçu.', color: '#3b82f6' },
+            { icon: Store, label: 'Vendeur', text: 'Paiement immédiat dès que la livraison est confirmée par le client.', color: '#ff6b00' },
+            { icon: Bike, label: 'Livreur', text: 'Commission versée instantanément après validation du code OTP.', color: '#10b981' },
           ].map((g, i) => {
             const Icon = g.icon
             return (
               <div
                 key={i}
-                className="flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm"
+                className="group flex flex-col items-center gap-3 rounded-2xl border border-gray-100 bg-white p-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                style={{
+                  opacity: visible ? 1 : 0,
+                  transform: visible ? 'translateY(0)' : 'translateY(20px)',
+                  transition: `opacity 0.6s ease ${0.7 + i * 0.15}s, transform 0.6s ease ${0.7 + i * 0.15}s, box-shadow 0.3s ease`,
+                }}
               >
                 <div
-                  className="flex size-12 items-center justify-center rounded-2xl"
+                  className="flex size-12 items-center justify-center rounded-2xl transition-all duration-300 group-hover:scale-110 group-hover:rotate-6"
                   style={{ backgroundColor: `${g.color}15` }}
                 >
                   <Icon className="size-6" style={{ color: g.color }} strokeWidth={1.5} />
@@ -207,4 +212,5 @@ export function Security() {
     </section>
   )
 }
+
 
