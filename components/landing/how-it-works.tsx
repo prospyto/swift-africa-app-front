@@ -192,7 +192,7 @@ export function HowItWorks() {
                     boxShadow: `0 8px 24px -4px ${step.color}30`,
                   }}
                 >
-                  <step.icon className="size-8" style={{ color: step.color }} strokeWidth={1.5} />
+                  <step.icon className="size-8" style={{ color: tab.color }} strokeWidth={1.5} />
                 </div>
                 <h3 className="mb-3 text-xl font-bold">{step.title}</h3>
                 <p className="leading-relaxed text-gray-600">{step.desc}</p>
@@ -216,6 +216,7 @@ export function HowItWorks() {
     </section>
   )
 }
+
 
 
 
