@@ -23,7 +23,6 @@ function useLetterOffsets(words: string[]) {
 
 export function Hero() {
   const [splashDone, setSplashDone] = useState(false)
-  const [logoVisible, setLogoVisible] = useState(false)
   const [wordsVisible, setWordsVisible] = useState(false)
   const [subtitleVisible, setSubtitleVisible] = useState(false)
   const [ctaVisible, setCtaVisible] = useState(false)
@@ -32,9 +31,7 @@ export function Hero() {
   const offsets = useLetterOffsets(WORDS)
 
   useEffect(() => {
-    setTimeout(() => setSplashDone(true), 1800)
-    setTimeout(() => setLogoVisible(true), 1900)
-    setTimeout(() => setWordsVisible(true), 2200)
+    setTimeout(() => setSplashDone(true), 1800)    setTimeout(() => setWordsVisible(true), 2200)
     setTimeout(() => setSubtitleVisible(true), 2600)
     setTimeout(() => setCtaVisible(true), 2900)
   }, [])
@@ -199,6 +196,7 @@ export function Hero() {
     </>
   )
 }
+
 
 
 
