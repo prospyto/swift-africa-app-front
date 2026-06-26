@@ -112,6 +112,8 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
   const [otpError, setOtpError] = useState(false)
   const [funding, setFunding] = useState(false)
   const [fundError, setFundError] = useState<string | null>(null)
+  const [marking, setMarking] = useState(false)
+  const [markError, setMarkError] = useState<string | null>(null)
   const rank = ORDER_RANK[order.statut]
 
   async function handleConfirm() {
@@ -130,6 +132,25 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
       )
     } finally {
       setFunding(false)
+    }
+  }
+
+  async function handleMarkPret() {
+    setMarking(true)
+    setMarkError(null)
+    try {
+      const response = await fetch(`/api/commandes/${order.id}/marquer-pret/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('access_token')}` },
+      })
+      if (!response.ok) throw new Error('Impossible de marquer comme prête.')
+      // Rafraîchir la commande
+      const data = await response.json()
+      // Mettre à jour l'ordre local si possible
+    } catch (err) {
+      setMarkError(err instanceof Error ? err.message : 'Erreur lors du marquage.')
+    } finally {
+      setMarking(false)
     }
   }
 
@@ -286,3 +307,4 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
     </GlassCard>
   )
 }
+
