@@ -150,8 +150,8 @@ export function Hero() {
               transition: 'opacity 0.6s ease, transform 0.6s ease',
             }}
           >
-            Commandez, vendez ou livrez — votre argent est protégé à chaque étape.
-            Zéro arnaque. Zéro risque. Paiement libéré seulement à la livraison.
+            Tous vos paiements sont sécurisés par un système de confiance.
+            Votre argent n'est libéré que quand tout le monde est satisfait.
           </p>
 
           {/* CTA — toujours visibles */}
@@ -199,5 +199,6 @@ export function Hero() {
     </>
   )
 }
+
 
 
