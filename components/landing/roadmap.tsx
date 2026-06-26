@@ -11,7 +11,7 @@ const FEATURES = [
     badge: 'Logistique',
     title: 'Livreur en moins de 10 min',
     desc: "Notre algorithme GPS détecte automatiquement les livreurs disponibles près de vous et envoie la mission au plus proche. Zéro attente, zéro friction.",
-    color: '#ff6b00',
+    color: '#10b981',
     status: 'En développement',
     statusColor: '#ff6b00',
   },
@@ -47,7 +47,7 @@ const FEATURES = [
     badge: 'Réseau',
     title: 'Vos produits encore plus proches',
     desc: "Des points relais partenaires dans chaque quartier permettront de stocker vos best-sellers à proximité de vos clients. Livraison ultra-rapide, coûts réduits.",
-    color: '#f59e0b',
+    color: '#ff6b00',
     status: 'Vision 2.0',
     statusColor: '#f59e0b',
   },
@@ -178,3 +178,4 @@ function FeatureCard({
     </div>
   )
 }
+
