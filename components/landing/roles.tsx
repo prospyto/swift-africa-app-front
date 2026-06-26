@@ -123,7 +123,7 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
       >
         {role.featured && (
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-1 text-xs font-bold text-[#ff6b00] shadow-md">
-            ⭐ Le plus populaire
+            TrendingUp Le plus populaire
           </div>
         )}
 
@@ -204,4 +204,5 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
     </div>
   )
 }
+
 
