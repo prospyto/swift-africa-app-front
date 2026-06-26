@@ -71,8 +71,8 @@ const TABS = [
       {
         icon: MapPin,
         number: '01',
-        title: 'Recevez une mission',
-        desc: "Une notification arrive dès qu'une commande est disponible près de chez vous. Acceptez en un clic.",
+        title: 'Acceptez une mission',
+        desc: "Une notification arrive dès qu'une commande est disponible près de chez vous. Vous acceptez la mission en un clic.",
         color: '#10b981',
       },
       {
@@ -216,5 +216,6 @@ export function HowItWorks() {
     </section>
   )
 }
+
 
 
