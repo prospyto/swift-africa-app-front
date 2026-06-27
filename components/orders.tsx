@@ -44,15 +44,17 @@ export function Orders({
   openConversationFor,
   onConversationOpened,
 }: {
-  openConversationFor?: number | null
+  openConversationFor?: { commandeId: number; avecRole: string } | null
   onConversationOpened?: () => void
 } = {}) {
   const { orders, mode, user } = useApp()
   const [messagingOrderId, setMessagingOrderId] = useState<number | null>(null)
+  const [messagingAvecRole, setMessagingAvecRole] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     if (openConversationFor != null) {
-      setMessagingOrderId(openConversationFor)
+      setMessagingOrderId(openConversationFor.commandeId)
+      setMessagingAvecRole(openConversationFor.avecRole)
       onConversationOpened?.()
     }
   }, [openConversationFor, onConversationOpened])
@@ -89,7 +91,7 @@ export function Orders({
               key={o.id}
               order={o}
               activeRole={activeRole}
-              onOpenMessages={() => setMessagingOrderId(o.id)}
+              onOpenMessages={() => { setMessagingOrderId(o.id); setMessagingAvecRole(undefined) }}
             />
           ))}
         </div>
@@ -100,6 +102,7 @@ export function Orders({
           orderId={messagingOrderId}
           open={messagingOrderId !== null}
           onClose={() => setMessagingOrderId(null)}
+          initialAvecRole={messagingAvecRole}
         />
       )}
     </>

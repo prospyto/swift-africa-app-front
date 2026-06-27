@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Truck, ShoppingCart, LogOut, WifiOff, Loader2, Bell, MessageCircle, X } from 'lucide-react'
+import { Truck, ShoppingCart, LogOut, Bell, MessageCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 import { apiFetch } from '@/lib/api'
@@ -15,19 +15,20 @@ interface NavbarProps {
   tab: string
   onTab: (t: string) => void
   onOpenCart: () => void
-  onOpenConversation: (commandeId: number) => void
+  onOpenConversation: (commandeId: number, avecRole: string) => void
   tabs: Tab[]
 }
 
 interface ConvResume {
   commande_id: number
+  avec_role: string
   non_lus: number
   dernier_message: string
   dernier_auteur: string
 }
 
 export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: NavbarProps) {
-  const { user, logout, cartCount, offline, waking, mode, availableRoles, setMode } = useApp()
+  const { user, logout, cartCount, mode, availableRoles, setMode } = useApp()
   const [notifOpen, setNotifOpen] = useState(false)
   const [nonLus, setNonLus] = useState(0)
   const [convs, setConvs] = useState<ConvResume[]>([])
@@ -97,17 +98,6 @@ export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: Nav
 
         {/* Actions droite */}
         <div className="ml-auto flex items-center gap-2">
-          {waking && !offline && (
-            <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-medium text-accent-foreground sm:flex">
-              <Loader2 className="size-3.5 animate-spin" /> Réveil du serveur…
-            </span>
-          )}
-          {offline && (
-            <span className="hidden items-center gap-1.5 rounded-full bg-destructive/15 px-3 py-1.5 text-xs font-medium text-destructive sm:flex">
-              <WifiOff className="size-3.5" /> Hors ligne
-            </span>
-          )}
-
           {/* Switch de rôle si multi-rôle */}
           {availableRoles.length > 1 && (
             <select
@@ -164,7 +154,7 @@ export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: Nav
                         <button
                           onClick={() => {
                             setNotifOpen(false)
-                            onOpenConversation(c.commande_id)
+                            onOpenConversation(c.commande_id, c.avec_role)
                           }}
                           className="glass w-full rounded-2xl p-3 text-left transition hover:bg-secondary"
                         >

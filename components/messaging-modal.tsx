@@ -38,6 +38,7 @@ interface MessagingModalProps {
   orderId: number
   open: boolean
   onClose: () => void
+  initialAvecRole?: string
 }
 
 // Couleurs par rôle — cohérent avec ChatCommande
@@ -52,13 +53,37 @@ const ROLE_LABELS: Record<string, string> = {
   livreur:  'Livreur',
 }
 
-export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) {
+export function MessagingModal({ orderId, open, onClose, initialAvecRole }: MessagingModalProps) {
   const { user, mode } = useApp()
   const activeRole = mode || user?.role || 'acheteur'
 
-  // Onglet par défaut : le canal qui implique le rôle actif en premier
-  const defaultTab = CHAT_TABS.find((t) => t.roles[0] === activeRole)?.type ?? 'buyer_seller'
+  // Pour chaque onglet, le "rôle en face" à atteindre est l'autre rôle
+  // de la paire (celui qui n'est pas le rôle actif de l'utilisateur).
+  function autreRole(tab: ChatType): string {
+    const roles = CHAT_TABS.find((t) => t.type === tab)!.roles
+    return roles.find((r) => r !== activeRole) ?? roles[0]
+  }
+
+  // Seuls les onglets où le rôle actif fait réellement partie de la
+  // paire ont un sens — sinon ce serait demander "ma conversation
+  // avec moi-même", rejeté par le backend.
+  const visibleTabs = CHAT_TABS.filter((t) => t.roles.includes(activeRole))
+
+  // Si on arrive depuis une notification visant un rôle précis,
+  // ouvrir directement l'onglet correspondant à cette paire.
+  const tabForRole = initialAvecRole
+    ? visibleTabs.find((t) => t.roles.includes(initialAvecRole))?.type
+    : undefined
+  const defaultTab = tabForRole ?? visibleTabs[0]?.type ?? 'buyer_seller'
   const [currentTab, setCurrentTab] = useState<ChatType>(defaultTab)
+
+  // Si la modal se rouvre (ou reste montée) avec une cible différente
+  // (ex: deux notifications cliquées successivement), resynchronise
+  // l'onglet actif sur la bonne paire.
+  useEffect(() => {
+    if (open && tabForRole) setCurrentTab(tabForRole)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, initialAvecRole])
   const [conv, setConv] = useState<BackendConv | null>(null)
   const [loading, setLoading] = useState(false)
   const [sending, setSending] = useState(false)
@@ -70,7 +95,9 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
 
   const loadConv = useCallback(async () => {
     try {
-      const data = await apiFetch<BackendConv>(`chat/commande/${orderId}/`)
+      const data = await apiFetch<BackendConv>(
+        `chat/commande/${orderId}/avec/${autreRole(currentTab)}/`,
+      )
       setConv(data)
       setError(null)
     } catch (err) {
@@ -78,11 +105,13 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
     } finally {
       setLoading(false)
     }
-  }, [orderId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [orderId, currentTab, activeRole])
 
   useEffect(() => {
     if (!open) return
     setLoading(true)
+    setConv(null)
     loadConv()
     pollRef.current = setInterval(loadConv, 5000)
     return () => { if (pollRef.current) clearInterval(pollRef.current) }
@@ -104,7 +133,7 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
     setSending(true)
     setInput('')
     try {
-      await apiFetch(`chat/commande/${orderId}/`, {
+      await apiFetch(`chat/commande/${orderId}/avec/${autreRole(currentTab)}/`, {
         method: 'POST',
         body: { contenu: text },
       })
@@ -122,13 +151,10 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  // Filtre les messages selon le canal sélectionné
-  // Les participants du canal déterminent quels messages sont "visibles"
-  // Comme le backend a une seule conversation, on filtre côté frontend par rôle
-  const tabParticipants = CHAT_TABS.find((t) => t.type === currentTab)?.roles ?? []
-  const filteredMessages = conv?.messages.filter(
-    (m) => tabParticipants.includes(m.role_auteur)
-  ) ?? []
+  // Chaque conversation chargée est déjà strictement privée à la
+  // paire en cours (garanti par le backend) — plus besoin de filtrer
+  // les messages côté client.
+  const messages = conv?.messages ?? []
 
   if (!open) return null
 
@@ -164,9 +190,9 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
           </button>
         </div>
 
-        {/* 3 onglets de canal */}
+        {/* Onglets — seules les paires impliquant le rôle actif ont du sens */}
         <div className="flex gap-1 border-b border-border/60 px-3 pt-2 pb-0">
-          {CHAT_TABS.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button
               key={tab.type}
               onClick={() => setCurrentTab(tab.type)}
@@ -195,7 +221,7 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
               {error}
             </div>
           )}
-          {!loading && filteredMessages.length === 0 && (
+          {!loading && messages.length === 0 && (
             <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
               <MessageCircle className="size-10 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">
@@ -204,7 +230,7 @@ export function MessagingModal({ orderId, open, onClose }: MessagingModalProps) 
               </p>
             </div>
           )}
-          {filteredMessages.map((msg) => (
+          {messages.map((msg) => (
             <div key={msg.id} className={`mb-2 flex ${msg.est_moi ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] flex flex-col gap-0.5 ${msg.est_moi ? 'items-end' : 'items-start'}`}>
                 {!msg.est_moi && (

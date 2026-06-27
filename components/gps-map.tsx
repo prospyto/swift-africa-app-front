@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -29,12 +29,19 @@ interface MapProps {
 }
 
 export default function GPSMap({ currentLocation, destination }: MapProps) {
-  // Unique id so multiple maps can coexist without colliding on the DOM node.
-  const mapId = useId().replace(/[:]/g, '')
+  // Un ref DOM direct plutôt qu'un id généré par useId — Leaflet a
+  // besoin de l'élément réellement peint avant de s'initialiser ; un
+  // id pouvait pointer vers un nœud pas encore présent selon le
+  // timing de next/dynamic, faisant échouer L.map() silencieusement
+  // et ne laissant que les coordonnées brutes affichées en texte.
+  const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
+  const livreurMarkerRef = useRef<L.Marker | null>(null)
 
   useEffect(() => {
-    const map = L.map(mapId, {
+    if (!containerRef.current) return
+
+    const map = L.map(containerRef.current, {
       center: [currentLocation.latitude, currentLocation.longitude],
       zoom: 15,
       scrollWheelZoom: true,
@@ -46,17 +53,18 @@ export default function GPSMap({ currentLocation, destination }: MapProps) {
       maxZoom: 19,
     }).addTo(map)
 
-    L.marker([currentLocation.latitude, currentLocation.longitude], {
-      icon: markerIcon,
-      title: 'Position du livreur',
-    })
+    const livreurMarker = L.marker(
+      [currentLocation.latitude, currentLocation.longitude],
+      { icon: markerIcon, title: 'Position du livreur' },
+    )
       .bindPopup('Position actuelle du livreur')
       .addTo(map)
+    livreurMarkerRef.current = livreurMarker
 
-    L.marker([destination.latitude, destination.longitude], {
-      icon: destinationIcon,
-      title: destination.address,
-    })
+    const destMarker = L.marker(
+      [destination.latitude, destination.longitude],
+      { icon: destinationIcon, title: destination.address },
+    )
       .bindPopup(`Destination : ${destination.address}`)
       .addTo(map)
 
@@ -68,17 +76,25 @@ export default function GPSMap({ currentLocation, destination }: MapProps) {
       { color: '#FF6B00', weight: 3, opacity: 0.7 },
     ).addTo(map)
 
-    const group = new L.FeatureGroup([
-      L.marker([currentLocation.latitude, currentLocation.longitude]),
-      L.marker([destination.latitude, destination.longitude]),
-    ])
+    const group = new L.FeatureGroup([livreurMarker, destMarker])
     map.fitBounds(group.getBounds().pad(0.1))
 
     return () => {
       map.remove()
       mapRef.current = null
     }
-  }, [mapId, currentLocation, destination])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  return <div id={mapId} className="h-96 rounded-2xl overflow-hidden border border-border" />
+  // Le livreur se déplace : déplace le marqueur + recentre la carte,
+  // sans tout réinitialiser (effet séparé pour éviter de recréer la
+  // carte à chaque mise à jour de position).
+  useEffect(() => {
+    if (!mapRef.current || !livreurMarkerRef.current) return
+    const newPos: L.LatLngExpression = [currentLocation.latitude, currentLocation.longitude]
+    livreurMarkerRef.current.setLatLng(newPos)
+    mapRef.current.panTo(newPos)
+  }, [currentLocation.latitude, currentLocation.longitude])
+
+  return <div ref={containerRef} className="h-96 rounded-2xl overflow-hidden border border-border" />
 }
