@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
 const markerIcon = L.icon({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
@@ -40,6 +39,16 @@ export default function GPSMap({ currentLocation, destination }: MapProps) {
 
   useEffect(() => {
     if (!containerRef.current) return
+
+    // Injecter le CSS Leaflet dynamiquement si pas encore présent
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link')
+      link.id = 'leaflet-css'
+      link.rel = 'stylesheet'
+      link.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css'
+      document.head.appendChild(link)
+    }
+
 
     const map = L.map(containerRef.current, {
       center: [currentLocation.latitude, currentLocation.longitude],
@@ -98,3 +107,4 @@ export default function GPSMap({ currentLocation, destination }: MapProps) {
 
   return <div ref={containerRef} className="h-96 rounded-2xl overflow-hidden border border-border" />
 }
+
