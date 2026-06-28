@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { MapPin, Plus, Check, Search } from 'lucide-react'
 import { GlassCard, Skeleton } from '@/components/glass'
+import { ProductModal } from '@/components/product-modal'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Product } from '@/lib/types'
 
@@ -12,6 +13,7 @@ export function Catalog() {
   const [query, setQuery] = useState('')
   const [cat, setCat] = useState('Tous')
   const [added, setAdded] = useState<number | null>(null)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const categories = useMemo(
     () => ['Tous', ...Array.from(new Set(products.map((p) => p.categorie)))],
@@ -94,7 +96,8 @@ export function Catalog() {
             return (
               <GlassCard
                 key={p.id}
-                className="group flex flex-col overflow-hidden p-4 transition hover:-translate-y-1"
+                onClick={() => setSelectedProduct(p)}
+                className="group flex flex-col overflow-hidden p-4 transition hover:-translate-y-1 cursor-pointer"
               >
                 <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-secondary">
                   <Image
@@ -118,7 +121,7 @@ export function Catalog() {
                       {p.categorie}
                     </span>
                   </div>
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                  <p className="mt-1 line-clamp-3 text-sm text-muted-foreground">
                     {p.description}
                   </p>
                   <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
@@ -173,6 +176,14 @@ export function Catalog() {
           )}
         </div>
       )}
+      {/* Modal produit */}
+      <ProductModal
+        product={selectedProduct}
+        onClose={() => setSelectedProduct(null)}
+        onAddCart={(p) => { addToCart(p); setAdded(p.id); setTimeout(() => setAdded(cur => cur === p.id ? null : cur), 1200) }}
+        inCart={selectedProduct ? cart.some(i => i.product.id === selectedProduct.id) : false}
+      />
     </section>
   )
 }
+
