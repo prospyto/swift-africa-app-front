@@ -21,15 +21,14 @@ export function CartDrawer({
 }) {
   const { cart, updateQty, removeFromCart, cartTotal, checkout } = useApp()
   const { toast } = useToast()
-  const [depart, setDepart] = useState('Dakar')
-  const [arrivee, setArrivee] = useState('Abidjan')
+  const [adresseLivraison, setAdresseLivraison] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleCheckout() {
     if (cart.length === 0 || loading) return
     setLoading(true)
     try {
-      await checkout(depart, arrivee)
+      await checkout(adresseLivraison)
       toast('Commande passée avec succès ! 🎉', 'success')
       onOrdered()
       onClose()
@@ -142,16 +141,21 @@ export function CartDrawer({
           {cart.length > 0 && (
             <div className="border-t border-border/60 p-5">
               <div className="mb-4 grid grid-cols-2 gap-3">
-                <SelectVille
-                  label="Départ"
-                  value={depart}
-                  onChange={setDepart}
-                />
-                <SelectVille
-                  label="Arrivée"
-                  value={arrivee}
-                  onChange={setArrivee}
-                />
+                <div>
+                  <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+                    📍 Adresse de livraison
+                  </label>
+                  <input
+                    type="text"
+                    value={adresseLivraison}
+                    onChange={(e) => setAdresseLivraison(e.target.value)}
+                    placeholder="Ex: Quartier Akpakpa, rue 12, Cotonou"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20 transition"
+                  />
+                  <p className="mt-1 text-xs text-gray-400">
+                    Soyez précis — le livreur utilisera cette adresse
+                  </p>
+                </div>
               </div>
 
               <div className="mb-4 flex items-center justify-between">
@@ -220,3 +224,4 @@ function SelectVille({
     </div>
   )
 }
+
