@@ -28,6 +28,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     prix_solde: product?.prix_solde ? String(product.prix_solde) : '',
     categorie: product?.categorie || '',
     ville: product?.ville || '',
+    adresse_point_vente: (product as any)?.adresse_point_vente || '',
   })
 
   const [image, setImage] = useState<File | null>(null)
@@ -292,6 +293,23 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             </div>
           </div>
 
+        {/* Adresse du point de vente */}
+        <div>
+          <label className="mb-1.5 block text-sm font-semibold text-gray-700">
+            📍 Adresse du point de vente
+          </label>
+          <input
+            type="text"
+            value={form.adresse_point_vente}
+            onChange={(e) => setForm({ ...form, adresse_point_vente: e.target.value })}
+            placeholder="Ex: Quartier Gbèdjromèdé, rue 15, Cotonou"
+            className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20 transition"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Où le livreur viendra récupérer la commande
+          </p>
+        </div>
+
           {/* Actions */}
           <div className="flex gap-3 pt-4">
             <button
@@ -322,3 +340,4 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     </div>
   )
 }
+
