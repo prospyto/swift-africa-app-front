@@ -61,40 +61,30 @@ export function Hero() {
 
         {/* ── FOND VIDÉO ── */}
         <div className="absolute inset-0 z-0">
-          {/* Dégradé fallback */}
+          {/* Fond permanent — toujours visible, jamais de flash noir */}
           <div
-            className="absolute inset-0 transition-opacity duration-700"
+            className="absolute inset-0"
             style={{
               background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a1a2e 100%)',
-              opacity: videoLoaded ? 0 : 1,
             }}
           />
-          <div
-            className="absolute -right-32 -top-32 size-[600px] rounded-full"
-            style={{
-              background: 'radial-gradient(circle, #ff6b00 0%, transparent 70%)',
-              opacity: videoLoaded ? 0 : 0.2,
-              transition: 'opacity 1s ease',
-            }}
-          />
-          {/* Vidéo en fond — optimisée pour chargement rapide */}
+
+          {/* Vidéo — démarre immédiatement, fond dégradé visible dessous */}
           <video
             autoPlay
             loop
             muted
             playsInline
-            preload="metadata"
-            poster="/hero-poster.jpg"
+            preload="auto"
             onCanPlay={() => setVideoLoaded(true)}
-            onLoadedData={() => setVideoLoaded(true)}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
+            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-500"
             style={{ opacity: videoLoaded ? 1 : 0 }}
           >
-            <source src="/hero-video.webm" type="video/webm" />
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
-          {/* Voile dégradé */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/70" />
+
+          {/* Voile — toujours visible pour lisibilité du texte */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/40 to-black/70" />
         </div>
 
         {/* ── CONTENU — centré verticalement ── */}
@@ -194,4 +184,5 @@ export function Hero() {
     </>
   )
 }
+
 
