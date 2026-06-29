@@ -26,6 +26,10 @@ export function CartDrawer({
 
   async function handleCheckout() {
     if (cart.length === 0 || loading) return
+    if (!adresseLivraison.trim()) {
+      toast('Veuillez entrer votre adresse de livraison.', 'error')
+      return
+    }
     setLoading(true)
     try {
       await checkout(adresseLivraison)
@@ -224,4 +228,5 @@ function SelectVille({
     </div>
   )
 }
+
 
