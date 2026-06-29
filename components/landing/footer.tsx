@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 const WHATSAPP = '2290190685684'
 const PHONE = '+22901906856 84'
-const EMAIL = 'swiftafrica@gmail.com'
+const EMAIL = 'swiftafrica0@gmail.com'
 
 const PAYS = ['Bénin', 'Côte d\'Ivoire', 'Sénégal', 'Mali', 'Togo', 'Niger']
 
@@ -100,5 +100,6 @@ export function Footer() {
     </footer>
   )
 }
+
 
 
