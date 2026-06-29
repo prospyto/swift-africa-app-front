@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { TrendingUp, Send, CheckCircle2, ChevronDown, Handshake } from 'lucide-react'
 
-const EMAIL = 'swiftafrica@gmail.com'
+const EMAIL = 'swiftafrica0@gmail.com'
 
 export function Partnership() {
   const ref = useRef<HTMLDivElement>(null)
@@ -208,7 +208,7 @@ export function Partnership() {
                       Envoyer ma candidature
                     </button>
                     <p className="text-center text-xs text-gray-400">
-                      Réponse garantie sous 48h — swiftafrica@gmail.com
+                      Réponse garantie sous 48h — swiftafrica0@gmail.com
                     </p>
                   </div>
                 </>
@@ -220,4 +220,5 @@ export function Partnership() {
     </section>
   )
 }
+
 
