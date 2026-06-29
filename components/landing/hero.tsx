@@ -63,7 +63,7 @@ export function Hero() {
         <div className="absolute inset-0 z-0">
           {/* Dégradé fallback */}
           <div
-            className="absolute inset-0 transition-opacity duration-1000"
+            className="absolute inset-0 transition-opacity duration-700"
             style={{
               background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #1a1a2e 100%)',
               opacity: videoLoaded ? 0 : 1,
@@ -77,17 +77,20 @@ export function Hero() {
               transition: 'opacity 1s ease',
             }}
           />
-          {/* Vidéo en fond */}
+          {/* Vidéo en fond — optimisée pour chargement rapide */}
           <video
             autoPlay
             loop
             muted
             playsInline
-            preload="none"
+            preload="metadata"
+            poster="/hero-poster.jpg"
             onCanPlay={() => setVideoLoaded(true)}
-            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-1000"
+            onLoadedData={() => setVideoLoaded(true)}
+            className="absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-700"
             style={{ opacity: videoLoaded ? 1 : 0 }}
           >
+            <source src="/hero-video.webm" type="video/webm" />
             <source src="/hero-video.mp4" type="video/mp4" />
           </video>
           {/* Voile dégradé */}
@@ -191,3 +194,4 @@ export function Hero() {
     </>
   )
 }
+
