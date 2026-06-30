@@ -152,7 +152,7 @@ export function Hero() {
               href="/app"
               className="scanner-btn relative flex items-center gap-2 overflow-hidden rounded-2xl bg-[#ff6b00] px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-[#ff6b00]/40 transition-all hover:scale-105 hover:bg-[#e55f00] md:px-8 md:py-4 md:text-lg"
             >
-              <span className="relative z-10">Commencer maintenant →</span>
+              <span className="relative z-10">Commencer maintenant</span>
             </Link>
 
             <Link

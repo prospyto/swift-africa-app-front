@@ -172,7 +172,7 @@ export function CatalogPreview() {
             href="/app"
             className="scanner-btn relative inline-flex items-center gap-2 overflow-hidden rounded-2xl bg-[#ff6b00] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#ff6b00]/30 transition hover:scale-105 hover:bg-[#e55f00]"
           >
-            <span className="relative z-10">Voir tous les produits →</span>
+            <span className="relative z-10">Voir tous les produits</span>
           </Link>
         </div>
       </div>
