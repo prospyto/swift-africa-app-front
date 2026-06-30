@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ShoppingBag, Store, Bike, Star, Quote, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ShoppingBag, Store, Bike, Star, Quote } from 'lucide-react'
 
 const TESTIMONIALS = [
   {
@@ -190,7 +190,6 @@ export function Testimonials() {
               onClick={prev}
               className="flex size-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition hover:border-[#ff6b00] hover:text-[#ff6b00]"
             >
-              <ChevronLeft className="size-5" />
             </button>
 
             {/* Points indicateurs */}
@@ -212,7 +211,6 @@ export function Testimonials() {
               onClick={next}
               className="flex size-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-sm transition hover:border-[#ff6b00] hover:text-[#ff6b00]"
             >
-              <ChevronRight className="size-5" />
             </button>
           </div>
         </div>

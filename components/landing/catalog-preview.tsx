@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
 const SLIDES = [
@@ -138,7 +137,6 @@ export function CatalogPreview() {
             aria-label="Image précédente"
             className="absolute left-4 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-lg backdrop-blur-sm transition hover:scale-110 hover:bg-white"
           >
-            <ChevronLeft className="size-5 text-gray-800" />
           </button>
 
           {/* Flèche droite */}
@@ -147,7 +145,6 @@ export function CatalogPreview() {
             aria-label="Image suivante"
             className="absolute right-4 top-1/2 z-10 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/80 shadow-lg backdrop-blur-sm transition hover:scale-110 hover:bg-white"
           >
-            <ChevronRight className="size-5 text-gray-800" />
           </button>
 
           {/* Dots */}

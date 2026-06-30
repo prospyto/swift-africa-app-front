@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ShoppingBag, Store, Bike, ArrowRight, Check } from 'lucide-react'
+import { ShoppingBag, Store, Bike, Check } from 'lucide-react'
 import Link from 'next/link'
 
 const ROLES = [
@@ -121,12 +121,6 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
         className={`relative flex h-full flex-col rounded-3xl p-8 ${role.featured ? 'text-white' : 'bg-white'}`}
         style={role.featured ? { background: 'linear-gradient(135deg, #ff6b00, #ff8c00)' } : {}}
       >
-        {role.featured && (
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-white px-4 py-1 text-xs font-bold text-[#ff6b00] shadow-md">
-            TrendingUp Le plus populaire
-          </div>
-        )}
-
         {/* Badge icône pro avec animation */}
         <div className="mb-6 flex items-start justify-between">
           <div
@@ -197,7 +191,6 @@ function RoleCard({ role, i, visible }: { role: typeof ROLES[0]; i: number; visi
         >
           <span className="relative z-10 flex items-center gap-2">
             {role.cta}
-            <ArrowRight className="size-4" />
           </span>
         </Link>
       </div>
