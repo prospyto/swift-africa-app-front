@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, Upload, AlertCircle, MapPin } from 'lucide-react'
+import { ArrowLeft, Upload, AlertCircle, MapPin, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, Spinner } from '@/components/glass'
 import { multipartFetch } from '@/lib/api-multipart'
@@ -18,6 +18,7 @@ interface ProductFormProps {
 export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showSuccess, setShowSuccess] = useState(false)
   const [preview, setPreview] = useState<string>(product?.image || '')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -34,14 +35,31 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
   const [image, setImage] = useState<File | null>(null)
 
   const categories = [
-    'Salon',
-    'Chambre',
-    'Cuisine',
-    'Bureau',
-    'Salle à manger',
-    'Enfant',
+    'Mode & Vêtements',
+    'Électronique',
+    'Alimentation',
+    'Maison & Meuble',
+    'Beauté & Cosmétique',
+    'Agriculture',
+    'Artisanat',
+    'Services',
+    'Autre',
   ]
-  const villes = ['Dakar', 'Abidjan', 'Bamako', 'Niamey', 'Lomé', 'Cotonou']
+
+  const villesParPays: { pays: string; villes: string[] }[] = [
+    {
+      pays: 'Bénin',
+      villes: [
+        'Cotonou', 'Porto-Novo', 'Parakou', 'Abomey', 'Abomey-Calavi',
+        'Kétou', 'Bohicon', 'Natitingou', 'Ouidah', 'Djougou',
+        'Lokossa', 'Pobè', 'Savalou', 'Comè',
+      ],
+    },
+    {
+      pays: 'Régional (CEDEAO)',
+      villes: ['Dakar', 'Abidjan', 'Bamako', 'Niamey', 'Lomé', 'Accra', 'Lagos'],
+    },
+  ]
 
   function handleImageSelect(file: File | null) {
     if (!file) return
@@ -114,7 +132,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
         })
       }
 
-      onSuccess()
+      setShowSuccess(true)
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
@@ -128,6 +146,34 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
   return (
     <div className="mx-auto max-w-2xl px-3 py-6 md:px-6 md:py-8">
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-3xl bg-white p-8 text-center shadow-2xl">
+            <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-[#ff6b00]/10">
+              <CheckCircle2 className="size-9 text-[#ff6b00]" />
+            </div>
+            <h2 className="mb-2 text-xl font-bold text-gray-900">
+              {product ? 'Produit mis à jour' : 'Produit ajouté'}
+            </h2>
+            <p className="mb-6 text-sm text-gray-500">
+              {product
+                ? 'Vos modifications ont bien été enregistrées.'
+                : 'Votre produit est maintenant visible dans le catalogue.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowSuccess(false)
+                onSuccess()
+              }}
+              className="w-full rounded-2xl bg-[#ff6b00] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#e55f00]"
+            >
+              Continuer
+            </button>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={onCancel}
         className="mb-6 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -284,10 +330,14 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Sélectionner...</option>
-                {villes.map((ville) => (
-                  <option key={ville} value={ville}>
-                    {ville}
-                  </option>
+                {villesParPays.map((group) => (
+                  <optgroup key={group.pays} label={group.pays}>
+                    {group.villes.map((ville) => (
+                      <option key={ville} value={ville}>
+                        {ville}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </div>
