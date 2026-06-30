@@ -6,7 +6,8 @@ import { ArrowLeft, Upload, AlertCircle, MapPin, CheckCircle2 } from 'lucide-rea
 import { Button } from '@/components/ui/button'
 import { GlassCard, Spinner } from '@/components/glass'
 import { multipartFetch } from '@/lib/api-multipart'
-import { ApiError } from '@/lib/api'
+import { ApiError, OfflineError } from '@/lib/api'
+import { useApp } from '@/lib/store'
 import type { Product } from '@/lib/types'
 
 interface ProductFormProps {
@@ -16,6 +17,7 @@ interface ProductFormProps {
 }
 
 export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
+  const { waking } = useApp()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
@@ -136,6 +138,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     } catch (err) {
       if (err instanceof ApiError) {
         setError(err.message)
+      } else if (err instanceof OfflineError) {
+        setError('Le serveur ne répond pas. Vérifiez votre connexion et réessayez.')
       } else {
         setError('Une erreur est survenue')
       }
@@ -351,6 +355,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
           </label>
           <input
             type="text"
+            name="point-de-vente-adresse"
+            autoComplete="off"
             value={form.adresse_point_vente}
             onChange={(e) => setForm({ ...form, adresse_point_vente: e.target.value })}
             placeholder="Ex: Quartier Gbèdjromèdé, rue 15, Cotonou"
@@ -377,7 +383,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <Spinner /> Enregistrement…
+                  <Spinner /> {waking ? 'Réveil du serveur…' : 'Enregistrement…'}
                 </span>
               ) : product ? (
                 'Mettre à jour'
@@ -386,6 +392,12 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               )}
             </Button>
           </div>
+
+          {loading && waking && (
+            <p className="text-center text-xs text-gray-400">
+              Le serveur était en veille, ça peut prendre jusqu'à 30 secondes. Merci de patienter.
+            </p>
+          )}
         </form>
       </GlassCard>
     </div>
