@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
-import { ArrowLeft, Upload, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Upload, AlertCircle, MapPin } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GlassCard, Spinner } from '@/components/glass'
 import { multipartFetch } from '@/lib/api-multipart'
@@ -295,8 +295,9 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
 
         {/* Adresse du point de vente */}
         <div>
-          <label className="mb-1.5 block text-sm font-semibold text-gray-700">
-            📍 Adresse du point de vente
+          <label className="mb-1.5 flex items-center gap-1.5 text-sm font-semibold text-gray-700">
+            <MapPin className="size-4 text-[#ff6b00]" />
+            Adresse du point de vente
           </label>
           <input
             type="text"
