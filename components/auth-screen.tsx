@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import Link from 'next/link'
 import {
   Truck, ShieldCheck, Store, ShoppingBag,
   PackageCheck, AlertCircle, Eye, EyeOff,
@@ -100,7 +101,7 @@ export function AuthScreen() {
         <div className="hidden lg:flex lg:flex-col lg:gap-10">
 
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link href="/" className="flex items-center gap-3">
             <div
               className="flex size-14 items-center justify-center rounded-2xl shadow-lg"
               style={{ backgroundColor: '#ff6b00', boxShadow: '0 8px 32px #ff6b0050' }}
@@ -111,7 +112,7 @@ export function AuthScreen() {
               <p className="text-2xl font-black text-white">Swift Africa</p>
               <p className="text-sm" style={{ color: '#ff6b00' }}>Trust-as-a-Service</p>
             </div>
-          </div>
+          </Link>
 
           {/* Headline */}
           <div>
@@ -167,7 +168,7 @@ export function AuthScreen() {
           style={{ boxShadow: '0 32px 64px rgba(0,0,0,0.4)' }}
         >
           {/* Logo mobile */}
-          <div className="mb-6 flex items-center gap-3 lg:hidden">
+          <Link href="/" className="mb-6 flex items-center gap-3 lg:hidden">
             <div
               className="flex size-11 items-center justify-center rounded-2xl"
               style={{ backgroundColor: '#ff6b00' }}
@@ -175,12 +176,12 @@ export function AuthScreen() {
               <Truck className="size-6 text-white" />
             </div>
             <p className="text-xl font-black text-white">Swift Africa</p>
-          </div>
+          </Link>
 
           {/* Titre */}
           <div className="mb-7">
             <h2 className="text-2xl font-black text-white">
-              {mode === 'login' ? 'Bon retour 👋' : 'Créer un compte'}
+              {mode === 'login' ? 'Bon retour' : 'Créer un compte'}
             </h2>
             <p className="mt-1 text-sm text-white/50">
               {mode === 'login'
@@ -330,9 +331,9 @@ export function AuthScreen() {
               {loading ? (
                 <><Spinner /> Veuillez patienter…</>
               ) : mode === 'login' ? (
-                'Se connecter →'
+                'Se connecter'
               ) : (
-                'Créer mon compte →'
+                'Créer mon compte'
               )}
             </button>
           </form>

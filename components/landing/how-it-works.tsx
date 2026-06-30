@@ -196,18 +196,6 @@ export function HowItWorks() {
                 </div>
                 <h3 className="mb-3 text-xl font-bold">{step.title}</h3>
                 <p className="leading-relaxed text-gray-600">{step.desc}</p>
-
-                {/* Connecteur */}
-                {i < 2 && (
-                  <div className="absolute -right-4 top-1/2 hidden -translate-y-1/2 md:block">
-                    <div
-                      className="flex size-8 items-center justify-center rounded-full text-white text-xs font-bold shadow-md"
-                      style={{ backgroundColor: tab.color }}
-                    >
-                      →
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
           ))}
