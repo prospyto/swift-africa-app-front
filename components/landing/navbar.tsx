@@ -76,6 +76,10 @@ export function Navbar() {
               className="rounded-xl bg-[#ff6b00] px-4 py-2 text-sm font-bold text-white shadow-sm shadow-[#ff6b00]/30 transition hover:bg-[#e55f00] hover:scale-105"
             >
               Commencer
+            </Link>
+          </div>
+
+          {/* Burger mobile */}
           <button
             onClick={() => setMenuOpen((v) => !v)}
             className="flex size-9 items-center justify-center rounded-xl transition md:hidden"
@@ -122,6 +126,12 @@ export function Navbar() {
               className="rounded-xl bg-[#ff6b00] py-3 text-center text-sm font-bold text-white transition hover:bg-[#e55f00]"
             >
               Commencer
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Overlay fermeture menu */}
       {menuOpen && (
         <div
           className="fixed inset-0 z-20 md:hidden"
