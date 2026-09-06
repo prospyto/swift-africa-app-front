@@ -49,7 +49,6 @@ export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
 }
 
 const FAST_TIMEOUT_MS = 8000
-const WAKE_TIMEOUT_MS = 45000
 
 // Parse les erreurs Django qui peuvent être de plusieurs formats :
 // { detail: "..." } ou { username: ["..."] } ou { email: ["..."] } etc.
@@ -107,6 +106,15 @@ export async function apiFetch<T = unknown>(
     body: body !== undefined ? JSON.stringify(body) : undefined,
   }
 
+  // Render (plan gratuit) ferme activement la connexion (ERR_CONNECTION_CLOSED)
+  // pendant qu'il réveille l'instance, au lieu de faire patienter la requête.
+  // Un simple "retry une fois avec un timeout plus long" ne suffit donc pas :
+  // le 2e essai peut se faire fermer tout aussi vite si l'instance n'est
+  // toujours pas prête. On retente plusieurs fois avec un vrai délai entre
+  // chaque tentative, jusqu'à couvrir le temps de réveil annoncé (~50-60s).
+  const WAKE_RETRY_DELAY_MS = 4000
+  const MAX_WAKE_ATTEMPTS = 12 // ~ (8s premier essai) + 11 * (4s pause + 8s essai) ≈ 140s de marge
+
   let response: Response
   try {
     response = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(FAST_TIMEOUT_MS) })
@@ -114,17 +122,30 @@ export async function apiFetch<T = unknown>(
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('sa:waking'))
     }
-    try {
-      response = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(WAKE_TIMEOUT_MS) })
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('sa:awake'))
+
+    let lastError: unknown
+    response = undefined as unknown as Response
+    for (let attempt = 1; attempt <= MAX_WAKE_ATTEMPTS; attempt++) {
+      await new Promise((resolve) => setTimeout(resolve, WAKE_RETRY_DELAY_MS))
+      try {
+        response = await fetch(url, { ...fetchOptions, signal: AbortSignal.timeout(FAST_TIMEOUT_MS) })
+        lastError = undefined
+        break
+      } catch (err) {
+        lastError = err
       }
-    } catch {
+    }
+
+    if (lastError !== undefined) {
       if (!offlineNotified && typeof window !== 'undefined') {
         offlineNotified = true
         window.dispatchEvent(new CustomEvent('sa:offline'))
       }
       throw new OfflineError()
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('sa:awake'))
     }
   }
 
