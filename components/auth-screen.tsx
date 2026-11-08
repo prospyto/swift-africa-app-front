@@ -8,6 +8,7 @@ import {
   Zap, Lock, MapPin,
 } from 'lucide-react'
 import { Spinner } from '@/components/glass'
+import { GoogleButton, GOOGLE_CLIENT_ID } from '@/components/google-button'
 import { useApp } from '@/lib/store'
 import type { Role } from '@/lib/types'
 import { ApiError } from '@/lib/api'
@@ -29,8 +30,12 @@ const FEATURES = [
 ]
 
 export function AuthScreen() {
-  const { login, register } = useApp()
+  const { login, register, loginWithGoogle } = useApp()
   const [mode, setMode] = useState<'login' | 'register'>('login')
+  // Compte Google inconnu : on garde le jeton le temps de choisir un rôle
+  const [pendingGoogle, setPendingGoogle] = useState<
+    { credential: string; email: string; prenom: string } | null
+  >(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPwd, setShowPwd] = useState(false)
@@ -70,6 +75,25 @@ export function AuthScreen() {
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Une erreur est survenue. Réessayez.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function onGoogleCredential(credential: string, role?: Role) {
+    if (loading) return
+    setLoading(true)
+    setError(null)
+    try {
+      // En mode "Inscription", le rôle est déjà choisi : on l'envoie tout de suite.
+      const res = await loginWithGoogle(credential, role ?? (mode === 'register' ? form.role : undefined))
+      if (res.needsRole) {
+        setMode('register') // la couleur d'accent suit le rôle choisi
+        setPendingGoogle({ credential, email: res.email, prenom: res.prenom })
+      }
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Une erreur est survenue. Réessayez.')
+      setPendingGoogle(null)
     } finally {
       setLoading(false)
     }
@@ -181,15 +205,50 @@ export function AuthScreen() {
           {/* Titre */}
           <div className="mb-7">
             <h2 className="text-2xl font-black text-white">
-              {mode === 'login' ? 'Bon retour' : 'Créer un compte'}
+              {pendingGoogle
+                ? 'Un dernier détail'
+                : mode === 'login' ? 'Bon retour' : 'Créer un compte'}
             </h2>
             <p className="mt-1 text-sm text-white/50">
-              {mode === 'login'
-                ? 'Connectez-vous pour continuer'
-                : 'Rejoignez Swift Africa gratuitement'}
+              {pendingGoogle
+                ? `Bienvenue${pendingGoogle.prenom ? ` ${pendingGoogle.prenom}` : ''} ! Choisissez votre rôle pour terminer l'inscription.`
+                : mode === 'login'
+                  ? 'Connectez-vous pour continuer'
+                  : 'Rejoignez Swift Africa gratuitement'}
             </p>
           </div>
 
+          {pendingGoogle ? (
+            <div className="grid gap-4">
+              <p className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/70">
+                Compte Google : <span className="font-semibold text-white">{pendingGoogle.email}</span>
+              </p>
+              <RolePicker value={form.role} onChange={(r) => set('role', r)} />
+              {error && (
+                <div className="flex items-center gap-2 rounded-2xl bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+                  <AlertCircle className="size-4 shrink-0" />
+                  {error}
+                </div>
+              )}
+              <button
+                type="button"
+                disabled={loading}
+                onClick={() => onGoogleCredential(pendingGoogle.credential, form.role)}
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-base font-bold text-white transition-all duration-300 disabled:opacity-40"
+                style={{ backgroundColor: accentColor, boxShadow: `0 8px 24px ${accentColor}50` }}
+              >
+                {loading ? <><Spinner /> Veuillez patienter…</> : 'Créer mon compte'}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setPendingGoogle(null); setError(null) }}
+                className="text-sm text-white/50 transition hover:text-white/80"
+              >
+                Annuler
+              </button>
+            </div>
+          ) : (
+          <>
           {/* Tabs */}
           <div className="mb-6 flex rounded-2xl bg-white/10 p-1">
             {(['login', 'register'] as const).map((m) => (
@@ -272,41 +331,7 @@ export function AuthScreen() {
 
             {/* Sélection rôle */}
             {mode === 'register' && (
-              <div>
-                <label className="mb-2 block text-sm font-semibold text-white/70">
-                  Je m'inscris en tant que
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {ROLES.map((r) => {
-                    const active = form.role === r.value
-                    const Icon = r.icon
-                    return (
-                      <button
-                        key={r.value}
-                        type="button"
-                        onClick={() => set('role', r.value)}
-                        className="flex flex-col items-center gap-2 rounded-2xl border p-3 text-center transition-all duration-300"
-                        style={{
-                          borderColor: active ? r.color : 'rgba(255,255,255,0.1)',
-                          backgroundColor: active ? `${r.color}20` : 'rgba(255,255,255,0.05)',
-                          transform: active ? 'scale(1.03)' : 'scale(1)',
-                          boxShadow: active ? `0 4px 20px ${r.color}40` : 'none',
-                        }}
-                      >
-                        <div
-                          className="flex size-10 items-center justify-center rounded-xl transition"
-                          style={{ backgroundColor: active ? `${r.color}30` : 'rgba(255,255,255,0.08)' }}
-                        >
-                          <Icon className="size-5" style={{ color: active ? r.color : 'rgba(255,255,255,0.4)' }} />
-                        </div>
-                        <span className="text-xs font-bold" style={{ color: active ? r.color : 'rgba(255,255,255,0.5)' }}>
-                          {r.label}
-                        </span>
-                      </button>
-                    )
-                  })}
-                </div>
-              </div>
+              <RolePicker value={form.role} onChange={(r) => set('role', r)} />
             )}
 
             {/* Erreur */}
@@ -337,9 +362,72 @@ export function AuthScreen() {
               )}
             </button>
           </form>
+
+          {/* Connexion / inscription Google (affichée seulement si configurée) */}
+          {GOOGLE_CLIENT_ID && (
+            <>
+              <div className="my-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="text-xs text-white/40">ou</span>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
+              <GoogleButton
+                text={mode === 'login' ? 'signin_with' : 'signup_with'}
+                disabled={loading}
+                onCredential={(c) => onGoogleCredential(c)}
+              />
+              {mode === 'register' && (
+                <p className="mt-2 text-center text-xs text-white/40">
+                  Le rôle choisi ci-dessus sera utilisé pour votre compte Google.
+                </p>
+              )}
+            </>
+          )}
+          </>
+          )}
         </div>
       </div>
     </main>
+  )
+}
+
+function RolePicker({ value, onChange }: { value: Role; onChange: (r: Role) => void }) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-semibold text-white/70">
+        Je m'inscris en tant que
+      </label>
+      <div className="grid grid-cols-3 gap-2">
+        {ROLES.map((r) => {
+          const active = value === r.value
+          const Icon = r.icon
+          return (
+            <button
+              key={r.value}
+              type="button"
+              onClick={() => onChange(r.value)}
+              className="flex flex-col items-center gap-2 rounded-2xl border p-3 text-center transition-all duration-300"
+              style={{
+                borderColor: active ? r.color : 'rgba(255,255,255,0.1)',
+                backgroundColor: active ? `${r.color}20` : 'rgba(255,255,255,0.05)',
+                transform: active ? 'scale(1.03)' : 'scale(1)',
+                boxShadow: active ? `0 4px 20px ${r.color}40` : 'none',
+              }}
+            >
+              <div
+                className="flex size-10 items-center justify-center rounded-xl transition"
+                style={{ backgroundColor: active ? `${r.color}30` : 'rgba(255,255,255,0.08)' }}
+              >
+                <Icon className="size-5" style={{ color: active ? r.color : 'rgba(255,255,255,0.4)' }} />
+              </div>
+              <span className="text-xs font-bold" style={{ color: active ? r.color : 'rgba(255,255,255,0.5)' }}>
+                {r.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }
 

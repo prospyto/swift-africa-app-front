@@ -28,6 +28,11 @@ interface RegisterPayload {
 
 const ALL_ROLES: Role[] = ['acheteur', 'vendeur', 'livreur']
 
+/** Résultat de la connexion Google : soit connecté, soit il faut choisir un rôle. */
+export type GoogleLoginResult =
+  | { needsRole: false }
+  | { needsRole: true; email: string; prenom: string; nom: string }
+
 interface AppState {
   user: User | null
   ready: boolean
@@ -44,6 +49,7 @@ interface AppState {
   refreshOrders: () => Promise<void>
   login: (email: string, password: string) => Promise<void>
   register: (payload: RegisterPayload) => Promise<void>
+  loginWithGoogle: (credential: string, role?: Role) => Promise<GoogleLoginResult>
   logout: () => void
   addToCart: (product: Product) => void
   updateQty: (productId: number, qty: number) => void
@@ -65,7 +71,8 @@ interface BackendMe {
   id: string
   nom: string
   prenom: string
-  telephone: string
+  // null pour les comptes créés via Google (pas de numéro à l'inscription)
+  telephone: string | null
   email: string
   role: Role
   availableRoles?: Role[]
@@ -77,7 +84,7 @@ function backendMeToUser(me: BackendMe): User {
     id: Number(me.id) || 0,
     nom: me.nom,
     prenom: me.prenom,
-    telephone: me.telephone,
+    telephone: me.telephone ?? '',
     email: me.email,
     role: me.role,
     availableRoles: me.availableRoles?.length ? me.availableRoles : [me.role],
@@ -220,6 +227,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser(userData)
   }, [])
 
+  const loginWithGoogle = useCallback(
+    async (credential: string, role?: Role): Promise<GoogleLoginResult> => {
+      const res = await apiFetch<
+        | { needs_role: true; email: string; prenom: string; nom: string }
+        | { token: string; refresh: string; user: BackendMe }
+      >('auth/google/', {
+        auth: false,
+        method: 'POST',
+        body: { credential, role },
+      })
+      if ('needs_role' in res) {
+        return { needsRole: true, email: res.email, prenom: res.prenom, nom: res.nom }
+      }
+      const userData = backendMeToUser(res.user)
+      setSession(res.token, userData.role)
+      setUser(userData)
+      return { needsRole: false }
+    },
+    [],
+  )
+
   const logout = useCallback(() => {
     clearSession()
     setUser(null)
@@ -333,7 +361,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value: AppState = {
     user, ready, offline, waking, mode, availableRoles, setMode,
     products, productsLoading, refreshProducts: loadProducts, cart, orders, refreshOrders: loadOrders,
-    login, register, logout,
+    login, register, loginWithGoogle, logout,
     addToCart, updateQty, removeFromCart, clearCart,
     cartTotal, cartCount,
     checkout, fundOrder, confirmOtp, decaisserOrder, rateOrder,
