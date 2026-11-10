@@ -6,17 +6,10 @@ import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 import { apiFetch } from '@/lib/api'
 
-interface Tab {
-  id: string
-  label: string
-}
-
 interface NavbarProps {
-  tab: string
   onTab: (t: string) => void
   onOpenCart: () => void
   onOpenConversation: (commandeId: number, avecRole: string) => void
-  tabs: Tab[]
 }
 
 interface ConvResume {
@@ -27,7 +20,7 @@ interface ConvResume {
   dernier_auteur: string
 }
 
-export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: NavbarProps) {
+export function Navbar({ onTab, onOpenCart, onOpenConversation }: NavbarProps) {
   const { user, logout, cartCount, mode, availableRoles, setMode } = useApp()
   const [notifOpen, setNotifOpen] = useState(false)
   const [nonLus, setNonLus] = useState(0)
@@ -78,23 +71,6 @@ export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: Nav
             Swift Africa
           </span>
         </div>
-
-        {/* Onglets desktop */}
-        <nav className="glass ml-1 hidden rounded-2xl p-1 md:flex">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => onTab(t.id)}
-              className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
-                tab === t.id
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </nav>
 
         {/* Actions droite */}
         <div className="ml-auto flex items-center gap-2">
@@ -233,22 +209,6 @@ export function Navbar({ tab, onTab, onOpenCart, onOpenConversation, tabs }: Nav
         </div>
       </div>
 
-      {/* Onglets mobile */}
-      <nav className="glass mx-auto mt-2 flex max-w-7xl rounded-2xl p-1 md:hidden">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            onClick={() => onTab(t.id)}
-            className={`flex-1 rounded-xl px-2 py-2 text-xs font-semibold transition ${
-              tab === t.id
-                ? 'bg-primary text-primary-foreground'
-                : 'text-muted-foreground'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
     </header>
   )
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useApp } from '@/lib/store'
 import { AuthScreen } from '@/components/auth-screen'
 import { Navbar } from '@/components/navbar'
+import { BottomNav } from '@/components/bottom-nav'
 import { Catalog } from '@/components/catalog'
 import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
@@ -56,16 +57,14 @@ function AppShellInner() {
   if (!user) return <AuthScreen />
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-28">
       <Navbar
-        tab={currentTab}
         onTab={setTab}
         onOpenCart={() => setCartOpen(true)}
         onOpenConversation={(commandeId, avecRole) => {
           setOpenConversationFor({ commandeId, avecRole })
           setTab('commandes')
         }}
-        tabs={tabs}
       />
       {currentTab === 'catalogue' && <Catalog />}
       {currentTab === 'commandes' && (
@@ -75,6 +74,7 @@ function AppShellInner() {
         />
       )}
       {currentTab === 'espace' && <Espace />}
+      <BottomNav tabs={tabs} tab={currentTab} onTab={setTab} role={activeRole} />
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}

@@ -10,6 +10,8 @@ export interface User {
   /** All roles this account can operate as (multi-role accounts). */
   availableRoles?: Role[]
   score?: number
+  /** Note moyenne reçue (sur 5) par rôle ; 0 = aucune note. */
+  scores?: Partial<Record<Role, number>>
 }
 
 export interface Product {
