@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '@/lib/store'
 import { AuthScreen } from '@/components/auth-screen'
 import { Navbar } from '@/components/navbar'
 import { BottomNav } from '@/components/bottom-nav'
+import { GuestBar } from '@/components/guest-bar'
 import { Catalog } from '@/components/catalog'
 import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
@@ -34,6 +35,10 @@ const TABS_BY_ROLE = {
 function AppShellInner() {
   const { user, ready, mode } = useApp()
   const [cartOpen, setCartOpen] = useState(false)
+  // Visiteur : l'écran de connexion s'ouvre sur demande. `fromCart` sert à
+  // rouvrir le panier juste après la connexion.
+  const [authOpen, setAuthOpen] = useState(false)
+  const [fromCart, setFromCart] = useState(false)
   const [openConversationFor, setOpenConversationFor] = useState<{ commandeId: number; avecRole: string } | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
@@ -46,6 +51,16 @@ function AppShellInner() {
   // Quand le rôle change, revenir au premier onglet
   const currentTab = tabs.some((t) => t.id === tab) ? tab : tabs[0].id
 
+  // Après connexion depuis le panier : on rouvre le panier (acheteur seulement,
+  // le panier n'existe pas pour les autres rôles).
+  useEffect(() => {
+    if (user && fromCart) {
+      if (user.role === 'acheteur') setCartOpen(true)
+      setFromCart(false)
+      setAuthOpen(false)
+    }
+  }, [user, fromCart])
+
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -54,7 +69,22 @@ function AppShellInner() {
     )
   }
 
-  if (!user) return <AuthScreen />
+  if (!user) {
+    if (authOpen) return <AuthScreen onClose={() => setAuthOpen(false)} />
+    return (
+      <div className="min-h-screen pb-12">
+        <GuestBar onOpenCart={() => setCartOpen(true)} onLogin={() => setAuthOpen(true)} />
+        <Catalog />
+        <CartDrawer
+          guest
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          onOrdered={() => {}}
+          onLoginRequired={() => { setFromCart(true); setAuthOpen(true) }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen pb-28">

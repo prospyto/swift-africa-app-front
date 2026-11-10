@@ -8,20 +8,29 @@ import { Spinner } from '@/components/glass'
 import { useApp, formatXOF } from '@/lib/store'
 import { useToast } from '@/components/toast'
 
-const VILLES = ['Dakar', 'Abidjan', 'Bamako', 'Niamey', 'Lomé', 'Cotonou']
+const VILLES = [
+  'Cotonou', 'Porto-Novo', 'Abomey-Calavi', 'Parakou',
+  'Dakar', 'Abidjan', 'Bamako', 'Niamey', 'Lomé',
+]
 
 export function CartDrawer({
   open,
   onClose,
   onOrdered,
+  guest = false,
+  onLoginRequired,
 }: {
   open: boolean
   onClose: () => void
   onOrdered: () => void
+  /** Visiteur non connecté : le panier reste utilisable, la commande demande un compte. */
+  guest?: boolean
+  onLoginRequired?: () => void
 }) {
   const { cart, updateQty, removeFromCart, cartTotal, checkout } = useApp()
   const { toast } = useToast()
   const [adresseLivraison, setAdresseLivraison] = useState('')
+  const [ville, setVille] = useState(VILLES[0])
   const [loading, setLoading] = useState(false)
 
   async function handleCheckout() {
@@ -32,7 +41,7 @@ export function CartDrawer({
     }
     setLoading(true)
     try {
-      await checkout(adresseLivraison)
+      await checkout(adresseLivraison.trim(), ville)
       toast('Commande passée avec succès ! 🎉', 'success')
       onOrdered()
       onClose()
@@ -144,7 +153,9 @@ export function CartDrawer({
 
           {cart.length > 0 && (
             <div className="border-t border-border/60 p-5">
-              <div className="mb-4 grid grid-cols-2 gap-3">
+              {!guest && (
+              <div className="mb-4 grid gap-3">
+                <SelectVille label="🏙️ Ville de livraison" value={ville} onChange={setVille} />
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-gray-700">
                     📍 Adresse de livraison
@@ -161,6 +172,7 @@ export function CartDrawer({
                   </p>
                 </div>
               </div>
+              )}
 
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Total</span>
@@ -177,6 +189,14 @@ export function CartDrawer({
                 </span>
               </div>
 
+              {guest ? (
+                <Button
+                  onClick={() => { onClose(); onLoginRequired?.() }}
+                  className="glass-cta h-12 w-full rounded-2xl bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90"
+                >
+                  Se connecter pour commander
+                </Button>
+              ) : (
               <Button
                 onClick={handleCheckout}
                 disabled={loading}
@@ -190,6 +210,7 @@ export function CartDrawer({
                   'Financer la commande'
                 )}
               </Button>
+              )}
             </div>
           )}
         </div>

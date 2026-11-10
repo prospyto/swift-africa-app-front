@@ -145,7 +145,11 @@ export function Catalog() {
                       )}
                     </div>
                     <button
-                      onClick={() => handleAdd(p)}
+                      onClick={(e) => {
+                        // sans ça, le clic remonte à la carte et ouvre aussi la fiche produit
+                        e.stopPropagation()
+                        handleAdd(p)
+                      }}
                       className={`glass-cta flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
                         added === p.id
                           ? 'bg-success text-success-foreground'

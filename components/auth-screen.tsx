@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   Truck, ShieldCheck, Store, ShoppingBag,
   PackageCheck, AlertCircle, Eye, EyeOff,
-  Zap, Lock, MapPin,
+  Zap, Lock, MapPin, ArrowLeft,
 } from 'lucide-react'
 import { Spinner } from '@/components/glass'
 import { GoogleButton, GOOGLE_CLIENT_ID } from '@/components/google-button'
@@ -29,7 +29,7 @@ const FEATURES = [
   { icon: Zap,         label: 'Commission 0% — 2 mois', color: '#8b5cf6' },
 ]
 
-export function AuthScreen() {
+export function AuthScreen({ onClose }: { onClose?: () => void } = {}) {
   const { login, register, loginWithGoogle } = useApp()
   const [mode, setMode] = useState<'login' | 'register'>('login')
   // Compte Google inconnu : on garde le jeton le temps de choisir un rôle
@@ -109,6 +109,16 @@ export function AuthScreen() {
         background: 'linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 40%, #16213e 70%, #0f3460 100%)',
       }}
     >
+      {onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute left-4 top-4 z-20 flex items-center gap-1.5 rounded-xl bg-white/10 px-3 py-2 text-sm font-semibold text-white/80 transition hover:bg-white/20"
+        >
+          <ArrowLeft className="size-4" /> Retour au catalogue
+        </button>
+      )}
+
       {/* Cercles décoratifs */}
       <div
         className="pointer-events-none absolute -left-40 -top-40 size-[600px] rounded-full opacity-20 blur-3xl transition-all duration-700"
