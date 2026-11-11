@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { Fragment, useState } from 'react'
 import Image from 'next/image'
 import { X, Minus, Plus, Trash2, ShieldCheck } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -31,7 +31,14 @@ export function CartDrawer({
   const { toast } = useToast()
   const [adresseLivraison, setAdresseLivraison] = useState('')
   const [ville, setVille] = useState(VILLES[0])
+  const [etiquette, setEtiquette] = useState('')
   const [loading, setLoading] = useState(false)
+
+  // panier rangé par boutique (une commande par boutique)
+  const parBoutique = [...cart].sort((a, b) =>
+    String(a.product.vendeur_id ?? a.product.vendeur).localeCompare(String(b.product.vendeur_id ?? b.product.vendeur)),
+  )
+  const nbBoutiques = new Set(cart.map((i) => i.product.vendeur_id ?? i.product.vendeur)).size
 
   async function handleCheckout() {
     if (cart.length === 0 || loading) return
@@ -41,8 +48,12 @@ export function CartDrawer({
     }
     setLoading(true)
     try {
-      await checkout(adresseLivraison.trim(), ville)
-      toast('Commande passée avec succès ! 🎉', 'success')
+      const crees = await checkout(adresseLivraison.trim(), ville, etiquette)
+      setEtiquette('')
+      toast(
+        crees.length > 1 ? `${crees.length} commandes passées (une par boutique) ! 🎉` : 'Commande passée avec succès ! 🎉',
+        'success',
+      )
       onOrdered()
       onClose()
     } catch (err: unknown) {
@@ -88,11 +99,20 @@ export function CartDrawer({
               </div>
             ) : (
               <ul className="grid gap-3">
-                {cart.map((item) => {
+                {parBoutique.map((item, idx) => {
                   const price = item.product.prix_solde ?? item.product.prix
+                  const cle = item.product.vendeur_id ?? item.product.vendeur
+                  const precedent = parBoutique[idx - 1]
+                  const nouvelleBoutique =
+                    idx === 0 || (precedent.product.vendeur_id ?? precedent.product.vendeur) !== cle
                   return (
+                    <Fragment key={item.product.id}>
+                    {nouvelleBoutique && (
+                      <li className="px-1 pt-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {item.product.vendeur || 'Boutique'}
+                      </li>
+                    )}
                     <li
-                      key={item.product.id}
                       className="glass flex gap-3 rounded-2xl p-3"
                     >
                       <div className="relative size-16 shrink-0 overflow-hidden rounded-xl bg-secondary">
@@ -145,6 +165,7 @@ export function CartDrawer({
                         </div>
                       </div>
                     </li>
+                    </Fragment>
                   )
                 })}
               </ul>
@@ -155,6 +176,20 @@ export function CartDrawer({
             <div className="border-t border-border/60 p-5">
               {!guest && (
               <div className="mb-4 grid gap-3">
+                <div>
+                  <label htmlFor="commande-etiquette" className="mb-1.5 block text-sm font-semibold text-gray-700">
+                    🏷️ Nom de la commande <span className="font-normal text-gray-400">(facultatif)</span>
+                  </label>
+                  <input
+                    id="commande-etiquette"
+                    type="text"
+                    maxLength={60}
+                    value={etiquette}
+                    onChange={(e) => setEtiquette(e.target.value)}
+                    placeholder="Ex: Cadeau maman, Tabaski…"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#ff6b00] focus:ring-2 focus:ring-[#ff6b00]/20 transition"
+                  />
+                </div>
                 <SelectVille label="🏙️ Ville de livraison" value={ville} onChange={setVille} />
                 <div>
                   <label className="mb-1.5 block text-sm font-semibold text-gray-700">
@@ -174,12 +209,16 @@ export function CartDrawer({
               </div>
               )}
 
-              <div className="mb-4 flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total</span>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Produits</span>
                 <span className="text-xl font-bold">
                   {formatXOF(cartTotal)}
                 </span>
               </div>
+              <p className="mb-4 text-xs text-muted-foreground">
+                + livraison, calculée selon la ville.
+                {nbBoutiques > 1 && ` Vous avez ${nbBoutiques} boutiques : une commande (et une livraison) par boutique.`}
+              </p>
 
               <div className="mb-4 flex items-start gap-2 rounded-2xl bg-success/10 p-3 text-xs text-success">
                 <ShieldCheck className="size-4 shrink-0" />
@@ -204,10 +243,10 @@ export function CartDrawer({
               >
                 {loading ? (
                   <span className="flex items-center gap-2">
-                    <Spinner /> Financement…
+                    <Spinner /> Envoi…
                   </span>
                 ) : (
-                  'Financer la commande'
+                  nbBoutiques > 1 ? `Passer ${nbBoutiques} commandes` : 'Passer la commande'
                 )}
               </Button>
               )}

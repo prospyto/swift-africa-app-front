@@ -162,6 +162,7 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
+          {order.etiquette && <p className="text-sm font-bold">{order.etiquette}</p>}
           <p className="text-xs text-muted-foreground">Commande #{String(order.id).slice(-6)}</p>
           <div className="mt-1 flex items-center gap-2 text-sm font-semibold">
             {order.ville_depart}
@@ -182,6 +183,7 @@ function OrderCard({ order, activeRole, onOpenMessages }: { order: Order; active
             <p className="text-lg font-bold">{formatXOF(order.total)}</p>
             <p className="text-xs text-muted-foreground">
               {order.produits.reduce((s, i) => s + i.quantite, 0)} article(s)
+              {order.frais_livraison ? ` · dont ${formatXOF(order.frais_livraison)} de livraison` : ''}
             </p>
           </div>
         </div>

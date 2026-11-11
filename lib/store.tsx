@@ -58,7 +58,8 @@ interface AppState {
   clearCart: () => void
   cartTotal: number
   cartCount: number
-  checkout: (adresse: string, ville: string) => Promise<Order>
+  /** Une commande par boutique : renvoie les commandes créées. */
+  checkout: (adresse: string, ville: string, etiquette?: string) => Promise<Order[]>
   fundOrder: (orderId: number) => Promise<void>
   confirmOtp: (orderId: number, code: string) => Promise<boolean>
   decaisserOrder: (orderId: number) => Promise<void>
@@ -353,22 +354,50 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ----- orders -----
   const checkout = useCallback(
-    async (adresse: string, ville: string): Promise<Order> => {
-      // Ville de départ : celle du premier produit ; sinon le backend
-      // prend la ville d'arrivée.
-      const villeDepart = cart[0]?.product.ville
-      const res = await apiFetch<Order>('commandes/', {
-        method: 'POST',
-        body: {
-          produits: cart.map((i) => ({ id: i.product.id, quantite: i.quantite })),
-          ville_arrivee: ville,
-          adresse_livraison: adresse,
-          ...(villeDepart ? { ville_depart: villeDepart } : {}),
-        },
-      })
-      setOrders((prev) => [res, ...prev])
-      setCart([])
-      return res
+    async (adresse: string, ville: string, etiquette?: string): Promise<Order[]> => {
+      // Règle : une commande = une boutique. On scinde le panier par boutique.
+      const groupes = new Map<string, CartItem[]>()
+      for (const item of cart) {
+        const cle = String(item.product.vendeur_id ?? item.product.vendeur)
+        groupes.set(cle, [...(groupes.get(cle) ?? []), item])
+      }
+      const label = (etiquette ?? '').trim()
+      const crees: Order[] = []
+      try {
+        for (const items of groupes.values()) {
+          const boutique = items[0].product.vendeur
+          const nom = label
+            ? (groupes.size > 1 && boutique ? `${label} · ${boutique}` : label).slice(0, 80)
+            : ''
+          // Ville de départ : celle du premier produit de la boutique ; sinon le
+          // backend prend la ville d'arrivée.
+          const villeDepart = items[0].product.ville
+          const res = await apiFetch<Order>('commandes/', {
+            method: 'POST',
+            body: {
+              produits: items.map((i) => ({ id: i.product.id, quantite: i.quantite })),
+              ville_arrivee: ville,
+              adresse_livraison: adresse,
+              ...(nom ? { etiquette: nom } : {}),
+              ...(villeDepart ? { ville_depart: villeDepart } : {}),
+            },
+          })
+          crees.push(res)
+          // on retire du panier ce qui est commandé, pour ne jamais commander deux fois
+          const ids = new Set(items.map((i) => i.product.id))
+          setCart((prev) => prev.filter((i) => !ids.has(i.product.id)))
+        }
+      } catch (err) {
+        if (crees.length > 0) setOrders((prev) => [...crees.reverse(), ...prev])
+        const reste = err instanceof Error ? err.message : 'Erreur lors de la commande'
+        throw new Error(
+          crees.length > 0
+            ? `${crees.length} commande(s) passée(s), mais une boutique a échoué : ${reste} Elle reste dans votre panier.`
+            : reste,
+        )
+      }
+      setOrders((prev) => [...crees.slice().reverse(), ...prev])
+      return crees
     },
     [cart],
   )
