@@ -158,12 +158,15 @@ export function ProductModal({ product, onClose, onAddCart, inCart }: ProductMod
 
           <button
             onClick={handleAdd}
+            disabled={product.stock === 0}
             className="flex items-center gap-2 rounded-2xl px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:scale-105"
             style={{
-              backgroundColor: added ? '#10b981' : inCart ? '#f59e0b' : '#ff6b00',
+              backgroundColor: product.stock === 0 ? '#9ca3af' : added ? '#10b981' : inCart ? '#f59e0b' : '#ff6b00',
             }}
           >
-            {added ? (
+            {product.stock === 0 ? (
+              <>Épuisé</>
+            ) : added ? (
               <><Check className="size-4" /> Ajouté !</>
             ) : inCart ? (
               <><ShoppingCart className="size-4" /> Encore</>

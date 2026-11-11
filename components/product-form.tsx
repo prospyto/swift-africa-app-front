@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { ArrowLeft, Upload, AlertCircle, MapPin, CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -8,7 +8,8 @@ import { GlassCard, Spinner } from '@/components/glass'
 import { multipartFetch } from '@/lib/api-multipart'
 import { ApiError, OfflineError } from '@/lib/api'
 import { useApp } from '@/lib/store'
-import type { Product } from '@/lib/types'
+import { apiFetch } from '@/lib/api'
+import type { Product, Allee } from '@/lib/types'
 
 interface ProductFormProps {
   product?: Product
@@ -32,7 +33,15 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     categorie: product?.categorie || '',
     ville: product?.ville || '',
     adresse_point_vente: (product as any)?.adresse_point_vente || '',
+    allee: product?.allee ? String(product.allee) : '',
+    // vide = stock non suivi ; 1 = pièce unique
+    stock: product?.stock != null ? String(product.stock) : '',
   })
+  const [allees, setAllees] = useState<Allee[]>([])
+
+  useEffect(() => {
+    apiFetch<Allee[]>('allees/').then(setAllees).catch(() => setAllees([]))
+  }, [])
 
   const [image, setImage] = useState<File | null>(null)
 
@@ -113,6 +122,8 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       if (form.prix_solde) formData.append('prix_solde', form.prix_solde)
       formData.append('categorie', form.categorie)
       formData.append('ville', form.ville)
+      formData.append('allee', form.allee) // vide = aucune allée
+      formData.append('stock', form.stock) // vide = stock non suivi
 
       if (image) {
         formData.append('image', image)
@@ -298,6 +309,56 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
                 step="100"
                 className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
+            </div>
+          </div>
+
+          {/* Allée & Stock */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label htmlFor="produit-allee" className="mb-2 block text-sm font-medium">
+                Allée de la boutique
+              </label>
+              <select
+                id="produit-allee"
+                value={form.allee}
+                onChange={(e) => setForm({ ...form, allee: e.target.value })}
+                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              >
+                <option value="">Aucune</option>
+                {allees.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.nom}
+                  </option>
+                ))}
+              </select>
+              {allees.length === 0 && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Créez vos allées dans « Ma boutique ».
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="produit-stock" className="mb-2 block text-sm font-medium">
+                Quantité en stock
+              </label>
+              <input
+                id="produit-stock"
+                type="number"
+                min={0}
+                step={1}
+                inputMode="numeric"
+                value={form.stock}
+                onChange={(e) => setForm({ ...form, stock: e.target.value })}
+                placeholder="Laisser vide = illimité"
+                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                type="button"
+                onClick={() => setForm({ ...form, stock: '1' })}
+                className="mt-1 text-xs text-primary hover:underline"
+              >
+                Pièce unique (1 seul exemplaire)
+              </button>
             </div>
           </div>
 

@@ -10,11 +10,13 @@ import type { Boutique } from '@/lib/types'
 /** Page publique d'une boutique : visible aussi sans connexion. */
 export function BoutiquePage({ id, onBack }: { id: number; onBack: () => void }) {
   const [boutique, setBoutique] = useState<Boutique | null>(null)
+  const [alleeId, setAlleeId] = useState<number | null>(null)
   const [state, setState] = useState<'loading' | 'ok' | 'error'>('loading')
 
   useEffect(() => {
     let annule = false
     setState('loading')
+    setAlleeId(null)
     apiFetch<Boutique>(`boutiques/${id}/`, { auth: false })
       .then((b) => {
         if (annule) return
@@ -76,8 +78,27 @@ export function BoutiquePage({ id, onBack }: { id: number; onBack: () => void })
             </div>
           </GlassCard>
         )}
+
+        {state === 'ok' && boutique && (boutique.allees?.length ?? 0) > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Allées de la boutique">
+            {[{ id: null as number | null, nom: 'Toutes les allées' }, ...(boutique.allees ?? [])].map((a) => (
+              <button
+                key={a.id ?? 'toutes'}
+                onClick={() => setAlleeId(a.id)}
+                aria-pressed={alleeId === a.id}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                  alleeId === a.id
+                    ? 'bg-primary text-primary-foreground'
+                    : 'glass text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {a.nom}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
-      {state === 'ok' && <Catalog boutiqueId={id} />}
+      {state === 'ok' && <Catalog boutiqueId={id} alleeId={alleeId} />}
     </div>
   )
 }
