@@ -38,7 +38,7 @@ export function BoutiquePage({ id, onBack }: { id: number; onBack: () => void })
           onClick={onBack}
           className="mb-4 flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeft className="size-4" /> Retour au catalogue
+          <ArrowLeft className="size-4" /> Retour
         </button>
 
         {state === 'loading' && (

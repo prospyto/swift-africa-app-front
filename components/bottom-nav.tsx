@@ -1,6 +1,6 @@
 'use client'
 
-import { ClipboardList, LayoutGrid, Store, Truck, User } from 'lucide-react'
+import { ClipboardList, Home, LayoutGrid, Store, Truck, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Role } from '@/lib/types'
 
@@ -17,6 +17,8 @@ const ESPACE_ICON: Record<Role, LucideIcon> = {
 }
 
 function iconFor(tabId: string, role: Role): LucideIcon {
+  if (tabId === 'accueil') return Home
+  if (tabId === 'boutiques') return Store
   if (tabId === 'catalogue') return LayoutGrid
   if (tabId === 'commandes') return ClipboardList
   return ESPACE_ICON[role]
