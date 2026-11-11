@@ -7,6 +7,8 @@ import { Navbar } from '@/components/navbar'
 import { BottomNav } from '@/components/bottom-nav'
 import { GuestBar } from '@/components/guest-bar'
 import { Catalog } from '@/components/catalog'
+import { BoutiquesList } from '@/components/boutiques-list'
+import { VendeurAccueil } from '@/components/vendeur-accueil'
 import { BoutiquePage } from '@/components/boutique-page'
 import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
@@ -17,18 +19,18 @@ import { ToastProvider } from '@/components/toast'
 // Onglets selon le rôle actif
 const TABS_BY_ROLE = {
   acheteur: [
-    { id: 'catalogue', label: 'Catalogue' },
+    { id: 'boutiques', label: 'Boutiques' },
+    { id: 'catalogue', label: 'Produits' },
     { id: 'commandes', label: 'Mes commandes' },
     { id: 'espace', label: 'Mon espace' },
   ],
   vendeur: [
-    { id: 'espace', label: 'Mes produits' },
-    { id: 'catalogue', label: 'Catalogue' },
+    { id: 'accueil', label: 'Accueil' },
     { id: 'commandes', label: 'Commandes reçues' },
+    { id: 'espace', label: 'Mes produits' },
   ],
   livreur: [
     { id: 'espace', label: 'Mes missions' },
-    { id: 'catalogue', label: 'Catalogue' },
     { id: 'commandes', label: 'Historique' },
   ],
 }
@@ -80,7 +82,7 @@ function AppShellInner() {
         {boutiqueId != null ? (
           <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
         ) : (
-          <Catalog onOpenBoutique={setBoutiqueId} />
+          <BoutiquesList onOpenBoutique={setBoutiqueId} />
         )}
         <CartDrawer
           guest
@@ -103,6 +105,13 @@ function AppShellInner() {
           setTab('commandes')
         }}
       />
+      {currentTab === 'accueil' && <VendeurAccueil onTab={setTab} />}
+      {currentTab === 'boutiques' &&
+        (boutiqueId != null ? (
+          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
+        ) : (
+          <BoutiquesList onOpenBoutique={setBoutiqueId} />
+        ))}
       {currentTab === 'catalogue' &&
         (boutiqueId != null ? (
           <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
