@@ -42,10 +42,10 @@ export function Catalog() {
       <div className="mb-6 flex flex-col gap-4">
         <div>
           <h1 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
-            Collection Premium
+            Trouvez tout ce dont vous avez besoin
           </h1>
           <p className="mt-1 text-muted-foreground">
-            Du mobilier d&apos;exception, disponible pour tous les rôles.
+            Des produits de vendeurs de confiance, livrés chez vous.
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export function Catalog() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher un meuble, un vendeur…"
+              placeholder="Rechercher un produit, un vendeur…"
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground/70"
             />
           </div>
