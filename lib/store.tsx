@@ -27,6 +27,7 @@ interface RegisterPayload {
 }
 
 const ALL_ROLES: Role[] = ['acheteur', 'vendeur', 'livreur']
+const CART_KEY = 'sa_cart'
 
 /** Résultat de la connexion Google : soit connecté, soit il faut choisir un rôle. */
 export type GoogleLoginResult =
@@ -57,7 +58,7 @@ interface AppState {
   clearCart: () => void
   cartTotal: number
   cartCount: number
-  checkout: (depart: string, arrivee: string) => Promise<Order>
+  checkout: (adresse: string, ville: string) => Promise<Order>
   fundOrder: (orderId: number) => Promise<void>
   confirmOtp: (orderId: number, code: string) => Promise<boolean>
   decaisserOrder: (orderId: number) => Promise<void>
@@ -77,6 +78,7 @@ interface BackendMe {
   role: Role
   availableRoles?: Role[]
   score?: number
+  scores?: Partial<Record<Role, number>>
 }
 
 function backendMeToUser(me: BackendMe): User {
@@ -89,6 +91,7 @@ function backendMeToUser(me: BackendMe): User {
     role: me.role,
     availableRoles: me.availableRoles?.length ? me.availableRoles : [me.role],
     score: me.score,
+    scores: me.scores,
   }
 }
 
@@ -101,6 +104,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [products, setProducts] = useState<Product[]>([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [cart, setCart] = useState<CartItem[]>([])
+  // Le panier est lu après le premier rendu (localStorage n'existe pas côté
+  // serveur) ; on n'écrit qu'une fois cette lecture faite, sinon le panier
+  // sauvegardé serait écrasé par un panier vide.
+  const [cartLoaded, setCartLoaded] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
 
   const availableRoles = useMemo<Role[]>(() => {
@@ -166,8 +173,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const loadProducts = useCallback(async () => {
     setProductsLoading(true)
     try {
-      const data = await apiFetch<Product[]>('produits/', { auth: false })
-      setProducts(data)
+      // L'API renvoie `vendeur` = identifiant et `vendeur_nom` = nom de la boutique.
+      type Brut = Omit<Product, 'vendeur' | 'vendeur_id'> & { vendeur: number | string | null; vendeur_nom?: string | null }
+      const data = await apiFetch<Brut[]>('produits/', { auth: false })
+      setProducts(
+        data.map((p) => ({
+          ...p,
+          vendeur: p.vendeur_nom ?? (typeof p.vendeur === 'string' ? p.vendeur : ''),
+          vendeur_id: typeof p.vendeur === 'number' ? p.vendeur : null,
+        })),
+      )
     } catch {
       setProducts([])
     } finally {
@@ -178,6 +193,49 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     loadProducts()
   }, [loadProducts])
+
+  // ----- panier : sauvegarde dans le navigateur (visiteur ou connecté) -----
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(CART_KEY)
+      if (raw) {
+        const saved = JSON.parse(raw)
+        if (Array.isArray(saved)) {
+          setCart(saved.filter((i) => i?.product?.id != null && i.quantite > 0))
+        }
+      }
+    } catch {
+      // stockage indisponible ou contenu illisible : on part d'un panier vide
+    }
+    setCartLoaded(true)
+  }, [])
+
+  useEffect(() => {
+    if (!cartLoaded) return
+    try {
+      localStorage.setItem(CART_KEY, JSON.stringify(cart))
+    } catch {
+      // navigation privée / quota : le panier reste en mémoire seulement
+    }
+  }, [cart, cartLoaded])
+
+  // Remet à jour prix et noms depuis le catalogue frais, et retire les
+  // produits qui n'existent plus (le panier sauvegardé peut dater).
+  useEffect(() => {
+    if (!cartLoaded || productsLoading || products.length === 0) return
+    setCart((prev) => {
+      const next = prev
+        .map((i) => {
+          const fresh = products.find((p) => p.id === i.product.id)
+          return fresh ? { ...i, product: fresh } : null
+        })
+        .filter((i): i is CartItem => i !== null)
+      const same =
+        next.length === prev.length &&
+        next.every((n, idx) => n.product === prev[idx].product && n.quantite === prev[idx].quantite)
+      return same ? prev : next
+    })
+  }, [products, productsLoading, cartLoaded])
 
   // ----- orders (fetch au login et toutes les 30s) -----
   const loadOrders = useCallback(async () => {
@@ -295,13 +353,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   // ----- orders -----
   const checkout = useCallback(
-    async (depart: string, arrivee: string): Promise<Order> => {
+    async (adresse: string, ville: string): Promise<Order> => {
+      // Ville de départ : celle du premier produit ; sinon le backend
+      // prend la ville d'arrivée.
+      const villeDepart = cart[0]?.product.ville
       const res = await apiFetch<Order>('commandes/', {
         method: 'POST',
         body: {
           produits: cart.map((i) => ({ id: i.product.id, quantite: i.quantite })),
-          ville_depart: depart,
-          ville_arrivee: arrivee,
+          ville_arrivee: ville,
+          adresse_livraison: adresse,
+          ...(villeDepart ? { ville_depart: villeDepart } : {}),
         },
       })
       setOrders((prev) => [res, ...prev])

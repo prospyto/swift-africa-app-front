@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useApp } from '@/lib/store'
 import { AuthScreen } from '@/components/auth-screen'
 import { Navbar } from '@/components/navbar'
+import { BottomNav } from '@/components/bottom-nav'
+import { GuestBar } from '@/components/guest-bar'
 import { Catalog } from '@/components/catalog'
+import { BoutiquePage } from '@/components/boutique-page'
 import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
 import { CartDrawer } from '@/components/cart-drawer'
@@ -33,6 +36,12 @@ const TABS_BY_ROLE = {
 function AppShellInner() {
   const { user, ready, mode } = useApp()
   const [cartOpen, setCartOpen] = useState(false)
+  // Visiteur : l'écran de connexion s'ouvre sur demande. `fromCart` sert à
+  // rouvrir le panier juste après la connexion.
+  const [authOpen, setAuthOpen] = useState(false)
+  const [fromCart, setFromCart] = useState(false)
+  // Boutique ouverte (page publique), au-dessus du catalogue
+  const [boutiqueId, setBoutiqueId] = useState<number | null>(null)
   const [openConversationFor, setOpenConversationFor] = useState<{ commandeId: number; avecRole: string } | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
@@ -45,6 +54,16 @@ function AppShellInner() {
   // Quand le rôle change, revenir au premier onglet
   const currentTab = tabs.some((t) => t.id === tab) ? tab : tabs[0].id
 
+  // Après connexion depuis le panier : on rouvre le panier (acheteur seulement,
+  // le panier n'existe pas pour les autres rôles).
+  useEffect(() => {
+    if (user && fromCart) {
+      if (user.role === 'acheteur') setCartOpen(true)
+      setFromCart(false)
+      setAuthOpen(false)
+    }
+  }, [user, fromCart])
+
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -53,21 +72,43 @@ function AppShellInner() {
     )
   }
 
-  if (!user) return <AuthScreen />
+  if (!user) {
+    if (authOpen) return <AuthScreen onClose={() => setAuthOpen(false)} />
+    return (
+      <div className="min-h-screen pb-12">
+        <GuestBar onOpenCart={() => setCartOpen(true)} onLogin={() => setAuthOpen(true)} />
+        {boutiqueId != null ? (
+          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
+        ) : (
+          <Catalog onOpenBoutique={setBoutiqueId} />
+        )}
+        <CartDrawer
+          guest
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          onOrdered={() => {}}
+          onLoginRequired={() => { setFromCart(true); setAuthOpen(true) }}
+        />
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen pb-12">
+    <div className="min-h-screen pb-28">
       <Navbar
-        tab={currentTab}
         onTab={setTab}
         onOpenCart={() => setCartOpen(true)}
         onOpenConversation={(commandeId, avecRole) => {
           setOpenConversationFor({ commandeId, avecRole })
           setTab('commandes')
         }}
-        tabs={tabs}
       />
-      {currentTab === 'catalogue' && <Catalog />}
+      {currentTab === 'catalogue' &&
+        (boutiqueId != null ? (
+          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
+        ) : (
+          <Catalog onOpenBoutique={setBoutiqueId} />
+        ))}
       {currentTab === 'commandes' && (
         <Orders
           openConversationFor={openConversationFor}
@@ -75,6 +116,7 @@ function AppShellInner() {
         />
       )}
       {currentTab === 'espace' && <Espace />}
+      <BottomNav tabs={tabs} tab={currentTab} onTab={(t) => { setBoutiqueId(null); setTab(t) }} role={activeRole} />
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}

@@ -10,6 +10,8 @@ export interface User {
   /** All roles this account can operate as (multi-role accounts). */
   availableRoles?: Role[]
   score?: number
+  /** Note moyenne reçue (sur 5) par rôle ; 0 = aucune note. */
+  scores?: Partial<Record<Role, number>>
 }
 
 export interface Product {
@@ -22,7 +24,18 @@ export interface Product {
   image_url?: string | null
   categorie: string
   vendeur: string
+  /** identifiant de la boutique (page publique /boutique) */
+  vendeur_id?: number | null
   ville: string
+}
+
+export interface Boutique {
+  id: number
+  nom: string
+  description: string
+  adresse_point_vente?: string | null
+  nb_produits: number
+  villes: string[]
 }
 
 export interface CartItem {

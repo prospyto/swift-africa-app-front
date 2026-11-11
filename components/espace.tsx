@@ -85,8 +85,13 @@ function Stat({
 }
 
 // ─── ACHETEUR ────────────────────────────────────────────────
+// Score réel reçu du backend (0 = aucune note), jamais une valeur inventée.
+function formatScore(score: number | undefined) {
+  return `${(score ?? 0).toFixed(1)} / 5`
+}
+
 function BuyerSpace() {
-  const { orders } = useApp()
+  const { orders, user } = useApp()
   const escrow = orders
     .filter((o) => o.statut === 'finance' || o.statut === 'en_livraison')
     .reduce((s, o) => s + o.total, 0)
@@ -98,7 +103,7 @@ function BuyerSpace() {
         <Stat icon={Package} label="Commandes" value={String(orders.length)} />
         <Stat icon={ShieldCheck} label="Fonds en Escrow" value={formatXOF(escrow)} accent="success" />
         <Stat icon={Truck} label="Livrées" value={String(done)} accent="success" />
-        <Stat icon={Star} label="Score acheteur" value="4.8 / 5" />
+        <Stat icon={Star} label="Score acheteur" value={formatScore(user?.scores?.acheteur)} />
       </div>
       <WalletCard />
     </div>
@@ -107,7 +112,7 @@ function BuyerSpace() {
 
 // ─── VENDEUR ─────────────────────────────────────────────────
 function SellerSpace() {
-  const { refreshProducts } = useApp()
+  const { refreshProducts, user } = useApp()
   const [products, setProducts] = useState<Product[]>([])
   const [view, setView] = useState<'dashboard' | 'add' | 'edit'>('dashboard')
   const [editProduct, setEditProduct] = useState<Product | null>(null)
@@ -161,7 +166,7 @@ function SellerSpace() {
       <div className="grid gap-5 sm:grid-cols-3">
         <Stat icon={Package} label="Produits en ligne" value={String(products.length)} />
         <Stat icon={Percent} label="Commission plateforme" value="12 %" accent="primary" />
-        <Stat icon={Star} label="Score vendeur" value="4.9 / 5" accent="success" />
+        <Stat icon={Star} label="Score vendeur" value={formatScore(user?.scores?.vendeur)} accent="success" />
       </div>
 
       {/* Bouton ajouter */}
@@ -341,7 +346,7 @@ interface MissionDisponible {
 }
 
 function CourierSpace() {
-  const { orders, refreshOrders } = useApp()
+  const { orders, refreshOrders, user } = useApp()
   const [disponibles, setDisponibles] = useState<MissionDisponible[]>([])
   const [loadingDispo, setLoadingDispo] = useState(true)
   const [accepting, setAccepting] = useState<number | null>(null)
@@ -389,7 +394,7 @@ function CourierSpace() {
       <div className="grid gap-5 sm:grid-cols-3">
         <Stat icon={Truck} label="Missions actives" value={String(missions.length)} />
         <Stat icon={Wallet} label="Wallet livreur" value={formatXOF(wallet)} accent="success" />
-        <Stat icon={Star} label="Score de confiance" value="4.7 / 5" accent="primary" />
+        <Stat icon={Star} label="Score de confiance" value={formatScore(user?.scores?.livreur)} accent="primary" />
       </div>
 
       <GlassCard strong className="p-5 md:p-6">

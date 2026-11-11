@@ -42,7 +42,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {/* Toaster — coin bas gauche, au-dessus de tout */}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed bottom-6 left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2"
+        className="pointer-events-none fixed bottom-28 left-1/2 z-[9999] flex -translate-x-1/2 flex-col items-center gap-2"
       >
         {toasts.map((t) => (
           <div
