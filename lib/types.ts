@@ -74,7 +74,11 @@ export type OrderStatus =
 export interface Order {
   id: number
   produits: CartItem[]
+  /** montant payé : produits + livraison */
   total: number
+  frais_livraison?: number
+  /** nom donné par l'acheteur pour retrouver sa commande */
+  etiquette?: string
   statut: OrderStatus
   otp: string
   ville_depart: string
