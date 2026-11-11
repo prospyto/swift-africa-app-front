@@ -7,6 +7,7 @@ import { Navbar } from '@/components/navbar'
 import { BottomNav } from '@/components/bottom-nav'
 import { GuestBar } from '@/components/guest-bar'
 import { Catalog } from '@/components/catalog'
+import { BoutiquePage } from '@/components/boutique-page'
 import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
 import { CartDrawer } from '@/components/cart-drawer'
@@ -39,6 +40,8 @@ function AppShellInner() {
   // rouvrir le panier juste après la connexion.
   const [authOpen, setAuthOpen] = useState(false)
   const [fromCart, setFromCart] = useState(false)
+  // Boutique ouverte (page publique), au-dessus du catalogue
+  const [boutiqueId, setBoutiqueId] = useState<number | null>(null)
   const [openConversationFor, setOpenConversationFor] = useState<{ commandeId: number; avecRole: string } | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
@@ -74,7 +77,11 @@ function AppShellInner() {
     return (
       <div className="min-h-screen pb-12">
         <GuestBar onOpenCart={() => setCartOpen(true)} onLogin={() => setAuthOpen(true)} />
-        <Catalog />
+        {boutiqueId != null ? (
+          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
+        ) : (
+          <Catalog onOpenBoutique={setBoutiqueId} />
+        )}
         <CartDrawer
           guest
           open={cartOpen}
@@ -96,7 +103,12 @@ function AppShellInner() {
           setTab('commandes')
         }}
       />
-      {currentTab === 'catalogue' && <Catalog />}
+      {currentTab === 'catalogue' &&
+        (boutiqueId != null ? (
+          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
+        ) : (
+          <Catalog onOpenBoutique={setBoutiqueId} />
+        ))}
       {currentTab === 'commandes' && (
         <Orders
           openConversationFor={openConversationFor}
@@ -104,7 +116,7 @@ function AppShellInner() {
         />
       )}
       {currentTab === 'espace' && <Espace />}
-      <BottomNav tabs={tabs} tab={currentTab} onTab={setTab} role={activeRole} />
+      <BottomNav tabs={tabs} tab={currentTab} onTab={(t) => { setBoutiqueId(null); setTab(t) }} role={activeRole} />
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}

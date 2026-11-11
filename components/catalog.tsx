@@ -8,7 +8,14 @@ import { ProductModal } from '@/components/product-modal'
 import { useApp, formatXOF } from '@/lib/store'
 import type { Product } from '@/lib/types'
 
-export function Catalog() {
+export function Catalog({
+  boutiqueId,
+  onOpenBoutique,
+}: {
+  /** si défini : n'affiche que les produits de cette boutique */
+  boutiqueId?: number
+  onOpenBoutique?: (id: number) => void
+}) {
   const { products, productsLoading, addToCart, cart } = useApp()
   const [query, setQuery] = useState('')
   const [cat, setCat] = useState('Tous')
@@ -16,19 +23,27 @@ export function Catalog() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const categories = useMemo(
-    () => ['Tous', ...Array.from(new Set(products.map((p) => p.categorie)))],
-    [products],
+    () => [
+      'Tous',
+      ...Array.from(
+        new Set(
+          products.filter((p) => boutiqueId == null || p.vendeur_id === boutiqueId).map((p) => p.categorie),
+        ),
+      ),
+    ],
+    [products, boutiqueId],
   )
 
   const filtered = useMemo(
     () =>
       products.filter(
         (p) =>
+          (boutiqueId == null || p.vendeur_id === boutiqueId) &&
           (cat === 'Tous' || p.categorie === cat) &&
           (p.nom.toLowerCase().includes(query.toLowerCase()) ||
             p.vendeur.toLowerCase().includes(query.toLowerCase())),
       ),
-    [products, cat, query],
+    [products, cat, query, boutiqueId],
   )
 
   function handleAdd(p: Product) {
@@ -40,6 +55,7 @@ export function Catalog() {
   return (
     <section className="mx-auto max-w-7xl px-3 py-6 md:px-6 md:py-8">
       <div className="mb-6 flex flex-col gap-4">
+        {boutiqueId == null && (
         <div>
           <h1 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
             Trouvez tout ce dont vous avez besoin
@@ -48,6 +64,7 @@ export function Catalog() {
             Des produits de vendeurs de confiance, livrés chez vous.
           </p>
         </div>
+        )}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="glass flex flex-1 items-center gap-2 rounded-2xl px-4 py-2.5">
@@ -126,7 +143,20 @@ export function Catalog() {
                   </p>
                   <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                     <MapPin className="size-3.5" />
-                    {p.vendeur} · {p.ville}
+                    {onOpenBoutique && p.vendeur_id != null && boutiqueId == null ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onOpenBoutique(p.vendeur_id as number)
+                        }}
+                        className="underline-offset-2 hover:text-foreground hover:underline"
+                      >
+                        {p.vendeur}
+                      </button>
+                    ) : (
+                      p.vendeur
+                    )}{' '}
+                    · {p.ville}
                   </div>
 
                   <div className="mt-4 flex items-end justify-between gap-3">

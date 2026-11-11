@@ -173,8 +173,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const loadProducts = useCallback(async () => {
     setProductsLoading(true)
     try {
-      const data = await apiFetch<Product[]>('produits/', { auth: false })
-      setProducts(data)
+      // L'API renvoie `vendeur` = identifiant et `vendeur_nom` = nom de la boutique.
+      type Brut = Omit<Product, 'vendeur' | 'vendeur_id'> & { vendeur: number | string | null; vendeur_nom?: string | null }
+      const data = await apiFetch<Brut[]>('produits/', { auth: false })
+      setProducts(
+        data.map((p) => ({
+          ...p,
+          vendeur: p.vendeur_nom ?? (typeof p.vendeur === 'string' ? p.vendeur : ''),
+          vendeur_id: typeof p.vendeur === 'number' ? p.vendeur : null,
+        })),
+      )
     } catch {
       setProducts([])
     } finally {

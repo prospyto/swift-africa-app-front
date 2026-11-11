@@ -24,7 +24,18 @@ export interface Product {
   image_url?: string | null
   categorie: string
   vendeur: string
+  /** identifiant de la boutique (page publique /boutique) */
+  vendeur_id?: number | null
   ville: string
+}
+
+export interface Boutique {
+  id: number
+  nom: string
+  description: string
+  adresse_point_vente?: string | null
+  nb_produits: number
+  villes: string[]
 }
 
 export interface CartItem {
