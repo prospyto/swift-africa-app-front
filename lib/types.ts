@@ -12,6 +12,8 @@ export interface User {
   score?: number
   /** Note moyenne reçue (sur 5) par rôle ; 0 = aucune note. */
   scores?: Partial<Record<Role, number>>
+  /** false = compte créé avec Google, sans mot de passe */
+  a_mot_de_passe?: boolean
 }
 
 export interface Product {
@@ -43,6 +45,8 @@ export interface Boutique {
   nb_produits: number
   villes: string[]
   allees?: { id: number; nom: string; nb_produits: number }[]
+  logo_url?: string | null
+  banniere_url?: string | null
 }
 
 export interface Allee {
@@ -57,6 +61,10 @@ export interface MaBoutique {
   boutique: string
   description: string
   adresse_point_vente: string | null
+  logo_url?: string | null
+  banniere_url?: string | null
+  numero_paiement?: string
+  operateur_paiement?: '' | 'MTN' | 'MOOV'
 }
 
 export interface CartItem {

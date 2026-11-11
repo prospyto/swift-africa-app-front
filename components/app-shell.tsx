@@ -9,6 +9,7 @@ import { GuestBar } from '@/components/guest-bar'
 import { Catalog } from '@/components/catalog'
 import { BoutiquesList } from '@/components/boutiques-list'
 import { VendeurAccueil } from '@/components/vendeur-accueil'
+import { Parametres } from '@/components/parametres'
 import { BoutiquePage } from '@/components/boutique-page'
 import { Orders } from '@/components/orders'
 import { Espace } from '@/components/espace'
@@ -44,6 +45,8 @@ function AppShellInner() {
   const [fromCart, setFromCart] = useState(false)
   // Boutique ouverte (page publique), au-dessus du catalogue
   const [boutiqueId, setBoutiqueId] = useState<number | null>(null)
+  // Page Paramètres (⚙), au-dessus de l'onglet courant
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [openConversationFor, setOpenConversationFor] = useState<{ commandeId: number; avecRole: string } | null>(null)
 
   const activeRole = mode || user?.role || 'acheteur'
@@ -98,34 +101,37 @@ function AppShellInner() {
   return (
     <div className="min-h-screen pb-28">
       <Navbar
-        onTab={setTab}
+        onTab={(t) => { setSettingsOpen(false); setTab(t) }}
         onOpenCart={() => setCartOpen(true)}
+        onOpenSettings={() => setSettingsOpen(true)}
         onOpenConversation={(commandeId, avecRole) => {
           setOpenConversationFor({ commandeId, avecRole })
+          setSettingsOpen(false)
           setTab('commandes')
         }}
       />
-      {currentTab === 'accueil' && <VendeurAccueil onTab={setTab} />}
-      {currentTab === 'boutiques' &&
+      {settingsOpen && <Parametres onBack={() => setSettingsOpen(false)} />}
+      {!settingsOpen && currentTab === 'accueil' && <VendeurAccueil onTab={setTab} />}
+      {!settingsOpen && currentTab === 'boutiques' &&
         (boutiqueId != null ? (
           <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
         ) : (
           <BoutiquesList onOpenBoutique={setBoutiqueId} />
         ))}
-      {currentTab === 'catalogue' &&
+      {!settingsOpen && currentTab === 'catalogue' &&
         (boutiqueId != null ? (
           <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
         ) : (
           <Catalog onOpenBoutique={setBoutiqueId} />
         ))}
-      {currentTab === 'commandes' && (
+      {!settingsOpen && currentTab === 'commandes' && (
         <Orders
           openConversationFor={openConversationFor}
           onConversationOpened={() => setOpenConversationFor(null)}
         />
       )}
-      {currentTab === 'espace' && <Espace />}
-      <BottomNav tabs={tabs} tab={currentTab} onTab={(t) => { setBoutiqueId(null); setTab(t) }} role={activeRole} />
+      {!settingsOpen && currentTab === 'espace' && <Espace />}
+      <BottomNav tabs={tabs} tab={currentTab} onTab={(t) => { setBoutiqueId(null); setSettingsOpen(false); setTab(t) }} role={activeRole} />
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
