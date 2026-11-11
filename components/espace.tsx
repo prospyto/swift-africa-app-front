@@ -117,7 +117,8 @@ function SellerSpace() {
   const [products, setProducts] = useState<Product[]>([])
   const [view, setView] = useState<'dashboard' | 'add' | 'edit'>('dashboard')
   const [editProduct, setEditProduct] = useState<Product | null>(null)
-  const COMMISSION = 0.88
+  // La plateforme prend 3 % sur la part du vendeur et 3 % sur celle du livreur
+  const COMMISSION = 0.97
 
   const loadMyProducts = useCallback(async () => {
     try {
@@ -166,7 +167,7 @@ function SellerSpace() {
       {/* Stats */}
       <div className="grid gap-5 sm:grid-cols-3">
         <Stat icon={Package} label="Produits en ligne" value={String(products.length)} />
-        <Stat icon={Percent} label="Commission plateforme" value="12 %" accent="primary" />
+        <Stat icon={Percent} label="Commission plateforme" value="3 %" accent="primary" />
         <Stat icon={Star} label="Score vendeur" value={formatScore(user?.scores?.vendeur)} accent="success" />
       </div>
 
@@ -282,7 +283,7 @@ function MissionCard({ mission }: { mission: import('@/lib/types').Order }) {
           {mission.ville_arrivee}
         </div>
         <span className="rounded-full bg-accent px-3 py-1 text-xs font-medium text-accent-foreground">
-          {formatXOF(Math.round(mission.total * 0.08))} à percevoir
+          {formatXOF(Math.round((mission.frais_livraison ?? 0) * 0.97))} à percevoir
         </span>
       </div>
 
@@ -397,7 +398,7 @@ function CourierSpace() {
   )
   const wallet = orders
     .filter((o) => o.statut === 'decaisse')
-    .reduce((s, o) => s + Math.round(o.total * 0.08), 0)
+    .reduce((s, o) => s + Math.round((o.frais_livraison ?? 0) * 0.97), 0)
 
   return (
     <div className="grid gap-5">
