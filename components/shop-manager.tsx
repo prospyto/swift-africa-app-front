@@ -18,10 +18,13 @@ function messageErreur(e: unknown) {
 export function ShopManager({
   nbAComplete,
   onChanged,
+  onAddToAllee,
 }: {
   /** produits sans description ou sans allée, pour rappeler au vendeur de les compléter */
   nbAComplete: number
   onChanged: () => void
+  /** raccourci : ajouter un produit directement dans cette allée */
+  onAddToAllee?: (alleeId: number) => void
 }) {
   const [boutique, setBoutique] = useState<MaBoutique | null>(null)
   const [allees, setAllees] = useState<Allee[]>([])
@@ -189,6 +192,11 @@ export function ShopManager({
               <span>
                 {a.nom} <span className="text-xs text-muted-foreground">({a.nb_produits})</span>
               </span>
+              {onAddToAllee && (
+                <button onClick={() => onAddToAllee(a.id)} aria-label={`Ajouter un produit dans ${a.nom}`} className="rounded-full p-1 text-primary hover:bg-primary/10">
+                  <Plus className="size-3.5" />
+                </button>
+              )}
               <button onClick={() => renommer(a)} aria-label={`Renommer ${a.nom}`} className="rounded-full p-1 text-muted-foreground hover:text-foreground">
                 <Pencil className="size-3.5" />
               </button>

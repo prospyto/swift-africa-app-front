@@ -13,11 +13,13 @@ import type { Product, Allee } from '@/lib/types'
 
 interface ProductFormProps {
   product?: Product
+  /** allée présélectionnée à l'ajout d'un nouveau produit */
+  defaultAllee?: number | null
   onSuccess: () => void
   onCancel: () => void
 }
 
-export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
+export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: ProductFormProps) {
   const { waking } = useApp()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -33,7 +35,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
     categorie: product?.categorie || '',
     ville: product?.ville || '',
     adresse_point_vente: (product as any)?.adresse_point_vente || '',
-    allee: product?.allee ? String(product.allee) : '',
+    allee: product?.allee ? String(product.allee) : defaultAllee ? String(defaultAllee) : '',
     // vide = stock non suivi ; 1 = pièce unique
     stock: product?.stock != null ? String(product.stock) : '',
   })
@@ -124,6 +126,7 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
       formData.append('ville', form.ville)
       formData.append('allee', form.allee) // vide = aucune allée
       formData.append('stock', form.stock) // vide = stock non suivi
+      if (product?.brouillon) formData.append('brouillon', 'false') // publication
 
       if (image) {
         formData.append('image', image)
@@ -168,10 +171,10 @@ export function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) 
               <CheckCircle2 className="size-9 text-[#ff6b00]" />
             </div>
             <h2 className="mb-2 text-xl font-bold text-gray-900">
-              {product ? 'Produit mis à jour' : 'Produit ajouté'}
+              {product?.brouillon ? 'Produit publié' : product ? 'Produit mis à jour' : 'Produit ajouté'}
             </h2>
             <p className="mb-6 text-sm text-gray-500">
-              {product
+              {product && !product.brouillon
                 ? 'Vos modifications ont bien été enregistrées.'
                 : 'Votre produit est maintenant visible dans le catalogue.'}
             </p>

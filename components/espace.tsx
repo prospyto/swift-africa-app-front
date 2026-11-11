@@ -11,6 +11,7 @@ import {
   ArrowRight,
   Percent,
   Plus,
+  ImagePlus,
   Pencil,
   Trash2,
   MapPin,
@@ -23,10 +24,11 @@ import { useApp, formatXOF } from '@/lib/store'
 import { apiFetch } from '@/lib/api'
 import { ProductForm } from '@/components/product-form'
 import { ShopManager } from '@/components/shop-manager'
+import { BulkUpload } from '@/components/bulk-upload'
 import { GPSTracker } from '@/components/gps-tracker'
 import { WalletCard } from '@/components/wallet-card'
 import { RatingStars } from '@/components/rating-stars'
-import type { Product } from '@/lib/types'
+import type { Product, Allee } from '@/lib/types'
 
 export function Espace() {
   const { user, mode } = useApp()
@@ -117,6 +119,22 @@ function SellerSpace() {
   const [products, setProducts] = useState<Product[]>([])
   const [view, setView] = useState<'dashboard' | 'add' | 'edit'>('dashboard')
   const [editProduct, setEditProduct] = useState<Product | null>(null)
+  // allée présélectionnée (raccourci « ajouter dans cette allée »)
+  const [alleeDefaut, setAlleeDefaut] = useState<number | null>(null)
+  const [lotOuvert, setLotOuvert] = useState(false)
+  const [allees, setAllees] = useState<Allee[]>([])
+  const [infoLot, setInfoLot] = useState<string | null>(null)
+
+  const ouvrirLot = useCallback(async (alleeId: number | null = null) => {
+    setAlleeDefaut(alleeId)
+    setInfoLot(null)
+    try {
+      setAllees(await apiFetch<Allee[]>('allees/'))
+    } catch {
+      setAllees([])
+    }
+    setLotOuvert(true)
+  }, [])
   const COMMISSION = 0.88
 
   const loadMyProducts = useCallback(async () => {
@@ -143,10 +161,14 @@ function SellerSpace() {
     }
   }, [loadMyProducts, refreshProducts])
 
+  const brouillons = products.filter((p) => p.brouillon)
+  const publies = products.filter((p) => !p.brouillon)
+
   if (view === 'add' || view === 'edit') {
     return (
       <ProductForm
         product={editProduct ?? undefined}
+        defaultAllee={editProduct ? null : alleeDefaut}
         onSuccess={() => {
           setView('dashboard')
           setEditProduct(null)
@@ -165,20 +187,78 @@ function SellerSpace() {
     <div className="grid gap-5">
       {/* Stats */}
       <div className="grid gap-5 sm:grid-cols-3">
-        <Stat icon={Package} label="Produits en ligne" value={String(products.length)} />
+        <Stat icon={Package} label="Produits en ligne" value={String(publies.length)} />
         <Stat icon={Percent} label="Commission plateforme" value="12 %" accent="primary" />
         <Stat icon={Star} label="Score vendeur" value={formatScore(user?.scores?.vendeur)} accent="success" />
       </div>
 
       <ShopManager
-        nbAComplete={products.filter((p) => !p.description?.trim() || !p.allee).length}
+        nbAComplete={publies.filter((p) => !p.description?.trim() || !p.allee).length}
         onChanged={() => { loadMyProducts(); refreshProducts() }}
+        onAddToAllee={(id) => { setEditProduct(null); setAlleeDefaut(id); setView('add') }}
       />
 
-      {/* Bouton ajouter */}
-      <div className="flex justify-end">
+      {lotOuvert && (
+        <BulkUpload
+          allees={allees}
+          defaultAllee={alleeDefaut}
+          onClose={() => setLotOuvert(false)}
+          onDone={(nb) => {
+            setInfoLot(`${nb} brouillon${nb > 1 ? 's' : ''} créé${nb > 1 ? 's' : ''}. Complétez chaque fiche pour la publier.`)
+            setLotOuvert(false)
+            loadMyProducts()
+          }}
+        />
+      )}
+
+      {infoLot && (
+        <p className="rounded-xl bg-success/10 px-4 py-3 text-sm text-success" role="status">{infoLot}</p>
+      )}
+
+      {brouillons.length > 0 && (
+        <GlassCard strong className="p-5 md:p-6">
+          <h2 className="font-bold">Brouillons à compléter ({brouillons.length})</h2>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Invisibles des clients tant que le nom, le prix et la catégorie ne sont pas renseignés.
+          </p>
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {brouillons.map((p) => (
+              <li key={p.id} className="glass overflow-hidden rounded-2xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                {p.image && <img src={p.image} alt="" className="aspect-square w-full object-cover" />}
+                <div className="flex items-center justify-between gap-1 p-2">
+                  <button
+                    onClick={() => { setEditProduct(p); setView('edit') }}
+                    className="rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+                  >
+                    Compléter
+                  </button>
+                  <button
+                    onClick={() => handleDelete(p.id)}
+                    aria-label="Supprimer ce brouillon"
+                    className="rounded-lg p-1.5 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </GlassCard>
+      )}
+
+      {/* Boutons ajouter */}
+      <div className="flex flex-wrap justify-end gap-2">
         <Button
-          onClick={() => { setEditProduct(null); setView('add') }}
+          variant="outline"
+          onClick={() => ouvrirLot(null)}
+          className="flex items-center gap-2 rounded-2xl px-5 py-2.5 font-semibold"
+        >
+          <ImagePlus className="size-4" />
+          Ajouter plusieurs photos
+        </Button>
+        <Button
+          onClick={() => { setEditProduct(null); setAlleeDefaut(null); setView('add') }}
           className="glass-cta flex items-center gap-2 rounded-2xl bg-primary px-5 py-2.5 font-semibold text-primary-foreground hover:bg-primary/90"
         >
           <Plus className="size-4" />
@@ -193,7 +273,7 @@ function SellerSpace() {
           <h2 className="font-bold">Mes produits</h2>
         </div>
 
-        {products.length === 0 ? (
+        {publies.length === 0 ? (
           <div className="py-10 text-center">
             <Package className="mx-auto mb-3 size-10 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">
@@ -208,7 +288,7 @@ function SellerSpace() {
           </div>
         ) : (
           <ul className="divide-y divide-border/60">
-            {products.map((p) => {
+            {publies.map((p) => {
               const base = p.prix_solde ?? p.prix
               const gain = Math.round(base * COMMISSION)
               return (
