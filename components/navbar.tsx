@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef } from 'react'
-import { Truck, ShoppingCart, LogOut, Bell, MessageCircle, X } from 'lucide-react'
+import { Truck, ShoppingCart, Settings, Bell, MessageCircle, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/lib/store'
 import { apiFetch } from '@/lib/api'
@@ -9,6 +9,7 @@ import { apiFetch } from '@/lib/api'
 interface NavbarProps {
   onTab: (t: string) => void
   onOpenCart: () => void
+  onOpenSettings: () => void
   onOpenConversation: (commandeId: number, avecRole: string) => void
 }
 
@@ -20,8 +21,8 @@ interface ConvResume {
   dernier_auteur: string
 }
 
-export function Navbar({ onTab, onOpenCart, onOpenConversation }: NavbarProps) {
-  const { user, logout, cartCount, mode, availableRoles, setMode } = useApp()
+export function Navbar({ onTab, onOpenCart, onOpenSettings, onOpenConversation }: NavbarProps) {
+  const { user, cartCount, mode, availableRoles, setMode } = useApp()
   const [notifOpen, setNotifOpen] = useState(false)
   const [nonLus, setNonLus] = useState(0)
   const [convs, setConvs] = useState<ConvResume[]>([])
@@ -200,11 +201,11 @@ export function Navbar({ onTab, onOpenCart, onOpenConversation }: NavbarProps) {
           <Button
             variant="ghost"
             size="icon"
-            onClick={logout}
-            className="size-10 rounded-xl text-muted-foreground hover:text-destructive"
-            aria-label="Se déconnecter"
+            onClick={onOpenSettings}
+            className="size-10 rounded-xl text-muted-foreground hover:text-foreground"
+            aria-label="Paramètres"
           >
-            <LogOut className="size-5" />
+            <Settings className="size-5" />
           </Button>
         </div>
       </div>

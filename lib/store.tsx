@@ -80,6 +80,7 @@ interface BackendMe {
   availableRoles?: Role[]
   score?: number
   scores?: Partial<Record<Role, number>>
+  a_mot_de_passe?: boolean
 }
 
 function backendMeToUser(me: BackendMe): User {
@@ -93,6 +94,7 @@ function backendMeToUser(me: BackendMe): User {
     availableRoles: me.availableRoles?.length ? me.availableRoles : [me.role],
     score: me.score,
     scores: me.scores,
+    a_mot_de_passe: me.a_mot_de_passe,
   }
 }
 
