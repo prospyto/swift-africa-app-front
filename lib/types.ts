@@ -27,6 +27,10 @@ export interface Product {
   /** identifiant de la boutique (page publique /boutique) */
   vendeur_id?: number | null
   ville: string
+  allee?: number | null
+  allee_nom?: string | null
+  /** null = non suivi, 1 = pièce unique, 0 = épuisé */
+  stock?: number | null
 }
 
 export interface Boutique {
@@ -36,6 +40,21 @@ export interface Boutique {
   adresse_point_vente?: string | null
   nb_produits: number
   villes: string[]
+  allees?: { id: number; nom: string; nb_produits: number }[]
+}
+
+export interface Allee {
+  id: number
+  nom: string
+  ordre: number
+  nb_produits: number
+}
+
+export interface MaBoutique {
+  id: number
+  boutique: string
+  description: string
+  adresse_point_vente: string | null
 }
 
 export interface CartItem {

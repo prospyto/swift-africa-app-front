@@ -10,10 +10,13 @@ import type { Product } from '@/lib/types'
 
 export function Catalog({
   boutiqueId,
+  alleeId,
   onOpenBoutique,
 }: {
   /** si défini : n'affiche que les produits de cette boutique */
   boutiqueId?: number
+  /** avec boutiqueId : n'affiche que cette allée */
+  alleeId?: number | null
   onOpenBoutique?: (id: number) => void
 }) {
   const { products, productsLoading, addToCart, cart } = useApp()
@@ -39,11 +42,12 @@ export function Catalog({
       products.filter(
         (p) =>
           (boutiqueId == null || p.vendeur_id === boutiqueId) &&
+          (alleeId == null || p.allee === alleeId) &&
           (cat === 'Tous' || p.categorie === cat) &&
           (p.nom.toLowerCase().includes(query.toLowerCase()) ||
             p.vendeur.toLowerCase().includes(query.toLowerCase())),
       ),
-    [products, cat, query, boutiqueId],
+    [products, cat, query, boutiqueId, alleeId],
   )
 
   function handleAdd(p: Product) {
@@ -110,6 +114,7 @@ export function Catalog({
           {filtered.map((p) => {
             const inCart = cart.some((i) => i.product.id === p.id)
             const onSale = p.prix_solde != null && p.prix_solde < p.prix
+            const epuise = p.stock === 0
             return (
               <GlassCard
                 key={p.id}
@@ -124,6 +129,16 @@ export function Catalog({
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition duration-500 group-hover:scale-105"
                   />
+                  {epuise && (
+                    <span className="absolute right-3 top-3 rounded-full bg-foreground/80 px-3 py-1 text-xs font-bold text-background">
+                      Épuisé
+                    </span>
+                  )}
+                  {p.stock === 1 && (
+                    <span className="absolute right-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
+                      Pièce unique
+                    </span>
+                  )}
                   {onSale && (
                     <span className="absolute left-3 top-3 rounded-full bg-success px-3 py-1 text-xs font-bold text-success-foreground">
                       Solde
@@ -175,18 +190,23 @@ export function Catalog({
                       )}
                     </div>
                     <button
+                      disabled={epuise}
                       onClick={(e) => {
                         // sans ça, le clic remonte à la carte et ouvre aussi la fiche produit
                         e.stopPropagation()
                         handleAdd(p)
                       }}
                       className={`glass-cta flex items-center gap-1.5 rounded-2xl px-4 py-2.5 text-sm font-semibold transition ${
-                        added === p.id
+                        epuise
+                          ? 'cursor-not-allowed bg-secondary text-muted-foreground'
+                          : added === p.id
                           ? 'bg-success text-success-foreground'
                           : 'bg-primary text-primary-foreground hover:bg-primary/90'
                       }`}
                     >
-                      {added === p.id ? (
+                      {epuise ? (
+                        'Épuisé'
+                      ) : added === p.id ? (
                         <>
                           <Check className="size-4" /> Ajouté
                         </>

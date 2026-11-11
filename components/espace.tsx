@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button'
 import { useApp, formatXOF } from '@/lib/store'
 import { apiFetch } from '@/lib/api'
 import { ProductForm } from '@/components/product-form'
+import { ShopManager } from '@/components/shop-manager'
 import { GPSTracker } from '@/components/gps-tracker'
 import { WalletCard } from '@/components/wallet-card'
 import { RatingStars } from '@/components/rating-stars'
@@ -169,6 +170,11 @@ function SellerSpace() {
         <Stat icon={Star} label="Score vendeur" value={formatScore(user?.scores?.vendeur)} accent="success" />
       </div>
 
+      <ShopManager
+        nbAComplete={products.filter((p) => !p.description?.trim() || !p.allee).length}
+        onChanged={() => { loadMyProducts(); refreshProducts() }}
+      />
+
       {/* Bouton ajouter */}
       <div className="flex justify-end">
         <Button
@@ -209,7 +215,11 @@ function SellerSpace() {
                 <li key={p.id} className="flex items-center justify-between gap-3 py-3">
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{p.nom}</p>
-                    <p className="text-xs text-muted-foreground">{p.categorie} · {p.ville}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.categorie} · {p.ville}
+                      {p.allee_nom ? ` · ${p.allee_nom}` : ''}
+                      {p.stock === 0 ? ' · Épuisé' : p.stock != null ? ` · Stock : ${p.stock}` : ''}
+                    </p>
                   </div>
                   <div className="flex items-center gap-3 text-sm">
                     <span className="text-muted-foreground">{formatXOF(base)}</span>
