@@ -31,6 +31,8 @@ export interface Product {
   allee_nom?: string | null
   /** null = non suivi, 1 = pièce unique, 0 = épuisé */
   stock?: number | null
+  /** ajouté en lot, pas encore publié */
+  brouillon?: boolean
 }
 
 export interface Boutique {
