@@ -5,6 +5,7 @@ import { ArrowLeft, Check, MapPin, Share2, Store } from 'lucide-react'
 import { GlassCard, Skeleton } from '@/components/glass'
 import { Catalog } from '@/components/catalog'
 import { apiFetch } from '@/lib/api'
+import { signalerVisite } from '@/lib/visites'
 import type { Boutique } from '@/lib/types'
 
 /** Page publique d'une boutique : visible aussi sans connexion. */
@@ -24,6 +25,7 @@ export function BoutiquePage({ id, onBack }: { id: number | string; onBack: () =
         if (annule) return
         setBoutique(b)
         setState('ok')
+        signalerVisite(b.slug || b.id)
       })
       .catch(() => {
         if (!annule) setState('error')
