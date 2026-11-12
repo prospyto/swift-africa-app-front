@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { ArrowLeft, ImagePlus, KeyRound, LogOut, Store, Trash2, Wallet } from 'lucide-react'
+import { ArrowLeft, Check, Copy, ExternalLink, ImagePlus, KeyRound, Link2, LogOut, MessageCircle, Store, Trash2, Wallet } from 'lucide-react'
 import { GlassCard, Spinner } from '@/components/glass'
 import { Button } from '@/components/ui/button'
 import { apiFetch, ApiError } from '@/lib/api'
@@ -196,6 +196,8 @@ function BoutiqueEtPaiement() {
         </div>
       </GlassCard>
 
+      <LienBoutique slug={b.slug} nom={b.boutique} />
+
       <GlassCard strong className="p-5 md:p-6">
         <h2 className="mb-1 flex items-center gap-2 font-bold">
           <Wallet className="size-5 text-primary" /> Numéro de paiement
@@ -228,6 +230,54 @@ function BoutiqueEtPaiement() {
         </Button>
       </GlassCard>
     </>
+  )
+}
+
+/* ───────────── Lien public de la boutique ───────────── */
+
+function LienBoutique({ slug, nom }: { slug?: string; nom: string }) {
+  const [copie, setCopie] = useState(false)
+  if (!slug) return null
+  const lien = `${typeof window !== 'undefined' ? window.location.origin : ''}/boutique/${slug}`
+  const texte = `Découvrez ma boutique « ${nom} » sur Swift Africa : ${lien}`
+
+  async function copier() {
+    try {
+      await navigator.clipboard.writeText(lien)
+      setCopie(true)
+      setTimeout(() => setCopie(false), 2000)
+    } catch {
+      window.prompt('Copiez ce lien :', lien)
+    }
+  }
+
+  return (
+    <GlassCard strong className="p-5 md:p-6">
+      <h2 className="mb-1 flex items-center gap-2 font-bold">
+        <Link2 className="size-5 text-primary" /> Lien de ma boutique
+      </h2>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Partagez ce lien : n'importe qui peut ouvrir votre boutique, sans compte.
+      </p>
+      <input readOnly value={lien} aria-label="Lien de la boutique" onFocus={(e) => e.currentTarget.select()} className={`${champ} mb-3`} />
+      <div className="flex flex-wrap gap-2">
+        <Button type="button" onClick={copier} className="rounded-2xl bg-primary text-primary-foreground hover:bg-primary/90">
+          {copie ? <Check className="mr-1.5 size-4" /> : <Copy className="mr-1.5 size-4" />}
+          {copie ? 'Lien copié' : 'Copier le lien'}
+        </Button>
+        <a
+          href={`https://wa.me/?text=${encodeURIComponent(texte)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="glass inline-flex h-9 items-center gap-1.5 rounded-2xl px-4 text-sm font-medium"
+        >
+          <MessageCircle className="size-4 text-[#25D366]" /> WhatsApp
+        </a>
+        <a href={lien} target="_blank" rel="noopener noreferrer" className="glass inline-flex h-9 items-center gap-1.5 rounded-2xl px-4 text-sm font-medium">
+          <ExternalLink className="size-4" /> Ouvrir
+        </a>
+      </div>
+    </GlassCard>
   )
 }
 

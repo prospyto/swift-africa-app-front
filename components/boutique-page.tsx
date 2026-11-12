@@ -1,23 +1,25 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ArrowLeft, MapPin, Store } from 'lucide-react'
+import { ArrowLeft, Check, MapPin, Share2, Store } from 'lucide-react'
 import { GlassCard, Skeleton } from '@/components/glass'
 import { Catalog } from '@/components/catalog'
 import { apiFetch } from '@/lib/api'
 import type { Boutique } from '@/lib/types'
 
 /** Page publique d'une boutique : visible aussi sans connexion. */
-export function BoutiquePage({ id, onBack }: { id: number; onBack: () => void }) {
+/** `id` : identifiant numérique OU slug (adresse /boutique/<slug>). */
+export function BoutiquePage({ id, onBack }: { id: number | string; onBack: () => void }) {
   const [boutique, setBoutique] = useState<Boutique | null>(null)
   const [alleeId, setAlleeId] = useState<number | null>(null)
   const [state, setState] = useState<'loading' | 'ok' | 'error'>('loading')
+  const [copie, setCopie] = useState(false)
 
   useEffect(() => {
     let annule = false
     setState('loading')
     setAlleeId(null)
-    apiFetch<Boutique>(`boutiques/${id}/`, { auth: false })
+    apiFetch<Boutique>(`boutiques/${encodeURIComponent(String(id))}/`, { auth: false })
       .then((b) => {
         if (annule) return
         setBoutique(b)
@@ -64,6 +66,27 @@ export function BoutiquePage({ id, onBack }: { id: number; onBack: () => void })
               {boutique.description && (
                 <p className="mt-1 text-sm text-muted-foreground">{boutique.description}</p>
               )}
+              {boutique.slug && (
+                <button
+                  onClick={async () => {
+                    const lien = `${window.location.origin}/boutique/${boutique.slug}`
+                    try {
+                      if (navigator.share) await navigator.share({ title: boutique.nom, url: lien })
+                      else {
+                        await navigator.clipboard.writeText(lien)
+                        setCopie(true)
+                        setTimeout(() => setCopie(false), 2000)
+                      }
+                    } catch {
+                      /* partage annulé */
+                    }
+                  }}
+                  className="mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium text-primary hover:bg-primary/10"
+                >
+                  {copie ? <Check className="size-3.5" /> : <Share2 className="size-3.5" />}
+                  {copie ? 'Lien copié' : 'Partager cette boutique'}
+                </button>
+              )}
               <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 <span>
                   {boutique.nb_produits} produit{boutique.nb_produits > 1 ? 's' : ''}
@@ -98,7 +121,7 @@ export function BoutiquePage({ id, onBack }: { id: number; onBack: () => void })
           </div>
         )}
       </div>
-      {state === 'ok' && <Catalog boutiqueId={id} alleeId={alleeId} />}
+      {state === 'ok' && boutique && <Catalog boutiqueId={boutique.id} alleeId={alleeId} />}
     </div>
   )
 }
