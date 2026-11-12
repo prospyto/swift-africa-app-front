@@ -58,6 +58,7 @@ function BoutiqueEtPaiement() {
   const [nom, setNom] = useState('')
   const [description, setDescription] = useState('')
   const [adresse, setAdresse] = useState('')
+  const [vacances, setVacances] = useState(false)
   const [operateur, setOperateur] = useState('')
   const [numero, setNumero] = useState('')
   const [logo, setLogo] = useState<File | null>(null)
@@ -74,6 +75,7 @@ function BoutiqueEtPaiement() {
     setNom(x.boutique)
     setDescription(x.description || '')
     setAdresse(x.adresse_point_vente || '')
+    setVacances(!!x.en_vacances)
     setOperateur(x.operateur_paiement || '')
     setNumero(x.numero_paiement || '')
     setLogo(null)
@@ -96,6 +98,7 @@ function BoutiqueEtPaiement() {
         fd.append('boutique', nom)
         fd.append('description', description)
         fd.append('adresse_point_vente', adresse)
+        fd.append('en_vacances', vacances ? 'true' : 'false')
         if (logo) fd.append('logo', logo)
         else if (retirerLogo) fd.append('logo', '')
         if (banniere) fd.append('banniere', banniere)
@@ -108,6 +111,7 @@ function BoutiqueEtPaiement() {
       // on ne remet à zéro que le bloc enregistré : l'autre peut contenir une saisie en cours
       if (bloc === 'boutique') {
         setB(maj); setNom(maj.boutique); setDescription(maj.description || ''); setAdresse(maj.adresse_point_vente || '')
+        setVacances(!!maj.en_vacances)
         setLogo(null); setBanniere(null); setRetirerLogo(false); setRetirerBanniere(false)
       } else {
         setB(maj); setOperateur(maj.operateur_paiement || ''); setNumero(maj.numero_paiement || '')
@@ -204,6 +208,15 @@ function BoutiqueEtPaiement() {
             <Etiquette id="p-adr">Adresse du point de vente</Etiquette>
             <input id="p-adr" value={adresse} onChange={(e) => setAdresse(e.target.value)} maxLength={500} className={champ} />
           </div>
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-foreground/30 bg-white/90 px-4 py-3">
+            <input type="checkbox" checked={vacances} onChange={(e) => setVacances(e.target.checked)} className="mt-1 size-4 accent-primary" />
+            <span className="text-sm">
+              <span className="font-medium">Mode vacances</span>
+              <span className="block text-xs text-muted-foreground">
+                Votre boutique reste visible mais ne reçoit plus de nouvelles commandes, avec la mention « En vacances ».
+              </span>
+            </span>
+          </label>
         </div>
 
         {(logo || banniere) && (

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MapPin, Search, Store } from 'lucide-react'
+import { MapPin, Search, Star, Store } from 'lucide-react'
 import { GlassCard, Skeleton } from '@/components/glass'
 import { apiFetch } from '@/lib/api'
 import type { Boutique } from '@/lib/types'
@@ -95,6 +95,15 @@ export function BoutiquesList({
                   <span>
                     {b.nb_produits} produit{b.nb_produits > 1 ? 's' : ''}
                   </span>
+                  {b.note_moyenne != null && (
+                    <span className="flex items-center gap-1 font-medium text-foreground">
+                      <Star className="size-3 fill-amber-400 text-amber-400" />
+                      {String(b.note_moyenne).replace('.', ',')}
+                    </span>
+                  )}
+                  {b.en_vacances && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">En vacances</span>
+                  )}
                   {b.villes.length > 0 && (
                     <span className="flex items-center gap-1">
                       <MapPin className="size-3" />
