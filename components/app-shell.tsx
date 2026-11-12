@@ -36,7 +36,7 @@ const TABS_BY_ROLE = {
   ],
 }
 
-function AppShellInner() {
+function AppShellInner({ initialBoutique }: { initialBoutique?: string }) {
   const { user, ready, mode } = useApp()
   const [cartOpen, setCartOpen] = useState(false)
   // Visiteur : l'écran de connexion s'ouvre sur demande. `fromCart` sert à
@@ -44,7 +44,14 @@ function AppShellInner() {
   const [authOpen, setAuthOpen] = useState(false)
   const [fromCart, setFromCart] = useState(false)
   // Boutique ouverte (page publique), au-dessus du catalogue
-  const [boutiqueId, setBoutiqueId] = useState<number | null>(null)
+  const [boutiqueId, setBoutiqueIdBrut] = useState<number | string | null>(initialBoutique ?? null)
+  const setBoutiqueId = (v: number | string | null) => {
+    setBoutiqueIdBrut(v)
+    // en quittant une boutique ouverte par son adresse, on revient à l'application
+    if (v === null && initialBoutique && typeof window !== 'undefined' && window.location.pathname.startsWith('/boutique/')) {
+      window.history.replaceState(null, '', '/app')
+    }
+  }
   // Page Paramètres (⚙), au-dessus de l'onglet courant
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [openConversationFor, setOpenConversationFor] = useState<{ commandeId: number; avecRole: string } | null>(null)
@@ -111,26 +118,23 @@ function AppShellInner() {
         }}
       />
       {settingsOpen && <Parametres onBack={() => setSettingsOpen(false)} />}
-      {!settingsOpen && currentTab === 'accueil' && <VendeurAccueil onTab={setTab} />}
-      {!settingsOpen && currentTab === 'boutiques' &&
-        (boutiqueId != null ? (
-          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
-        ) : (
-          <BoutiquesList onOpenBoutique={setBoutiqueId} />
-        ))}
-      {!settingsOpen && currentTab === 'catalogue' &&
-        (boutiqueId != null ? (
-          <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
-        ) : (
-          <Catalog onOpenBoutique={setBoutiqueId} />
-        ))}
-      {!settingsOpen && currentTab === 'commandes' && (
+      {!settingsOpen && boutiqueId == null && currentTab === 'accueil' && <VendeurAccueil onTab={setTab} />}
+      {!settingsOpen && boutiqueId != null && (
+        <BoutiquePage id={boutiqueId} onBack={() => setBoutiqueId(null)} />
+      )}
+      {!settingsOpen && boutiqueId == null && currentTab === 'boutiques' && (
+        <BoutiquesList onOpenBoutique={setBoutiqueId} />
+      )}
+      {!settingsOpen && boutiqueId == null && currentTab === 'catalogue' && (
+        <Catalog onOpenBoutique={setBoutiqueId} />
+      )}
+      {!settingsOpen && boutiqueId == null && currentTab === 'commandes' && (
         <Orders
           openConversationFor={openConversationFor}
           onConversationOpened={() => setOpenConversationFor(null)}
         />
       )}
-      {!settingsOpen && currentTab === 'espace' && <Espace />}
+      {!settingsOpen && boutiqueId == null && currentTab === 'espace' && <Espace />}
       <BottomNav tabs={tabs} tab={currentTab} onTab={(t) => { setBoutiqueId(null); setSettingsOpen(false); setTab(t) }} role={activeRole} />
       <CartDrawer
         open={cartOpen}
@@ -141,10 +145,11 @@ function AppShellInner() {
   )
 }
 
-export function AppShell() {
+/** `initialBoutique` : slug d'une boutique à ouvrir directement (adresse /boutique/<slug>). */
+export function AppShell({ initialBoutique }: { initialBoutique?: string } = {}) {
   return (
     <ToastProvider>
-      <AppShellInner />
+      <AppShellInner initialBoutique={initialBoutique} />
     </ToastProvider>
   )
 }

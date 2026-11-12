@@ -39,6 +39,8 @@ export interface Product {
 
 export interface Boutique {
   id: number
+  /** identifiant lisible de l'adresse publique : /boutique/<slug> */
+  slug?: string
   nom: string
   description: string
   adresse_point_vente?: string | null
@@ -58,6 +60,7 @@ export interface Allee {
 
 export interface MaBoutique {
   id: number
+  slug?: string
   boutique: string
   description: string
   adresse_point_vente: string | null
