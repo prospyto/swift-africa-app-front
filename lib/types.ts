@@ -49,6 +49,9 @@ export interface Boutique {
   allees?: { id: number; nom: string; nb_produits: number }[]
   logo_url?: string | null
   banniere_url?: string | null
+  en_vacances?: boolean
+  note_moyenne?: number | null
+  nb_avis?: number
 }
 
 export interface Allee {
@@ -68,6 +71,7 @@ export interface MaBoutique {
   banniere_url?: string | null
   numero_paiement?: string
   operateur_paiement?: '' | 'MTN' | 'MOOV'
+  en_vacances?: boolean
 }
 
 export interface CartItem {

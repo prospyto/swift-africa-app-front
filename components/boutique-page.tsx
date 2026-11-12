@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ArrowLeft, Check, MapPin, Share2, Store } from 'lucide-react'
+import { ArrowLeft, Check, MapPin, Share2, Star, Store } from 'lucide-react'
 import { GlassCard, Skeleton } from '@/components/glass'
 import { Catalog } from '@/components/catalog'
 import { apiFetch } from '@/lib/api'
@@ -93,6 +93,16 @@ export function BoutiquePage({ id, onBack }: { id: number | string; onBack: () =
                 <span>
                   {boutique.nb_produits} produit{boutique.nb_produits > 1 ? 's' : ''}
                 </span>
+                {boutique.note_moyenne != null && (
+                  <span className="flex items-center gap-1 font-medium text-foreground">
+                    <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    {String(boutique.note_moyenne).replace('.', ',')}
+                    <span className="font-normal text-muted-foreground">({boutique.nb_avis} avis)</span>
+                  </span>
+                )}
+                {boutique.en_vacances && (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 font-medium text-amber-800">En vacances</span>
+                )}
                 {(boutique.adresse_point_vente || boutique.villes.length > 0) && (
                   <span className="flex items-center gap-1">
                     <MapPin className="size-3.5" />
