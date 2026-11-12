@@ -277,7 +277,7 @@ function SelectVille({
         name={`ville-${label.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-xl border border-border bg-input px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+        className="w-full rounded-xl border border-foreground/30 bg-white/90 px-3 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
       >
         {VILLES.map((v) => (
           <option key={v} value={v}>

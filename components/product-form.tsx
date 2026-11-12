@@ -261,7 +261,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
               value={form.nom}
               onChange={(e) => setForm({ ...form, nom: e.target.value })}
               placeholder="Ex: Canapé 3 places"
-              className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
@@ -277,7 +277,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
               }
               placeholder="Décrivez votre produit..."
               rows={3}
-              className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+              className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             />
           </div>
 
@@ -294,7 +294,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
                 placeholder="0"
                 min="0"
                 step="100"
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
             </div>
             <div>
@@ -310,7 +310,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
                 placeholder="0"
                 min="0"
                 step="100"
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
             </div>
           </div>
@@ -325,7 +325,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
                 id="produit-allee"
                 value={form.allee}
                 onChange={(e) => setForm({ ...form, allee: e.target.value })}
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Aucune</option>
                 {allees.map((a) => (
@@ -353,7 +353,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
                 value={form.stock}
                 onChange={(e) => setForm({ ...form, stock: e.target.value })}
                 placeholder="Laisser vide = illimité"
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
               <button
                 type="button"
@@ -377,7 +377,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
                 onChange={(e) =>
                   setForm({ ...form, categorie: e.target.value })
                 }
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Sélectionner...</option>
                 {categories.map((cat) => (
@@ -395,7 +395,7 @@ export function ProductForm({ product, defaultAllee, onSuccess, onCancel }: Prod
                 id="produit-ville"
                 value={form.ville}
                 onChange={(e) => setForm({ ...form, ville: e.target.value })}
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
               >
                 <option value="">Sélectionner...</option>
                 {villesParPays.map((group) => (

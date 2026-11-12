@@ -134,7 +134,7 @@ export function WalletCard() {
                 onChange={(e) => { setMontant(e.target.value); setError(null) }}
                 placeholder="Montant en FCFA"
                 min={500}
-                className="w-full rounded-xl border border-border bg-input px-4 py-2.5 pr-16 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+                className="w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 pr-16 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">FCFA</span>
             </div>
