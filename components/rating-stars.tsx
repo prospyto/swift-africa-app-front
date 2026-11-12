@@ -82,7 +82,7 @@ export function RatingStars({ commandeId, typeNote, label, onDone }: RatingStars
         onChange={(e) => setCommentaire(e.target.value)}
         placeholder="Laisser un commentaire (optionnel)…"
         rows={2}
-        className="mb-3 w-full resize-none rounded-xl border border-border bg-input px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+        className="mb-3 w-full resize-none rounded-xl border border-foreground/30 bg-white/90 px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
       />
 
       {error && <p className="mb-2 text-xs text-destructive">{error}</p>}

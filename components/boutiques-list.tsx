@@ -50,7 +50,7 @@ export function BoutiquesList({
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher une boutique…"
           aria-label="Rechercher une boutique"
-          className="w-full rounded-2xl border border-border bg-input py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
+          className="w-full rounded-2xl border border-foreground/30 bg-white/90 py-2.5 pl-11 pr-4 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
         />
       </div>
 

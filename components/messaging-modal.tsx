@@ -264,7 +264,7 @@ export function MessagingModal({ orderId, open, onClose, initialAvecRole }: Mess
               onKeyDown={handleKey}
               placeholder="Écrire un message…"
               disabled={sending}
-              className="flex-1 rounded-2xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
+              className="flex-1 rounded-2xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:opacity-50"
             />
             <button
               onClick={handleSend}

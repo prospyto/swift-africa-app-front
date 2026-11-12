@@ -10,7 +10,7 @@ import { useApp } from '@/lib/store'
 import type { MaBoutique } from '@/lib/types'
 
 const champ =
-  'w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30'
+  'w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30'
 
 const erreurDe = (e: unknown) =>
   e instanceof ApiError ? e.message : 'Une erreur est survenue. Réessayez.'
@@ -64,8 +64,8 @@ function BoutiqueEtPaiement() {
   const [banniere, setBanniere] = useState<File | null>(null)
   const [retirerLogo, setRetirerLogo] = useState(false)
   const [retirerBanniere, setRetirerBanniere] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<{ ok: boolean; texte: string } | null>(null)
+  const [saving, setSaving] = useState<'boutique' | 'paiement' | null>(null)
+  const [message, setMessage] = useState<{ bloc: 'boutique' | 'paiement'; ok: boolean; texte: string } | null>(null)
   const logoRef = useRef<HTMLInputElement>(null)
   const banniereRef = useRef<HTMLInputElement>(null)
 
@@ -86,26 +86,37 @@ function BoutiqueEtPaiement() {
     apiFetch<MaBoutique>('ma-boutique/').then(remplir).catch(() => setB(null))
   }, [])
 
-  async function enregistrer() {
-    setSaving(true)
+  // Chaque bloc a son propre bouton : on n'envoie que les champs du bloc.
+  async function enregistrer(bloc: 'boutique' | 'paiement') {
+    setSaving(bloc)
     setMessage(null)
     try {
       const fd = new FormData()
-      fd.append('boutique', nom)
-      fd.append('description', description)
-      fd.append('adresse_point_vente', adresse)
-      fd.append('operateur_paiement', numero.trim() ? operateur : '')
-      fd.append('numero_paiement', numero)
-      if (logo) fd.append('logo', logo)
-      else if (retirerLogo) fd.append('logo', '')
-      if (banniere) fd.append('banniere', banniere)
-      else if (retirerBanniere) fd.append('banniere', '')
-      remplir(await multipartFetch<MaBoutique>('ma-boutique/', { method: 'PATCH', body: fd }))
-      setMessage({ ok: true, texte: 'Enregistré.' })
+      if (bloc === 'boutique') {
+        fd.append('boutique', nom)
+        fd.append('description', description)
+        fd.append('adresse_point_vente', adresse)
+        if (logo) fd.append('logo', logo)
+        else if (retirerLogo) fd.append('logo', '')
+        if (banniere) fd.append('banniere', banniere)
+        else if (retirerBanniere) fd.append('banniere', '')
+      } else {
+        fd.append('operateur_paiement', numero.trim() ? operateur : '')
+        fd.append('numero_paiement', numero)
+      }
+      const maj = await multipartFetch<MaBoutique>('ma-boutique/', { method: 'PATCH', body: fd })
+      // on ne remet à zéro que le bloc enregistré : l'autre peut contenir une saisie en cours
+      if (bloc === 'boutique') {
+        setB(maj); setNom(maj.boutique); setDescription(maj.description || ''); setAdresse(maj.adresse_point_vente || '')
+        setLogo(null); setBanniere(null); setRetirerLogo(false); setRetirerBanniere(false)
+      } else {
+        setB(maj); setOperateur(maj.operateur_paiement || ''); setNumero(maj.numero_paiement || '')
+      }
+      setMessage({ bloc, ok: true, texte: 'Enregistré.' })
     } catch (e) {
-      setMessage({ ok: false, texte: erreurDe(e) })
+      setMessage({ bloc, ok: false, texte: erreurDe(e) })
     } finally {
-      setSaving(false)
+      setSaving(null)
     }
   }
 
@@ -194,6 +205,19 @@ function BoutiqueEtPaiement() {
             <input id="p-adr" value={adresse} onChange={(e) => setAdresse(e.target.value)} maxLength={500} className={champ} />
           </div>
         </div>
+
+        {(logo || banniere) && (
+          <p className="mt-4 text-xs text-amber-700">
+            Image choisie : elle ne sera visible qu'après avoir cliqué sur « Enregistrer la boutique ».
+          </p>
+        )}
+        {message?.bloc === 'boutique' && (
+          <p role="status" className={`mt-3 text-sm ${message.ok ? 'text-success' : 'text-destructive'}`}>{message.texte}</p>
+        )}
+        <Button onClick={() => enregistrer('boutique')} disabled={saving !== null}
+          className="mt-4 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
+          {saving === 'boutique' ? 'Enregistrement…' : 'Enregistrer la boutique'}
+        </Button>
       </GlassCard>
 
       <LienBoutique slug={b.slug} nom={b.boutique} />
@@ -221,12 +245,12 @@ function BoutiqueEtPaiement() {
           </div>
         </div>
 
-        {message && (
+        {message?.bloc === 'paiement' && (
           <p role="status" className={`mt-4 text-sm ${message.ok ? 'text-success' : 'text-destructive'}`}>{message.texte}</p>
         )}
-        <Button onClick={enregistrer} disabled={saving}
+        <Button onClick={() => enregistrer('paiement')} disabled={saving !== null}
           className="mt-4 w-full rounded-2xl bg-primary font-semibold text-primary-foreground hover:bg-primary/90">
-          {saving ? 'Enregistrement…' : 'Enregistrer la boutique et le paiement'}
+          {saving === 'paiement' ? 'Enregistrement…' : 'Enregistrer le numéro de paiement'}
         </Button>
       </GlassCard>
     </>

@@ -8,7 +8,7 @@ import { apiFetch, ApiError } from '@/lib/api'
 import type { Allee } from '@/lib/types'
 
 const champ =
-  'w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30'
+  'w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30'
 
 function messageErreur(e: unknown) {
   return e instanceof ApiError ? e.message : "Impossible d'enregistrer. Réessayez."

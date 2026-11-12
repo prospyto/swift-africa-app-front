@@ -106,7 +106,7 @@ export function BulkUpload({
         value={allee}
         onChange={(e) => setAllee(e.target.value)}
         disabled={enCours}
-        className="mb-3 w-full rounded-xl border border-border bg-input px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
+        className="mb-3 w-full rounded-xl border border-foreground/30 bg-white/90 px-4 py-2.5 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/30"
       >
         <option value="">Aucune (je le ferai ensuite)</option>
         {allees.map((a) => (
